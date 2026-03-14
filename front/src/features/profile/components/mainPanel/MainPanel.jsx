@@ -1,80 +1,22 @@
-import { useState, useEffect } from 'react'
-import styles from './MainPanelStyle.module.css'
-import { MainPanelLine } from './MainPanelLine'
-import { PasswordModal } from '../PasswordModal'
-import { useAuth } from '../../../../shared/context/authContext'
+import styles from './MainPanelStyle.module.css';
+import { MainPanelLine } from './MainPanelLine';
+import { PasswordModal } from '../PasswordModal';
+import { PROFILE_FIELDS, PROFILE_FIELD_MAP } from '../../../../shared/config/fields';
+import { useProfileForm } from '../../../../shared/hooks/useProfileForm';
 
 export const MainPanel = (props) => {
-    const { userData, updateUserData } = useAuth()
-    const [isEditing, setIsEditing] = useState(false)
-    const [showPasswordModal, setShowPasswordModal] = useState(false)
-    const [formData, setFormData] = useState(userData || {})
-    const [passwordError, setPasswordError] = useState('')
-
-    useEffect(() => {
-        if (userData) {
-            setFormData(userData)
-        }
-    }, [userData])
-
-    const MainPanelLineProps = [
-        {id:0, label:'Фамилия', value: formData?.surname || '', key: 'surname'},
-        {id:1, label:'Имя', value: formData?.name || '', key: 'name'},
-        {id:2, label:'Отчество', value: formData?.patronymic || '', key: 'patronymic'},
-        {id:3, label:'Email', value: formData?.email || '', key: 'email'},
-        {id:4, label:'Телефон', value: formData?.phone || '', key: 'phone'},
-        {id:5, label:'Серия паспорта', value: formData?.passportSeries || '', key: 'passportSeries'},
-        {id:6, label:'Номер паспорта', value: formData?.passportNumber || '', key: 'passportNumber'},
-        {id:7, label:'Кем выдан', value: formData?.issuedBy || '', key: 'issuedBy'},
-        {id:8, label:'Дата выдачи', value: formData?.issueDate || '', key: 'issueDate'},
-        {id:9, label:'Серия ВУ', value: formData?.licenseSeries || '', key: 'licenseSeries'},
-        {id:10, label:'Номер ВУ', value: formData?.licenseNumber || '', key: 'licenseNumber'},
-        {id:11, label:'Кем выдано ВУ', value: formData?.licenseIssuedBy || '', key: 'licenseIssuedBy'},
-        {id:12, label:'Дата выдачи ВУ', value: formData?.licenseIssueDate || '', key: 'licenseIssueDate'},
-        {id:13, label:'Дата окончания действия ВУ', value: formData?.licenseExpiryDate || '', key: 'licenseExpiryDate'},
-        {id:14, label:'Категория', value: formData?.licenseCategory || '', key: 'licenseCategory'},
-        {id:15, label:'Пароль', value: formData?.password || '', key: 'password', isPassword: true},
-    ]
-
-    const handleInputChange = (label, value) => {
-        const fieldMap = {
-            'Фамилия': 'surname',
-            'Имя': 'name',
-            'Отчество': 'patronymic',
-            'Email': 'email',
-            'Телефон': 'phone',
-            'Серия паспорта': 'passportSeries',
-            'Номер паспорта': 'passportNumber',
-            'Кем выдан': 'issuedBy',
-            'Дата выдачи': 'issueDate',
-            'Серия ВУ': 'licenseSeries',
-            'Номер ВУ': 'licenseNumber',
-            'Кем выдано ВУ': 'licenseIssuedBy',
-            'Дата выдачи ВУ': 'licenseIssueDate',
-            'Дата окончания действия ВУ': 'licenseExpiryDate',
-            'Категория': 'licenseCategory',
-            'Пароль': 'password'
-        }
-        
-        const key = fieldMap[label]
-        setFormData(prev => ({...prev, [key]: value}))
-    }
-
-    const handleSave = () => {
-        setPasswordError('')
-        setShowPasswordModal(true)
-    }
-
-    const confirmSave = (enteredPassword) => {
-        if (enteredPassword === userData?.password) {
-            updateUserData(formData)
-            setShowPasswordModal(false)
-            setIsEditing(false)
-            setPasswordError('')
-        } else {
-            setPasswordError('Неверный пароль')
-        }
-    }
+    const {
+        isEditing,
+        setIsEditing,
+        showPasswordModal,
+        formData,
+        passwordError,
+        handleInputChange,
+        handleSave,
+        confirmSave,
+        handleCancel,
+        handleModalClose
+    } = useProfileForm();
 
     return (
         <>
@@ -85,14 +27,15 @@ export const MainPanel = (props) => {
                 </div>
 
                 <div className={styles.MainPanelContainer}>
-                    {MainPanelLineProps.map((item, key) => (
+                    {PROFILE_FIELDS.map((item) => (
                         <MainPanelLine 
-                            key={key}
+                            key={item.id}
                             label={item.label}
-                            value={item.value}
+                            value={formData[item.key] || ''}
                             isEditing={isEditing}
                             isPassword={item.isPassword}
-                            onChange={handleInputChange}
+                            type={item.type}
+                            onChange={(label, value) => handleInputChange(label, value, PROFILE_FIELD_MAP)}
                         />
                     ))}
                 </div>
@@ -104,7 +47,7 @@ export const MainPanel = (props) => {
                         </button>
                     ) : (
                         <>
-                            <button onClick={() => setIsEditing(false)} className={styles.cancelButton}>
+                            <button onClick={handleCancel} className={styles.cancelButton}>
                                 Отмена
                             </button>
                             <button onClick={handleSave} className={styles.saveButton}>
@@ -117,13 +60,10 @@ export const MainPanel = (props) => {
 
             <PasswordModal 
                 isOpen={showPasswordModal}
-                onClose={() => {
-                    setShowPasswordModal(false)
-                    setPasswordError('')
-                }}
-                onConfirm={confirmSave}
+                onClose={handleModalClose}
+                onConfirm={(password) => confirmSave(password, handleModalClose)}
                 error={passwordError}
             />
         </>
-    )
-}
+    );
+};
