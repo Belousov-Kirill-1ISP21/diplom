@@ -1,0 +1,73 @@
+.TitleBlock{
+    width: 100%;
+    height: 72vh;
+}
+
+.TitleBlockImg{
+    float: left;
+    width: 49%;
+    height: 98%;
+}
+
+.TitleBlockContainer{
+    float: right;
+    width: 49%;
+    height: 98%;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    background-image: linear-gradient(to right, rgb(232 232 232 / 10.8%), rgb(72 100 111 / 60%)), url("../../../assets/SideBackground/SideBackground.png");
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+    background-position: center, center;
+}
+
+.TitleBlockH1{
+    color: white;
+    font-size: 8vh;
+    margin: 4%;
+    margin-left: 20%;
+    text-align: left;
+    font-family: 'Verdana';
+}
+
+.TitleBlockText{
+    color: white;
+    font-size: 3vh;
+    width: 70%;
+    margin: 1%;
+    text-align: left;
+    margin-left: 11%;
+}
+
+.TitleBlockLink{
+    width: 25%;
+    height: 10%;
+    text-decoration: none;
+}
+
+.TitleBlockButton{
+    width: 100%;
+    height: 100%;
+    margin: 4%;
+    background-color: #000033;
+    border-color: #000033;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+
+.TitleBlockButtonText{
+    display: inline-block;
+    font-size: 1.5vh;
+}
+
+.TitleBlockButtonImg{
+    display: inline-block;
+}
+

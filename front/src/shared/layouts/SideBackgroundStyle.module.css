@@ -1,0 +1,24 @@
+.SideBackground {
+    height: 100%;
+    width: 100%;
+}
+
+.SideDarkBackgroundImg{
+    background-image: linear-gradient(to right, rgb(232 232 232 / 10.8%), rgb(72 100 111 / 60%)), url("../../assets/SideBackground/SideDarkBackground.png");
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+    background-position: center, center;
+    height: 100%;
+    width: 100%;
+    transform: scale(1.01)
+}
+
+.SideBackgroundImg{
+    background-image: linear-gradient(to right, rgb(232 232 232 / 10.8%), rgb(72 100 111 / 60%)), url("../../assets/SideBackground/SideBackground.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+    transform: scale(1.01)
+}

@@ -1,0 +1,54 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+}
+
+.wrapper {
+    width: 100%;
+    height: 100vh;
+    background-image: url("../../../assets/SideBackground/SideDarkBackground.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.SidePanelContainer {
+    background-color: white;
+    border-radius: 14px;
+    width: 31%;
+    height: 54%;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+}
+
+.MainPanelContainer {
+    background-color: white;
+    border-radius: 14px;
+    width: 57%;
+    height: 94%;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+}
+
+.panelsContainer { 
+    width: 80%;
+    height: 80%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+}

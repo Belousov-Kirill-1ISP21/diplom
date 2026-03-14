@@ -1,0 +1,23 @@
+.MainPanelLine {
+    width: 100%;
+    height: 14%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-top: #F3F4F6;
+    border-bottom: white;
+    border-right: white;
+    border-left: white;
+    border-style: solid;
+}
+
+.MainPanelLineH1 {
+    display: inline-block;
+    font-size: 1.5vh;
+}
+
+.MainPanelLineText {
+    display: inline-block;
+    font-size: 1.4vh;
+}

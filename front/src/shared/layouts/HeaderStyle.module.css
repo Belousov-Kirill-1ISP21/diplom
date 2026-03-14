@@ -1,0 +1,97 @@
+.Header{
+    width: 100%;
+    height: 10vh;
+    margin-bottom: 1%;
+}
+
+.HeaderLeft{
+    width: 74%;
+    height: 100%;
+    display: inline-block;
+}
+
+.HeaderLogoButton{
+    float: left;
+    width: 44%;
+    height: 100%;
+    background-color: white;
+    border: none;
+    font-size: 4vh;
+    text-align: left;
+    margin-left: 4%;
+    outline: none;
+}
+
+.HeaderLeftLink{
+    text-decoration: none;
+}
+
+.HeaderLeftButtonContainer {
+    float: right;
+    width: 50%;
+    height: 100%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    flex-direction: row;
+}
+
+.HeaderLeftButtonContainerLink{
+    text-decoration: none;
+}
+
+.HeaderLeftButton{
+    margin-left: 1%;
+    margin-right: 1%;
+    width: 24%;
+    height: 100%;
+    background-color: white;
+    border: none;
+    color: gray;
+    font-size: 1.4vh;
+}
+
+.HeaderLeftContactButton {
+    margin-left: 1%;
+    margin-right: 1%;
+    width: 50%;
+    height: 100%;
+    background-color: white;
+    border: none;
+    color: gray;
+    font-size: 1.5vh;
+}
+
+.HeaderLeftContactButtonText{
+    display: inline-block;
+    margin: 1%;
+}
+
+.HeaderLeftContactButtonTextInText{
+    display: inline-block;
+    margin: 1%;
+    color: black;
+    font-weight: bold;
+}
+
+.HeaderRight{
+    width: 25%;
+    height: 100%;
+    display: inline-block;
+}
+
+.HeaderRightLink{
+    text-decoration: none;
+}
+
+.HeaderRightButton{
+    float: right;
+    margin: 1%;
+    width: 44%;
+    height: 44%;
+    background-color: #837DBA;
+    border-color: #837DBA;
+    border-radius: 6px;
+    margin-top: 6%;
+    color: white;
+}

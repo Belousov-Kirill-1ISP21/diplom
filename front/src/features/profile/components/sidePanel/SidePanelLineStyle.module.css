@@ -1,0 +1,26 @@
+.SidePanelLine {
+    width: 100%;
+    height: 18%;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+}
+
+.SidePanelLineImg {
+    display: inline-block;
+    width: 20%;
+    height: 100%;
+}
+
+.SidePanelLineButtonLink {
+    display: inline-block;
+    margin-left: 4%;
+}
+
+.SidePanelLineButton {
+    display: inline-block;
+    background-color: white;
+    border: none;
+    font-size: 1.5vh;
+}

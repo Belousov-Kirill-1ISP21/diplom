@@ -1,0 +1,37 @@
+.MainPanel {
+    height: 90%;
+    width: 69%;
+    margin-left: 10%;
+}
+
+.MainPanelHead {
+    height: 15%;
+    width: 100%;
+    text-align: left;
+}
+
+.MainPanelHeadH1 {
+    font-size: 2vh;
+}
+
+.MainPanelHeadText {
+    font-size: 1.5vh;
+}
+
+.MainPanelContainer {
+    height: 70%;
+    width: 100%;
+}
+
+.MainPanelButtonContainer {
+    height: 10%;
+}
+
+.MainPanelButtonContainer button {
+    height: 69%;
+    width: 44%;
+    border-radius: 14px;
+    background-color: #4669B0;
+    border-color: #4669B0;
+    color: white;
+}

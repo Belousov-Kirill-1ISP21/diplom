@@ -1,0 +1,20 @@
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: inherit; 
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow: visible;
+}
+
+.Wrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+}

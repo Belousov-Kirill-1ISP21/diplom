@@ -1,0 +1,17 @@
+.AuthCheckboxContainer{
+    width: 44%;
+    display: inline-block;
+}
+
+.AuthCheckbox{
+    display: inline-block;
+    margin-right: 2%;
+}
+
+.AuthCheckboxLabel{
+    display: inline-block;
+    margin-left: 2%;
+    margin-right: 2%;
+    font-size: 1.5vh;
+    color: #616161;
+}

@@ -1,0 +1,13 @@
+.AboutTitleBlock{
+    height: 69vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.AboutTitleBlockImg{
+    height: 100%;
+    width: 69%;
+    margin-right: 10%;
+}

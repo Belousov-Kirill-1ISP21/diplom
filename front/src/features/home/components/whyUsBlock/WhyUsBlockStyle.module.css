@@ -1,0 +1,36 @@
+.WhyUsBlock{
+    width: 100%;
+    height: 100vh;
+    text-align: center;
+    background-color: #F7F8FA;
+    padding-top: 4%;
+}
+
+.WhyUsBlockHeader{
+    height: 25%;
+    width: 100%;
+    text-align: center;
+}
+
+.WhyUsBlockHeaderH1{
+    font-size: 9vh;
+    margin-top: 0%;
+}
+
+.WhyUsBlockHeaderText{
+    display: inline-block;
+    font-size: 2vh;
+    color:gray;
+}
+
+.WhyUsBlockHeaderTextInText{
+    display: inline-block;
+    font-size: 3vh;
+    margin: 1%;
+}
+
+.WhyUsBlockContainer{
+    height: 70%;
+    width: 88%;
+    margin-left: 8%;
+}

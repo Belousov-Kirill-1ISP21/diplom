@@ -1,0 +1,68 @@
+.AboutBlock{
+    height: 24%;
+    width: 100%;
+    margin-top: 4%;
+    margin-bottom: 4%;
+}
+
+.AboutBlockContainer{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.AboutBlockImgContainer{
+    height: 100%;
+    width: 50%;
+}
+
+.AboutBlockTextContainer{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-left: 4%;
+    padding-right: 4%;
+}
+
+.AboutBlockRightTextContainer{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding-left: 4%;
+    padding-right: 4%;
+}
+
+.AboutBlockImg{
+    height: 100%;
+    width: 100%;
+}
+
+.AboutBlockH1{
+    font-size: 6vh;
+    text-align: left;
+}
+
+.AboutBlockRightH1{
+    font-size: 6vh;
+    text-align: right;
+}
+
+.AboutBlockText{
+    font-size: 3vh;
+    color: #848383;
+    text-align: left;
+}
+
+.AboutBlockRightText{
+    font-size: 3vh;
+    color: #848383;
+    text-align: right;
+}
+
+
