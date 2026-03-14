@@ -1,8 +1,23 @@
 import styles from './MainPanelLineStyle.module.css'
-export const MainPanelLine =(props)=>{
-    const {MainPanelLineH1, MainPanelLineText} = props
+
+export const MainPanelLine = (props) => {
+    const {label, value, isEditing, onChange} = props
+
+    const handleChange = (e) => {
+        onChange(label, e.target.value)
+    }
+
     return <div className={styles.MainPanelLine}>
-        <h1 className={styles.MainPanelLineH1}>{MainPanelLineH1}</h1>
-        <p className={styles.MainPanelLineText}>{MainPanelLineText}</p>     
+        <h1 className={styles.MainPanelLineH1}>{label}</h1>
+        {isEditing ? (
+            <input 
+                type="text" 
+                value={value} 
+                onChange={handleChange}
+                className={styles.editInput}
+            />
+        ) : (
+            <p className={styles.MainPanelLineText}>{value}</p>
+        )}     
     </div>
 }

@@ -1,30 +1,38 @@
-.MainPanel {
+.MainPanel{
     height: 90%;
-    width: 69%;
-    margin-left: 10%;
+    width: 90%;  /* увеличил с 69% */
+    margin-left: 5%;  /* уменьшил отступ */
+    display: flex;
+    flex-direction: column;
 }
 
-.MainPanelHead {
+.MainPanelHead{
     height: 15%;
     width: 100%;
     text-align: left;
+    flex-shrink: 0;
 }
 
-.MainPanelHeadH1 {
+.MainPanelHeadH1{
     font-size: 2vh;
 }
 
-.MainPanelHeadText {
+.MainPanelHeadText{
     font-size: 1.5vh;
 }
 
-.MainPanelContainer {
-    height: 70%;
+.MainPanelContainer{
+    flex: 1;
+    overflow-y: auto;
     width: 100%;
+    margin: 10px 0;
 }
 
-.MainPanelButtonContainer {
+.MainPanelButtonContainer{
     height: 10%;
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
 }
 
 .MainPanelButtonContainer button {
@@ -34,4 +42,14 @@
     background-color: #4669B0;
     border-color: #4669B0;
     color: white;
+    cursor: pointer;
+}
+
+.MainPanelButtonContainer button:first-child {
+    background-color: #6c757d;
+}
+
+.MainPanelButtonContainer button:last-child {
+    background-color: #4669B0;
+    border-color: #4669B0;
 }
