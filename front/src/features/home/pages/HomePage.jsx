@@ -10,7 +10,7 @@ export const HomePage = (props)=>{
 
     return <div className={styles.wrapper}>
         
-        <Header isAuthenticated={false}/>
+        <Header/>
         <TitleBlock/>
         <AboutBlock/>
         <CatalogBlock/>

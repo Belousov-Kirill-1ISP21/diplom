@@ -4,13 +4,11 @@ import { MainPanel } from '../components/mainPanel/MainPanel'
 import { HistoryPanel } from '../components/HistoryPanel'
 import { NotificationsPanel } from '../components/NotificationsPanel'
 import { useState } from 'react'
-
-const SidePanelProps = [
-    {id:0, SidePanelHeadH1:'Фамилия имя', SidePanelHeadText: 'yourname@gmail.com'},
-];
+import { useAuth } from '../../../shared/context/authContext'
 
 export const ProfilePage = (props)=>{
     const [activeTab, setActiveTab] = useState('profile')
+    const { userData } = useAuth()
 
     const renderMainPanel = () => {
         switch(activeTab) {

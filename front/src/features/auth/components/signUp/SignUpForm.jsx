@@ -5,14 +5,13 @@ import * as yup from 'yup';
 import styles from './SignUpFormStyle.module.css';
 import { useNavigate } from 'react-router-dom';
 import { TextInput } from '../../../../shared/components/TextInput.jsx';
+import { useAuth } from '../../../../shared/context/authContext.js';
 
-// Константы для текущей даты
 const CURRENT_DATE = new Date(2026, 2, 14);
 const CURRENT_YEAR = 2026;
 const CURRENT_MONTH = 3;
 const CURRENT_DAY = 14;
 
-// Кастомный метод для валидации даты
 const isValidDate = (dateString) => {
     if (!dateString) return false;
     
@@ -32,7 +31,6 @@ const isValidDate = (dateString) => {
            date.getFullYear() === year;
 };
 
-// Схема для первого шага (личные данные)
 const step1Schema = yup.object().shape({
     surname: yup.string()
         .required('Фамилия обязательна')
@@ -64,7 +62,6 @@ const step1Schema = yup.object().shape({
         .test('min-age', 'Вам должно быть не меньше 18 лет', (value) => {
             if (!value) return false;
             const [day, month, year] = value.split('.').map(Number);
-            const birthDate = new Date(year, month - 1, day);
             
             let age = CURRENT_YEAR - year;
             if (month > CURRENT_MONTH || (month === CURRENT_MONTH && day > CURRENT_DAY)) {
@@ -115,7 +112,7 @@ const step1Schema = yup.object().shape({
 const step2Schema = yup.object().shape({
     documentType: yup.string()
         .required('Тип документа обязателен')
-        .oneOf(['паспорт', 'загранпаспорт'], 'Допустимые типы: паспорт, загранпаспорт')
+        .oneOf(['паспорт', 'загранпаспорт', 'военный билет'], 'Допустимые типы: паспорт, загранпаспорт, военный билет')
         .default('паспорт'),
     
     passportSeries: yup.string()
@@ -156,7 +153,6 @@ const step2Schema = yup.object().shape({
         }),
 });
 
-// Схема для третьего шага (водительское удостоверение)
 const step3Schema = yup.object().shape({
     licenseSeries: yup.string()
         .required('Серия ВУ обязательна')
@@ -221,6 +217,7 @@ const step3Schema = yup.object().shape({
 export const SignUpForm = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const { login } = useAuth();
     
     const { register, handleSubmit, formState: { errors }, trigger } = useForm({
         resolver: yupResolver(
@@ -244,10 +241,10 @@ export const SignUpForm = () => {
 
     const onSubmit = (data) => {
         console.log('Все данные регистрации:', data);
-        navigate('/SignIn');
+        login(data);
+        navigate('/Profile');
     };
 
-    // Поля для первого шага
     const step1Fields = [
         {id:0, placeholder: "Фамилия", type: "text", name: 'surname'},
         {id:1, placeholder: "Имя", type: "text", name: 'name'},
@@ -259,7 +256,6 @@ export const SignUpForm = () => {
         {id:7, placeholder: "Повторите пароль", type: "password", name: 'confirmPassword'},
     ];
 
-    // Поля для второго шага
     const step2Fields = [
         {id:0, placeholder: "Тип документа (паспорт)", type: "text", name: 'documentType'},
         {id:1, placeholder: "Серия паспорта (4 цифры)", type: "text", name: 'passportSeries'},
@@ -268,7 +264,6 @@ export const SignUpForm = () => {
         {id:4, placeholder: "Дата выдачи (дд.мм.гггг)", type: "text", name: 'issueDate'},
     ];
 
-    // Поля для третьего шага
     const step3Fields = [
         {id:0, placeholder: "Серия ВУ (4 цифры)", type: "text", name: 'licenseSeries'},
         {id:1, placeholder: "Номер ВУ (6 цифр)", type: "text", name: 'licenseNumber'},

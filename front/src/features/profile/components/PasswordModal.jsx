@@ -1,7 +1,20 @@
+import { useState } from 'react'
 import styles from './PasswordModal.module.css'
 
-export const PasswordModal = ({ isOpen, onClose, onConfirm }) => {
+export const PasswordModal = ({ isOpen, onClose, onConfirm, error }) => {
+    const [password, setPassword] = useState('')
+
     if (!isOpen) return null
+
+    const handleConfirm = () => {
+        onConfirm(password)
+        setPassword('')
+    }
+
+    const handleClose = () => {
+        setPassword('')
+        onClose()
+    }
 
     return (
         <div className={styles.modalOverlay}>
@@ -12,10 +25,13 @@ export const PasswordModal = ({ isOpen, onClose, onConfirm }) => {
                     type="password" 
                     placeholder="Пароль"
                     className={styles.modalInput}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                 />
+                {error && <p className={styles.errorMessage}>{error}</p>}
                 <div className={styles.modalButtons}>
-                    <button onClick={onClose}>Отмена</button>
-                    <button onClick={onConfirm}>Подтвердить</button>
+                    <button onClick={handleClose}>Отмена</button>
+                    <button onClick={handleConfirm}>Подтвердить</button>
                 </div>
             </div>
         </div>

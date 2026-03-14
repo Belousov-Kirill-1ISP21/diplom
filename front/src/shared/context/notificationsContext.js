@@ -2,7 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const NotificationsContext = createContext();
 
-// Начальные уведомления (вынесены, чтобы использовать в обоих местах)
 export const initialNotifications = [
     {
         id: 1,
@@ -27,7 +26,6 @@ export const NotificationsProvider = ({ children }) => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const updateUnreadCount = (count) => {
-        // Этот метод теперь будет обновлять состояние уведомлений
         if (count === 0) {
             const updated = notifications.map(n => ({...n, read: true}));
             setNotifications(updated);
