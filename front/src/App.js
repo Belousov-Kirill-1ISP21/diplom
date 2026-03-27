@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './shared/context/authContext';
 import { NotificationsProvider } from './shared/context/notificationsContext';
+import { CalculatorProvider } from './shared/context/сalculatorContext';
 import Routes from './app/Routes';
 
 function App() {
@@ -9,7 +10,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <NotificationsProvider>
-          <Routes />
+          <CalculatorProvider>
+            <Routes />
+          </CalculatorProvider>
         </NotificationsProvider>
       </AuthProvider>
     </BrowserRouter>

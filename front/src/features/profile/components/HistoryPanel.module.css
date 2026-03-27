@@ -82,3 +82,46 @@
     width: 120px;
     display: inline-block;
 }
+
+.emptyMessage {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.emptyMessage p:first-child {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.emptyMessage p:last-child {
+    font-size: 14px;
+    color: #999;
+}
+
+.goToCalculatorButton {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #000033;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.goToCalculatorButton:hover {
+    background-color: #333366;
+}
+
+.emptyMessage {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.emptyMessage p:first-child {
+    font-size: 18px;
+    margin-bottom: 20px;
+}

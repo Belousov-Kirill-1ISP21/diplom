@@ -1,23 +1,20 @@
 import * as yup from 'yup';
 
-// Константы для текущей даты
 const CURRENT_DATE = new Date(2026, 2, 14);
 const CURRENT_YEAR = 2026;
-const CURRENT_MONTH = 3;
-const CURRENT_DAY = 14;
 
-// Общая валидация даты
-export const isValidDate = (dateString) => {
+// Общая функция валидации даты в формате YYYY-MM-DD
+export const isValidDateISO = (dateString) => {
     if (!dateString) return false;
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return false;
     
-    const parts = dateString.split('.');
-    if (parts.length !== 3) return false;
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    const day = parseInt(match[3]);
     
-    const [day, month, year] = parts.map(Number);
-    
-    if (isNaN(day) || isNaN(month) || isNaN(year)) return false;
-    if (day < 1 || day > 31) return false;
     if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
     if (year < 1900 || year > CURRENT_YEAR) return false;
     
     const date = new Date(year, month - 1, day);
@@ -26,18 +23,31 @@ export const isValidDate = (dateString) => {
            date.getFullYear() === year;
 };
 
+// Схема для даты с проверкой на будущее (прошлая дата)
+export const pastDateSchema = (fieldName) => {
+    return yup.string()
+        .required(`${fieldName} обязательна`)
+        .test('valid-format', 'Введите корректную дату', isValidDateISO)
+        .test('not-future', `${fieldName} не может быть в будущем`, (value) => {
+            if (!value) return false;
+            const [year, month, day] = value.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date <= CURRENT_DATE;
+        });
+};
+
 // Общие правила для пароля
 export const passwordRules = {
     min: 8,
     max: 32,
-    hasUpperCase: /[A-Z]/,
-    hasLowerCase: /[a-z]/,
+    hasUpperCase: /[A-ZА-Я]/,
+    hasLowerCase: /[a-zа-я]/,
     hasNumber: /[0-9]/,
     hasSpecial: /[!@#$%^&*]/,
     noCyrillic: /^[a-zA-Z0-9!@#$%^&*]+$/
 };
 
-// Схема для личных данных 
+// Схема для личных данных
 export const personalInfoSchema = {
     surname: yup.string()
         .required('Фамилия обязательна')
@@ -57,6 +67,8 @@ export const personalInfoSchema = {
         .min(2, 'Отчество должно содержать минимум 2 символа')
         .max(50, 'Отчество должно содержать максимум 50 символов'),
     
+    birthDate: pastDateSchema('Дата рождения'),
+    
     phone: yup.string()
         .required('Телефон обязателен')
         .matches(/^\+7\d{10}$/, 'Телефон должен быть в формате +7XXXXXXXXXX (10 цифр после +7)')
@@ -74,45 +86,23 @@ export const personalInfoSchema = {
 
 // Схема для паспортных данных
 export const passportSchema = {
-    documentType: yup.string()
-        .required('Тип документа обязателен')
-        .oneOf(['паспорт', 'загранпаспорт'], 'Допустимые типы: паспорт, загранпаспорт')
-        .default('паспорт'),
-    
     passportSeries: yup.string()
         .required('Серия паспорта обязательна')
-        .matches(/^\d{4}$/, 'Серия паспорта должна содержать ровно 4 цифры')
-        .test('valid-series', 'Серия паспорта должна начинаться с ненулевых цифр', (value) => {
-            if (!value) return false;
-            return value[0] !== '0' && value[2] !== '0';
-        }),
+        .matches(/^\d{4}$/, 'Серия паспорта должна содержать ровно 4 цифры'),
     
     passportNumber: yup.string()
         .required('Номер паспорта обязателен')
-        .matches(/^\d{6}$/, 'Номер паспорта должен содержать ровно 6 цифр')
-        .test('valid-number', 'Номер паспорта не может состоять из одних нулей', (value) => {
-            if (!value) return false;
-            return !/^0+$/.test(value);
-        }),
+        .matches(/^\d{6}$/, 'Номер паспорта должен содержать ровно 6 цифр'),
     
     issuedBy: yup.string()
         .required('Кем выдан обязательно')
         .min(10, 'Название органа выдачи должно содержать минимум 10 символов')
-        .max(200, 'Название органа выдачи должно содержать максимум 200 символов')
-        .matches(/^[А-ЯЁа-яё0-9\s\-.,"№]+$/, 'Название может содержать русские буквы, цифры, пробелы и дефисы'),
+        .max(200, 'Название органа выдачи должно содержать максимум 200 символов'),
     
-    issueDate: yup.string()
-        .required('Дата выдачи обязательна')
-        .test('valid-format', 'Дата должна быть в формате дд.мм.гггг', isValidDate)
-        .test('not-future', 'Дата выдачи не может быть в будущем', (value) => {
-            if (!value) return false;
-            const [day, month, year] = value.split('.').map(Number);
-            const issueDate = new Date(year, month - 1, day);
-            return issueDate <= CURRENT_DATE;
-        })
+    issueDate: pastDateSchema('Дата выдачи')
         .test('not-too-old', 'Дата выдачи не может быть раньше 1991 года', (value) => {
             if (!value) return false;
-            const [day, month, year] = value.split('.').map(Number);
+            const [year] = value.split('-').map(Number);
             return year >= 1991;
         })
 };
@@ -132,49 +122,24 @@ export const licenseSchema = {
         .min(10, 'Название органа выдачи должно содержать минимум 10 символов')
         .max(200, 'Название органа выдачи должно содержать максимум 200 символов'),
     
-    licenseIssueDate: yup.string()
-        .required('Дата выдачи ВУ обязательна')
-        .test('valid-format', 'Дата должна быть в формате дд.мм.гггг', isValidDate)
-        .test('not-future', 'Дата выдачи не может быть в будущем', (value) => {
-            if (!value) return false;
-            const [day, month, year] = value.split('.').map(Number);
-            return new Date(year, month - 1, day) <= CURRENT_DATE;
-        }),
+    licenseIssueDate: pastDateSchema('Дата выдачи ВУ'),
     
     licenseExpiryDate: yup.string()
         .required('Дата окончания действия ВУ обязательна')
-        .test('valid-format', 'Дата должна быть в формате дд.мм.гггг', isValidDate)
+        .test('valid-format', 'Введите корректную дату', isValidDateISO)
         .test('after-issue', 'Дата окончания должна быть позже даты выдачи', function(value) {
             if (!value || !this.parent.licenseIssueDate) return false;
             
-            const [issueDay, issueMonth, issueYear] = this.parent.licenseIssueDate.split('.').map(Number);
-            const [expiryDay, expiryMonth, expiryYear] = value.split('.').map(Number);
+            const [issueYear, issueMonth, issueDay] = this.parent.licenseIssueDate.split('-').map(Number);
+            const [expiryYear, expiryMonth, expiryDay] = value.split('-').map(Number);
             
             const issueDate = new Date(issueYear, issueMonth - 1, issueDay);
             const expiryDate = new Date(expiryYear, expiryMonth - 1, expiryDay);
             
             return expiryDate > issueDate;
-        })
-        .test('max-term', 'Срок действия ВУ не может превышать 10 лет', function(value) {
-            if (!value || !this.parent.licenseIssueDate) return false;
-            
-            const [issueDay, issueMonth, issueYear] = this.parent.licenseIssueDate.split('.').map(Number);
-            const [expiryDay, expiryMonth, expiryYear] = value.split('.').map(Number);
-            
-            const issueDate = new Date(issueYear, issueMonth - 1, issueDay);
-            const expiryDate = new Date(expiryYear, expiryMonth - 1, expiryDay);
-            
-            const yearsDiff = (expiryDate - issueDate) / (1000 * 60 * 60 * 24 * 365.25);
-            return yearsDiff <= 10.1;
         }),
     
     licenseCategory: yup.string()
         .required('Категория обязательна')
-        .matches(/^[A-Z, ]+$/, 'Категории должны быть указаны заглавными латинскими буквами через запятую')
-        .test('valid-categories', 'Допустимые категории: A, B, C, D, E, M', (value) => {
-            if (!value) return false;
-            const categories = value.split(',').map(c => c.trim());
-            const validCategories = ['A', 'B', 'C', 'D', 'E', 'M'];
-            return categories.every(cat => validCategories.includes(cat));
-        })
+        .oneOf(['A', 'B', 'C', 'D', 'E'], 'Выберите категорию из списка')
 };

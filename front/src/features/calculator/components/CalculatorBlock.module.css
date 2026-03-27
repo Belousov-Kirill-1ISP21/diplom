@@ -1,0 +1,290 @@
+.calculator {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    font-size: 28px;
+    color: #000033;
+    margin-bottom: 20px;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.tab {
+    padding: 10px 30px;
+    font-size: 18px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tab.active {
+    background: #000033;
+    color: white;
+}
+
+.progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding: 0 20px;
+    gap: 10px;
+}
+
+.step {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    color: #999;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.step.active {
+    background: #000033;
+    color: white;
+}
+
+.content {
+    min-height: 400px;
+}
+
+.stepContent {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stepContent h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+    outline: none;
+    border-color: #000033;
+}
+
+.row {
+    display: flex;
+    gap: 20px;
+}
+
+.row .formGroup {
+    flex: 1;
+}
+
+.checkboxGroup {
+    margin: 20px 0;
+}
+
+.checkboxGroup label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkboxGroup input {
+    width: 18px;
+    height: 18px;
+}
+
+.buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.nextButton,
+.calculateButton,
+.submitButton {
+    flex: 1;
+    padding: 14px;
+    background: #000033;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.nextButton:hover,
+.calculateButton:hover,
+.submitButton:hover {
+    background: #333366;
+}
+
+.prevButton {
+    flex: 1;
+    padding: 14px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.prevButton:hover {
+    background: #5a6268;
+}
+
+.result {
+    text-align: center;
+    padding: 20px;
+}
+
+.price {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.price span {
+    display: block;
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.price strong {
+    font-size: 36px;
+    color: #000033;
+}
+
+.info {
+    text-align: left;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.info p {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.info ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info li {
+    margin: 8px 0;
+    color: #555;
+}
+
+.submitButton {
+    width: 100%;
+    padding: 14px;
+    background: #000033;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submitButton:hover {
+    background: #333366;
+}
+
+.errorMessage {
+    color: red;
+    font-size: 14px;
+    margin: 0;
+    text-align: left;
+    width: 44%;
+}
+
+.step.clickable {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.step.clickable:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.resultButtons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.resultButtons .prevButton {
+    flex: 1;
+    background: #6c757d;
+}
+
+.resultButtons .submitButton {
+    flex: 1;
+    background: #000033;
+}
+
+.resultButtons .prevButton:hover {
+    background: #5a6268;
+}
+
+.resultButtons .submitButton:hover {
+    background: #333366;
+}

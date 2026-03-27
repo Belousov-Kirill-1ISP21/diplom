@@ -13,6 +13,15 @@ export const AuthProvider = ({ children }) => {
         return savedUserData ? JSON.parse(savedUserData) : null;
     });
 
+    const [userPolicies, setUserPolicies] = useState(() => {
+        const savedPolicies = localStorage.getItem('userPolicies');
+        return savedPolicies ? JSON.parse(savedPolicies) : [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('userPolicies', JSON.stringify(userPolicies));
+    }, [userPolicies]);
+
     const login = (userDataFromForm) => {
         setIsAuthenticated(true);
         setUserData(userDataFromForm);
@@ -32,13 +41,25 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userData', JSON.stringify(newUserData));
     };
 
+    const addPolicy = (policy) => {
+        setUserPolicies(prev => [...prev, policy]);
+    };
+
+    const resetPolicies = () => {
+        setUserPolicies([]);
+        localStorage.setItem('userPolicies', JSON.stringify([]));
+    };
+
     return (
         <AuthContext.Provider value={{ 
             isAuthenticated, 
             userData, 
+            userPolicies,
             login, 
             logout,
-            updateUserData 
+            updateUserData,
+            addPolicy,
+            resetPolicies
         }}>
             {children}
         </AuthContext.Provider>

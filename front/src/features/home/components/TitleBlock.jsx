@@ -9,10 +9,10 @@ export const TitleBlock =(props)=>{
         <img src={TitleBlockImg} className={styles.TitleBlockImg}/> 
         <div className={styles.TitleBlockContainer}>
 
-            <h1 className={styles.TitleBlockH1}>Страхование вашего имущества и здоровья</h1>
-            <p className={styles.TitleBlockText}>А также страхование финансов и путешествий</p>
+            <h1 className={styles.TitleBlockH1}>Страхование и защита вашего автомобиля</h1>
+            <p className={styles.TitleBlockText}>ОСАГО и КАСКО — полная страховка на любой случай</p>
             
-            <Link to="/Catalog" className={styles.TitleBlockLink}>
+            <Link to="/Calculator" className={styles.TitleBlockLink}>
                 <button className={styles.TitleBlockButton}>
                     
                     <p className={styles.TitleBlockButtonText}>Застраховать</p>

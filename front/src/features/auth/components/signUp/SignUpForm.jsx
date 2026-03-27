@@ -46,6 +46,7 @@ export const SignUpForm = () => {
                         register={register(field.name)}
                         error={errors[field.name]}
                         errorClassName={styles.errorMessage}
+                        options={field.options} 
                     />
                 ))}
 
