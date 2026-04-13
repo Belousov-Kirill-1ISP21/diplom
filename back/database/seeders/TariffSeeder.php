@@ -101,6 +101,23 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
+             // КАСКО для мотоциклов (A)
+             [
+                'policy_type_id' => $kaskoId,
+                'vehicle_category' => 'A',
+                'base_rate' => 30000.00,
+                'min_rate' => 15000.00,
+                'max_rate' => 80000.00,
+                'power_coefficient' => 1.2,
+                'experience_coefficient' => 0.9,
+                'age_coefficient' => 0.85,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.1,
+                'vehicle_age_coefficient' => 0.95,
+                'security_coefficient' => 0.8,
+                'franchise_coefficient' => 0.7,
+                'calculation_method' => 'coefficient'
+            ],
             // КАСКО для легковых (B)
             [
                 'policy_type_id' => $kaskoId,
@@ -130,6 +147,40 @@ class TariffSeeder extends Seeder
                 'age_coefficient' => 0.85,
                 'bonus_malus_coefficient' => 1.0,
                 'region_coefficient' => 1.2,
+                'vehicle_age_coefficient' => 0.95,
+                'security_coefficient' => 0.8,
+                'franchise_coefficient' => 0.7,
+                'calculation_method' => 'coefficient'
+            ],
+            // КАСКО для автобусов (D)
+            [
+                'policy_type_id' => $kaskoId,
+                'vehicle_category' => 'D',
+                'base_rate' => 100000.00,
+                'min_rate' => 50000.00,
+                'max_rate' => 250000.00,
+                'power_coefficient' => 1.4,
+                'experience_coefficient' => 0.9,
+                'age_coefficient' => 0.85,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.2,
+                'vehicle_age_coefficient' => 0.95,
+                'security_coefficient' => 0.8,
+                'franchise_coefficient' => 0.7,
+                'calculation_method' => 'coefficient'
+            ],
+            // КАСКО для прицепов (E)
+            [
+                'policy_type_id' => $kaskoId,
+                'vehicle_category' => 'E',
+                'base_rate' => 40000.00,
+                'min_rate' => 20000.00,
+                'max_rate' => 100000.00,
+                'power_coefficient' => 1.0,
+                'experience_coefficient' => 0.9,
+                'age_coefficient' => 0.85,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.1,
                 'vehicle_age_coefficient' => 0.95,
                 'security_coefficient' => 0.8,
                 'franchise_coefficient' => 0.7,

@@ -29,9 +29,10 @@ export const SidePanel = (props) => {
     const SidePanelLineProps = [
         {id:0, SidePanelLineImg: Profile, SidePanelLineButton:'Профиль', tabName: 'profile'},
         {id:1, SidePanelLineImg: History, SidePanelLineButton:'История полисов', tabName: 'policies'},
-        {id:2, SidePanelLineImg: Notifications, SidePanelLineButton:'Уведомления', tabName: 'notifications', badge: unreadCount},
-        {id:3, SidePanelLineImg: Back, SidePanelLineButton:'На главную', isLink: true, LinkPath: "/"},
-        {id:4, SidePanelLineImg: Exit, SidePanelLineButton:'Выход', onClick: handleLogout},
+        {id:2, SidePanelLineImg: Profile, SidePanelLineButton:'Мои автомобили', tabName: 'vehicles'},  
+        {id:3, SidePanelLineImg: Notifications, SidePanelLineButton:'Уведомления', tabName: 'notifications', badge: unreadCount},
+        {id:4, SidePanelLineImg: Back, SidePanelLineButton:'На главную', isLink: true, LinkPath: "/"},
+        {id:5, SidePanelLineImg: Exit, SidePanelLineButton:'Выход', onClick: handleLogout},
     ];
 
     return <div className={styles.SidePanel}>

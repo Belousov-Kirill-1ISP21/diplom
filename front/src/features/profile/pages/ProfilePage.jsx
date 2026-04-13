@@ -3,6 +3,7 @@ import { SidePanel } from '../components/sidePanel/SidePanel'
 import { MainPanel } from '../components/mainPanel/MainPanel'
 import { HistoryPanel } from '../components/HistoryPanel'
 import { NotificationsPanel } from '../components/NotificationsPanel'
+import { VehiclesPanel } from '../components/VehiclesPanel';
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../../shared/context/authContext'
 import { useLocation } from 'react-router-dom'
@@ -28,6 +29,8 @@ export const ProfilePage = () => {
                 return <HistoryPanel />
             case 'notifications':
                 return <NotificationsPanel />
+            case 'vehicles': 
+                return <VehiclesPanel />
             default:
                 return <MainPanel />
         }

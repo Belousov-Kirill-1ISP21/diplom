@@ -64,6 +64,16 @@
     color: white;
 }
 
+.step.clickable {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.step.clickable:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
 .content {
     min-height: 400px;
 }
@@ -231,40 +241,6 @@
     color: #555;
 }
 
-.submitButton {
-    width: 100%;
-    padding: 14px;
-    background: #000033;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.submitButton:hover {
-    background: #333366;
-}
-
-.errorMessage {
-    color: red;
-    font-size: 14px;
-    margin: 0;
-    text-align: left;
-    width: 44%;
-}
-
-.step.clickable {
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.step.clickable:hover {
-    background: #e0e0e0;
-    transform: translateY(-2px);
-}
-
 .resultButtons {
     display: flex;
     gap: 15px;
@@ -287,4 +263,181 @@
 
 .resultButtons .submitButton:hover {
     background: #333366;
+}
+
+.errorMessage {
+    color: red;
+    font-size: 14px;
+    margin: 0;
+    text-align: left;
+    width: 44%;
+}
+
+/* Стили для выбора автомобиля (как в VehiclesPanel) */
+.vehicleSelector {
+    margin-bottom: 20px;
+}
+
+.vehicleSelector label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: 500;
+    color: #333;
+    font-size: 16px;
+}
+
+.vehicleList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.vehicleCard {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    transition: box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.vehicleCard:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vehicleCard.selected {
+    border: 2px solid #000033;
+    background: #f0f7ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 51, 0.2);
+}
+
+.vehicleCard h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.vehicleCard p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0;
+}
+
+.addVehicleButton {
+    width: 100%;
+    padding: 12px;
+    background: #4669B0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.addVehicleButton:hover {
+    background: #3457a0;
+}
+
+/* Модальное окно */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.modal .formGroup {
+    margin-bottom: 16px;
+}
+
+.modal .formGroup label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+}
+
+.modal .formGroup input,
+.modal .formGroup select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.modal .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.modal .checkboxGroup {
+    margin: 16px 0;
+}
+
+.modal .checkboxGroup label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.modalButtons button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.modalButtons button:first-child {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.modalButtons button:last-child {
+    background: #4669B0;
+    color: white;
+    border: none;
+}
+
+.modalButtons button:last-child:hover {
+    background: #3457a0;
 }

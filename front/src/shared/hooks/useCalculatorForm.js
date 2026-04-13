@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCalculator } from '../context/сalculatorContext';
-import { validateVehicleData, validateDates } from '../lib/validations/calculatorValidations';
+import { validateDates } from '../lib/validations/calculatorValidations';
 
 export const useCalculatorForm = () => {
     const { calculatorData, updateOsagoData, updateKaskoData } = useCalculator();
@@ -34,13 +34,6 @@ export const useCalculatorForm = () => {
         }
     };
 
-    const validateStep1 = () => {
-        const data = getCurrentData();
-        const validationErrors = validateVehicleData(data, policyType);
-        setErrors(validationErrors);
-        return Object.keys(validationErrors).length === 0;
-    };
-
     const validateStep2 = () => {
         const data = getCurrentData();
         const validationErrors = validateDates(data.startDate, data.endDate);
@@ -49,7 +42,6 @@ export const useCalculatorForm = () => {
     };
 
     const nextStep = () => {
-        if (step === 1 && !validateStep1()) return;
         if (step === 2 && !validateStep2()) return;
         
         const newStep = step + 1;
@@ -75,8 +67,6 @@ export const useCalculatorForm = () => {
 
     const goToStep = (targetStep) => {
         if (targetStep < step) {
-            const currentData = getCurrentData();
-            updateCurrentData(currentData);
             setStep(targetStep);
             if (policyType === 'osago') {
                 setOsagoStep(targetStep);
@@ -87,34 +77,17 @@ export const useCalculatorForm = () => {
         }
     };
 
-    const calculatePrice = () => {
-        const currentData = getCurrentData();
-        const mockPrice = policyType === 'osago' ? 2890 : 15000;
-        
-        updateCurrentData({
-            ...currentData,
-            calculatedPrice: mockPrice
-        });
-        
-        if (policyType === 'osago') {
-            setOsagoStep(3);
-            setStep(3);
-        } else {
-            setKaskoStep(4);
-            setStep(4);
-        }
-    };
-
     const handlePolicyTypeChange = (type) => {
-        const currentData = getCurrentData();
-        updateCurrentData(currentData);
-        
+        // Сохраняем текущий шаг для текущего типа
         if (policyType === 'osago') {
             setOsagoStep(step);
         } else {
             setKaskoStep(step);
         }
+        
         setPolicyType(type);
+        
+        // Восстанавливаем шаг для нового типа
         if (type === 'osago') {
             setStep(osagoStep);
         } else {
@@ -124,7 +97,16 @@ export const useCalculatorForm = () => {
     };
 
     const getMaxSteps = () => {
-        return policyType === 'osago' ? 3 : 4;
+        return 3; // У КАСКО тоже 3 шага (авто -> срок -> результат)
+    };
+
+    const resetToStep1 = () => {
+        setStep(1);
+        if (policyType === 'osago') {
+            setOsagoStep(1);
+        } else {
+            setKaskoStep(1);
+        }
     };
 
     return {
@@ -142,13 +124,13 @@ export const useCalculatorForm = () => {
         nextStep,
         prevStep,
         goToStep,
-        calculatePrice,
         handlePolicyTypeChange,
         getMaxSteps,
         setPolicyType,
         setStep,
         setOsagoStep,
         setKaskoStep,
-        setErrors
+        setErrors,
+        resetToStep1
     };
 };
