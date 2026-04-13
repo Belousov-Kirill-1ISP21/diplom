@@ -1,16 +1,41 @@
 import styles from './HistoryPanel.module.css'
 import { useAuth } from '../../../shared/context/authContext'
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { getMyPolicies } from '../../../api/policies'
 
 export const HistoryPanel = () => {
-    const { userPolicies } = useAuth();
+    const { userPolicies, refreshPolicies } = useAuth();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadPolicies = async () => {
+            await refreshPolicies();
+            setLoading(false);
+        };
+        loadPolicies();
+    }, []);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Не указано';
-        const [year, month, day] = dateString.split('-');
-        return `${day}.${month}.${year}`;
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU');
     };
+
+    const getStatusText = (status) => {
+        const statusMap = {
+            'draft': 'Черновик',
+            'active': 'Активен',
+            'expired': 'Просрочен',
+            'cancelled': 'Отменён'
+        };
+        return statusMap[status] || status;
+    };
+
+    if (loading) {
+        return <div className={styles.historyPanel}>Загрузка...</div>;
+    }
 
     return (
         <div className={styles.historyPanel}>
@@ -32,17 +57,17 @@ export const HistoryPanel = () => {
                     userPolicies.map(policy => (
                         <div key={policy.id} className={styles.policyCard}>
                             <div className={styles.policyHeader}>
-                                <span className={styles.policyNumber}>Полис №{policy.policyNumber}</span>
-                                <span className={`${styles.policyStatus} ${styles[policy.status.toLowerCase()]}`}>
-                                    {policy.status}
+                                <span className={styles.policyNumber}>Полис №{policy.policy_number}</span>
+                                <span className={`${styles.policyStatus} ${styles[policy.status]}`}>
+                                    {getStatusText(policy.status)}
                                 </span>
                             </div>
                             <div className={styles.policyInfo}>
-                                <p><strong>Авто:</strong> {policy.brand} {policy.model} ({policy.stateNumber})</p>
-                                <p><strong>Дата начала:</strong> {formatDate(policy.startDate)}</p>
-                                <p><strong>Дата окончания:</strong> {formatDate(policy.endDate)}</p>
-                                <p><strong>Стоимость:</strong> {policy.calculatedPrice?.toLocaleString()} ₽</p>
-                                <p><strong>Тип:</strong> {policy.type}</p>
+                                <p><strong>Авто:</strong> {policy.vehicle?.brand} {policy.vehicle?.model} ({policy.vehicle?.state_number})</p>
+                                <p><strong>Дата начала:</strong> {formatDate(policy.start_date)}</p>
+                                <p><strong>Дата окончания:</strong> {formatDate(policy.end_date)}</p>
+                                <p><strong>Стоимость:</strong> {policy.final_price?.toLocaleString()} ₽</p>
+                                <p><strong>Тип:</strong> {policy.policy_type?.name || (policy.policy_type_id === 1 ? 'ОСАГО' : 'КАСКО')}</p>
                             </div>
                         </div>
                     ))
@@ -50,4 +75,4 @@ export const HistoryPanel = () => {
             </div>
         </div>
     )
-}
+};

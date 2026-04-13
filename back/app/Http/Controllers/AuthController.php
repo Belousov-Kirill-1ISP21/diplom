@@ -15,45 +15,84 @@ class AuthController extends Controller
     // Регистрация нового клиента
     public function register(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|unique:users',
-            'phone' => 'required|string|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'last_name' => 'required|string|max:30',
-            'first_name' => 'required|string|max:30',
-            'middle_name' => 'nullable|string|max:30',
-            'birth_date' => 'nullable|date',
-        ]);
-
-        $clientType = UserType::where('name', 'client')->first();
+        \Log::info('Register method called');
+        \Log::info('Request data:', $request->all());
         
-        if (!$clientType) {
-            return response()->json(['message' => 'User type not found'], 500);
+        try {
+            $request->validate([
+                'email' => 'required|email|unique:users',
+                'phone' => 'required|string|unique:users',
+                'password' => 'required|min:6|confirmed',
+                'last_name' => 'required|string|max:30',
+                'first_name' => 'required|string|max:30',
+                'middle_name' => 'nullable|string|max:30',
+                'birth_date' => 'nullable|date',
+                // Добавляем валидацию для паспортных данных и прав
+                'passport_series' => 'nullable|string|max:10',
+                'passport_number' => 'nullable|string|max:20',
+                'passport_issued_by' => 'nullable|string|max:100',
+                'passport_issue_date' => 'nullable|date',
+                'driver_license_series' => 'nullable|string|max:10',
+                'driver_license_number' => 'nullable|string|max:20',
+                'driver_license_issued_by' => 'nullable|string|max:100',
+                'driver_license_issue_date' => 'nullable|date',
+                'driver_license_expiry_date' => 'nullable|date',
+                'driver_categories' => 'nullable|string|max:50',
+            ]);
+            \Log::info('Validation passed');
+            
+            $clientType = UserType::where('name', 'client')->first();
+            \Log::info('Client type found:', $clientType ? $clientType->toArray() : 'null');
+            
+            if (!$clientType) {
+                return response()->json(['message' => 'User type not found'], 500);
+            }
+            
+            $user = User::create([
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password_hash' => Hash::make($request->password),
+                'user_type_id' => $clientType->id,
+            ]);
+            \Log::info('User created:', $user->toArray());
+            
+            // Добавляем ВСЕ данные из паспорта и прав
+            $clientProfile = ClientProfile::create([
+                'user_id' => $user->id,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'birth_date' => $request->birth_date,
+                // Паспортные данные
+                'passport_series' => $request->passport_series,
+                'passport_number' => $request->passport_number,
+                'passport_issued_by' => $request->passport_issued_by,
+                'passport_issue_date' => $request->passport_issue_date,
+                // Водительские права
+                'driver_license_series' => $request->driver_license_series,
+                'driver_license_number' => $request->driver_license_number,
+                'driver_license_issued_by' => $request->driver_license_issued_by,
+                'driver_license_issue_date' => $request->driver_license_issue_date,
+                'driver_license_expiry_date' => $request->driver_license_expiry_date,
+                'driver_categories' => $request->driver_categories,
+            ]);
+            \Log::info('Client profile created:', $clientProfile->toArray());
+            
+            $token = $user->createToken('auth_token')->plainTextToken;
+            \Log::info('Token generated');
+            
+            return response()->json([
+                'message' => 'Registration successful',
+                'user' => $user->load('userType'),
+                'profile' => $clientProfile,
+                'token' => $token
+            ], 201);
+            
+        } catch (\Exception $e) {
+            \Log::error('Registration error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->json(['message' => 'Registration failed: ' . $e->getMessage()], 500);
         }
-
-        $user = User::create([
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password_hash' => Hash::make($request->password),
-            'user_type_id' => $clientType->id,
-        ]);
-
-        $clientProfile = ClientProfile::create([
-            'user_id' => $user->id,
-            'last_name' => $request->last_name,
-            'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
-            'birth_date' => $request->birth_date,
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Registration successful',
-            'user' => $user->load('userType'),
-            'profile' => $clientProfile,
-            'token' => $token
-        ], 201);
     }
 
     // Авторизация

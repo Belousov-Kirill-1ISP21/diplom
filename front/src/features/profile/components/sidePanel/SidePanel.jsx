@@ -10,9 +10,9 @@ import { useAuth } from '../../../../shared/context/authContext'
 import { useNavigate } from 'react-router-dom'
 
 export const SidePanel = (props) => {
-    const {SidePanelHeadH1, SidePanelHeadText, activeTab, setActiveTab} = props
+    const { activeTab, setActiveTab } = props
     const { unreadCount } = useNotifications()
-    const { logout, userData } = useAuth()
+    const { logout, fullUserData } = useAuth()
     const navigate = useNavigate()
 
     const handleLogout = () => {
@@ -20,8 +20,11 @@ export const SidePanel = (props) => {
         navigate('/')
     }
 
-    const displayName = userData ? `${userData.surname} ${userData.name}` : SidePanelHeadH1
-    const displayEmail = userData?.email || SidePanelHeadText
+    // Формируем отображаемое имя из полей surname и name
+    const displayName = fullUserData?.surname && fullUserData?.name 
+        ? `${fullUserData.surname} ${fullUserData.name}`
+        : fullUserData?.email?.split('@')[0] || 'Пользователь'
+    const displayEmail = fullUserData?.email || 'email@example.com'
 
     const SidePanelLineProps = [
         {id:0, SidePanelLineImg: Profile, SidePanelLineButton:'Профиль', tabName: 'profile'},

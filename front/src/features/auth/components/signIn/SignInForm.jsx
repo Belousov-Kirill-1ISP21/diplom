@@ -1,11 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { useState } from 'react';
 import styles from './SignInFormStyle.module.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../shared/context/authContext.js';
 import { TextInput } from '../../../../shared/components/TextInput.jsx';
 import { AuthCheckBox } from '../../../../shared/components/auth/AuthCheckBox';
+import { login as apiLogin } from '../../../../api/auth';
 
 const signInSchema = yup.object().shape({
   email: yup
@@ -22,6 +24,8 @@ const signInSchema = yup.object().shape({
 export const SignInForm = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(signInSchema),
@@ -29,23 +33,20 @@ export const SignInForm = () => {
     });
 
     const onSubmit = async (data) => {
+        setLoading(true);
+        setError('');
+        
         try {
-            const savedUserData = localStorage.getItem('userData');
-            if (savedUserData) {
-                const userData = JSON.parse(savedUserData);
-                
-                if (data.email === userData.email && data.password === userData.password) {
-                    login(userData);
-                    navigate('/Profile');
-                } else {
-                    alert('Неверный email или пароль');
-                }
-            } else {
-                alert('Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
-            }
+            const response = await apiLogin(data.email, data.password);
+            const { token, user } = response.data;
+            
+            login(user, token);
+            navigate('/Profile');
         } catch (error) {
-            console.error('Ошибка входа:', error);
-            alert('Ошибка при входе в систему');
+            const message = error.response?.data?.message || 'Неверный email или пароль';
+            setError(message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -78,6 +79,8 @@ export const SignInForm = () => {
           >
               <h1 className={styles.SignInFormH1}>Вход в аккаунт</h1>
               
+              {error && <div className={styles.errorMessage}>{error}</div>}
+              
               {TextInputProps.map((TextInputInfo, key) => (
                   <TextInput 
                       key={key}
@@ -105,8 +108,12 @@ export const SignInForm = () => {
                   </button>
               </div>
               
-              <button type="submit" className={styles.SignInFormFormButton}>
-                  Войти
+              <button 
+                  type="submit" 
+                  className={styles.SignInFormFormButton}
+                  disabled={loading}
+              >
+                  {loading ? 'Вход...' : 'Войти'}
               </button>
               
           </form>

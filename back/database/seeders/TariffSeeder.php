@@ -15,26 +15,8 @@ class TariffSeeder extends Seeder
         $osagoId = PolicyType::where('name', 'ОСАГО')->first()->id;
         $kaskoId = PolicyType::where('name', 'КАСКО')->first()->id;
         
-        // ОСАГО для легковых авто (категория B)
         $tariffs = [
-            // ОСАГО
-            [
-                'policy_type_id' => $osagoId,
-                'vehicle_category' => 'B',
-                'base_rate' => 4118.00,
-                'min_rate' => 2746.00,
-                'max_rate' => 4942.00,
-                'power_coefficient' => 1.0,
-                'experience_coefficient' => 1.0,
-                'age_coefficient' => 1.0,
-                'bonus_malus_coefficient' => 1.0,
-                'region_coefficient' => 1.0,
-                'vehicle_age_coefficient' => 1.0,
-                'security_coefficient' => 1.0,
-                'franchise_coefficient' => 1.0,
-                'calculation_method' => 'basic'
-            ],
-            // ОСАГО для мотоциклов
+            // ОСАГО для мотоциклов (A)
             [
                 'policy_type_id' => $osagoId,
                 'vehicle_category' => 'A',
@@ -51,7 +33,75 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
-            // КАСКО
+            // ОСАГО для легковых (B)
+            [
+                'policy_type_id' => $osagoId,
+                'vehicle_category' => 'B',
+                'base_rate' => 4118.00,
+                'min_rate' => 2746.00,
+                'max_rate' => 4942.00,
+                'power_coefficient' => 1.0,
+                'experience_coefficient' => 1.0,
+                'age_coefficient' => 1.0,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.0,
+                'vehicle_age_coefficient' => 1.0,
+                'security_coefficient' => 1.0,
+                'franchise_coefficient' => 1.0,
+                'calculation_method' => 'basic'
+            ],
+            // ОСАГО для грузовых (C)
+            [
+                'policy_type_id' => $osagoId,
+                'vehicle_category' => 'C',
+                'base_rate' => 5500.00,
+                'min_rate' => 4000.00,
+                'max_rate' => 7000.00,
+                'power_coefficient' => 1.2,
+                'experience_coefficient' => 1.0,
+                'age_coefficient' => 1.0,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.0,
+                'vehicle_age_coefficient' => 1.0,
+                'security_coefficient' => 1.0,
+                'franchise_coefficient' => 1.0,
+                'calculation_method' => 'basic'
+            ],
+            // ОСАГО для автобусов (D)
+            [
+                'policy_type_id' => $osagoId,
+                'vehicle_category' => 'D',
+                'base_rate' => 6500.00,
+                'min_rate' => 5000.00,
+                'max_rate' => 8500.00,
+                'power_coefficient' => 1.3,
+                'experience_coefficient' => 1.0,
+                'age_coefficient' => 1.0,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.0,
+                'vehicle_age_coefficient' => 1.0,
+                'security_coefficient' => 1.0,
+                'franchise_coefficient' => 1.0,
+                'calculation_method' => 'basic'
+            ],
+            // ОСАГО для прицепов (E)
+            [
+                'policy_type_id' => $osagoId,
+                'vehicle_category' => 'E',
+                'base_rate' => 2000.00,
+                'min_rate' => 1500.00,
+                'max_rate' => 3000.00,
+                'power_coefficient' => 1.0,
+                'experience_coefficient' => 1.0,
+                'age_coefficient' => 1.0,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.0,
+                'vehicle_age_coefficient' => 1.0,
+                'security_coefficient' => 1.0,
+                'franchise_coefficient' => 1.0,
+                'calculation_method' => 'basic'
+            ],
+            // КАСКО для легковых (B)
             [
                 'policy_type_id' => $kaskoId,
                 'vehicle_category' => 'B',
@@ -63,6 +113,23 @@ class TariffSeeder extends Seeder
                 'age_coefficient' => 0.85,
                 'bonus_malus_coefficient' => 1.0,
                 'region_coefficient' => 1.1,
+                'vehicle_age_coefficient' => 0.95,
+                'security_coefficient' => 0.8,
+                'franchise_coefficient' => 0.7,
+                'calculation_method' => 'coefficient'
+            ],
+            // КАСКО для грузовых (C)
+            [
+                'policy_type_id' => $kaskoId,
+                'vehicle_category' => 'C',
+                'base_rate' => 70000.00,
+                'min_rate' => 35000.00,
+                'max_rate' => 200000.00,
+                'power_coefficient' => 1.3,
+                'experience_coefficient' => 0.9,
+                'age_coefficient' => 0.85,
+                'bonus_malus_coefficient' => 1.0,
+                'region_coefficient' => 1.2,
                 'vehicle_age_coefficient' => 0.95,
                 'security_coefficient' => 0.8,
                 'franchise_coefficient' => 0.7,

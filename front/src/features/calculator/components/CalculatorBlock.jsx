@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import styles from './CalculatorBlock.module.css';
 import { useAuth } from '../../../shared/context/authContext';
 import { useCalculatorForm } from '../../../shared/hooks/useCalculatorForm';
+import { createPolicy, calculatePolicy } from '../../../api/policies';
+import api from '../../../api/client';
 
 export const CalculatorBlock = () => {
-    const { isAuthenticated, addPolicy } = useAuth();
+    const { isAuthenticated, addPolicy, refreshPolicies, profileData } = useAuth();
     const form = useCalculatorForm();
+    const [isCalculating, setIsCalculating] = useState(false);
+    const [error, setError] = useState(null);
 
     const saveSteps = (type, currentStep, oStep, kStep) => {
         localStorage.setItem('pendingCalculatorState', JSON.stringify({
@@ -45,30 +49,206 @@ export const CalculatorBlock = () => {
         saveSteps(form.policyType, form.step, form.osagoStep, form.kaskoStep);
     }, [form.step, form.policyType]);
 
-    const handleSubmit = () => {
-        const currentData = form.getCurrentData();
+    const calculatePrice = async () => {
+        console.log('=== НАЧАЛО calculatePrice ===');
+        setIsCalculating(true);
+        setError(null);
         
-        if (isAuthenticated) {
-            const newPolicy = {
-                id: Date.now(),
-                policyNumber: `POL-${Date.now()}`,
-                type: form.policyType === 'osago' ? 'ОСАГО' : 'КАСКО',
+        try {
+            const currentData = form.getCurrentData();
+            console.log('currentData:', currentData);
+            
+            // Проверяем обязательные поля
+            if (!currentData.stateNumber) {
+                throw new Error('Госномер обязателен');
+            }
+            if (!currentData.vin) {
+                throw new Error('VIN обязателен');
+            }
+            if (!currentData.category) {
+                throw new Error('Категория обязательна');
+            }
+            if (!currentData.startDate) {
+                throw new Error('Дата начала обязательна');
+            }
+            if (!currentData.endDate) {
+                throw new Error('Дата окончания обязательна');
+            }
+            if (!currentData.brand) {
+                throw new Error('Марка обязательна');
+            }
+            if (!currentData.model) {
+                throw new Error('Модель обязательна');
+            }
+            if (!currentData.manufactureYear) {
+                throw new Error('Год выпуска обязателен');
+            }
+            if (!currentData.powerHp) {
+                throw new Error('Мощность обязательна');
+            }
+            
+            console.log('Валидация пройдена');
+            
+            // 1. Сначала проверяем, существует ли уже такой автомобиль у клиента
+            let vehicleId = null;
+            
+            try {
+                const myVehiclesResponse = await api.get('/client/vehicles');
+                const myVehicles = myVehiclesResponse.data;
+                console.log('Мои автомобили:', myVehicles);
+                
+                const existingVehicle = myVehicles.find(v => 
+                    v.state_number === currentData.stateNumber || 
+                    v.vin === currentData.vin
+                );
+                
+                if (existingVehicle) {
+                    vehicleId = existingVehicle.id;
+                    console.log('=== НАЙДЕН СУЩЕСТВУЮЩИЙ АВТОМОБИЛЬ ===', vehicleId);
+                }
+            } catch (err) {
+                console.log('Ошибка при проверке существующих авто:', err);
+            }
+            
+            // 2. Если автомобиль не найден - создаем новый
+            if (!vehicleId) {
+                console.log('Создаем новый автомобиль...');
+                const vehicleResponse = await api.post('/client/vehicles', {
+                    state_number: currentData.stateNumber,
+                    brand: currentData.brand,
+                    model: currentData.model,
+                    manufacture_year: parseInt(currentData.manufactureYear),
+                    power_hp: parseInt(currentData.powerHp),
+                    category: currentData.category,
+                    vin: currentData.vin,
+                    purchase_price: currentData.purchasePrice ? parseFloat(currentData.purchasePrice) : null,
+                    has_tracker: currentData.hasTracker || false,
+                    parking_type: currentData.parkingType || 'garage'
+                });
+                
+                console.log('Ответ от сервера при создании авто:', vehicleResponse.data);
+                vehicleId = vehicleResponse.data.vehicle.id;
+                console.log('=== СОЗДАН НОВЫЙ АВТОМОБИЛЬ ===', vehicleId);
+            }
+            
+            // 3. Сохраняем vehicleId
+            form.updateCurrentData({
                 ...currentData,
-                status: 'Активный',
-                createdAt: new Date().toISOString()
-            };
-            addPolicy(newPolicy);
+                vehicleId: vehicleId
+            });
+            
+            // 4. Получаем tariff_id
+            const policyTypeId = form.policyType === 'osago' ? 1 : 2;
+            console.log('policyTypeId:', policyTypeId);
+            
+
+            const tariffsResponse = await api.get('/tariffs/public', {
+                params: { policy_type_id: policyTypeId }
+            });
+            console.log('Тарифы:', tariffsResponse.data);
+            
+            console.log('Тип vehicle_category в тарифах:', tariffsResponse.data.map(t => ({ id: t.id, category: t.vehicle_category, type: typeof t.vehicle_category })));
+            console.log('Тип currentData.category:', currentData.category, typeof currentData.category);
+            console.log('Сравнение:', tariffsResponse.data[0]?.vehicle_category === currentData.category);
+            const tariff = tariffsResponse.data.find(t => t.vehicle_category?.code === currentData.category);
+            console.log('Найденный тариф:', tariff);
+            
+            if (!tariff) {
+                throw new Error('Тариф не найден для категории ' + currentData.category);
+            }
+            
+            // 5. Рассчитываем стоимость
+            console.log('Отправляем запрос на расчет...');
+            const response = await api.post('/client/policies/calculate', {
+                policy_type_id: policyTypeId,
+                vehicle_id: vehicleId,
+                tariff_id: tariff.id,
+                start_date: currentData.startDate,
+                end_date: currentData.endDate
+            });
+            
+            console.log('Ответ на расчет:', response.data);
+            const calculatedPrice = response.data.calculated_price;
+            
+            form.updateCurrentData({
+                ...currentData,
+                vehicleId: vehicleId,
+                tariffId: tariff.id,
+                calculatedPrice: calculatedPrice
+            });
+            
+            if (form.policyType === 'osago') {
+                form.setOsagoStep(3);
+                form.setStep(3);
+            } else {
+                form.setKaskoStep(4);
+                form.setStep(4);
+            }
+            
+        } catch (error) {
+            console.error('=== ОШИБКА В calculatePrice ===');
+            console.error('Тип ошибки:', error.name);
+            console.error('Сообщение:', error.message);
+            console.error('Стек:', error.stack);
+            
+            if (error.response) {
+                console.error('Статус:', error.response.status);
+                console.error('Данные ошибки:', error.response.data);
+                console.error('Ошибки валидации:', error.response.data?.errors);
+            }
+            
+            let errorMessage = error.message || 'Ошибка при расчете';
+            if (error.response?.data?.errors) {
+                const errors = Object.values(error.response.data.errors).flat();
+                errorMessage = errors.join(', ');
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            
+            setError(errorMessage);
+        } finally {
+            setIsCalculating(false);
+        }
+    };
+    
+    const handleSubmit = async () => {
+        if (!isAuthenticated) {
+            // ... сохранение в localStorage
+            return;
+        }
+    
+        setIsCalculating(true);
+        setError(null);
+        
+        try {
+            const currentData = form.getCurrentData();
+            const clientId = profileData?.id;
+            
+            if (!clientId) throw new Error('Client profile not found');
+            if (!currentData.vehicleId) throw new Error('Vehicle not created');
+            if (!currentData.tariffId) throw new Error('Tariff not found');
+            
+            const response = await createPolicy({
+                policy_type_id: form.policyType === 'osago' ? 1 : 2,
+                client_id: clientId,
+                vehicle_id: currentData.vehicleId,
+                tariff_id: currentData.tariffId,
+                base_price: currentData.calculatedPrice,
+                final_price: currentData.calculatedPrice,
+                start_date: currentData.startDate,
+                end_date: currentData.endDate,
+                franchise_amount: 0,
+                coverage_amount: null
+            });
+            
+            addPolicy(response.data.policy);
+            await refreshPolicies();
             window.location.href = '/Profile?tab=policies';
-        } else {
-            localStorage.setItem('pendingCalculatorData', JSON.stringify({
-                osago: form.calculatorData.osago,
-                kasko: form.calculatorData.kasko,
-                policyType: form.policyType,
-                step: form.step,
-                osagoStep: form.osagoStep,
-                kaskoStep: form.kaskoStep
-            }));
-            window.location.href = '/SignUp';
+        } catch (error) {
+            console.error('Error:', error.response?.data);
+            setError(error.response?.data?.message || 'Ошибка при оформлении полиса');
+        } finally {
+            setIsCalculating(false);
         }
     };
 
@@ -99,6 +279,12 @@ export const CalculatorBlock = () => {
                     </button>
                 </div>
             </div>
+
+            {error && (
+                <div className={styles.errorMessage}>
+                    {error}
+                </div>
+            )}
 
             <div className={styles.progress}>
                 <div 
@@ -288,8 +474,8 @@ export const CalculatorBlock = () => {
                                     Далее
                                 </button>
                             ) : (
-                                <button onClick={form.calculatePrice} className={styles.calculateButton}>
-                                    Рассчитать
+                                <button onClick={calculatePrice} disabled={isCalculating} className={styles.calculateButton}>
+                                    {isCalculating ? 'Расчет...' : 'Рассчитать'}
                                 </button>
                             )}
                         </div>
@@ -330,8 +516,8 @@ export const CalculatorBlock = () => {
                             <button onClick={form.prevStep} className={styles.prevButton}>
                                 Назад
                             </button>
-                            <button onClick={form.calculatePrice} className={styles.calculateButton}>
-                                Рассчитать
+                            <button onClick={calculatePrice} disabled={isCalculating} className={styles.calculateButton}>
+                                {isCalculating ? 'Расчет...' : 'Рассчитать'}
                             </button>
                         </div>
                     </div>
@@ -366,8 +552,8 @@ export const CalculatorBlock = () => {
                                     <button onClick={form.prevStep} className={styles.prevButton}>
                                         Назад
                                     </button>
-                                    <button onClick={handleSubmit} className={styles.submitButton}>
-                                        Оформить полис
+                                    <button onClick={handleSubmit} disabled={isCalculating} className={styles.submitButton}>
+                                        {isCalculating ? 'Оформление...' : 'Оформить полис'}
                                     </button>
                                 </div>
                             </div>

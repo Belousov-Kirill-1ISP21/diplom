@@ -15,9 +15,6 @@ class VehicleCategorySeeder extends Seeder
             ['code' => 'C', 'name' => 'Грузовые автомобили'],
             ['code' => 'D', 'name' => 'Автобусы'],
             ['code' => 'E', 'name' => 'Прицепы'],
-            ['code' => 'M', 'name' => 'Мопеды'],
-            ['code' => 'T', 'name' => 'Трамваи'],
-            ['code' => 'Tb', 'name' => 'Троллейбусы'],
         ];
 
         foreach ($categories as $category) {

@@ -7,11 +7,6 @@ export const MainPanelLine = (props) => {
         onChange(label, e.target.value)
     }
 
-    const getMaskedPassword = () => {
-        if (!value) return ''
-        return '•'.repeat(value.length)
-    }
-
     return <div className={styles.MainPanelLine}>
         <h1 className={styles.MainPanelLineH1}>{label}</h1>
         {isEditing ? (
@@ -24,7 +19,7 @@ export const MainPanelLine = (props) => {
             />
         ) : (
             <p className={styles.MainPanelLineText}>
-                {isPassword ? getMaskedPassword() : value}
+                {isPassword ? '********' : value}
             </p>
         )}     
     </div>

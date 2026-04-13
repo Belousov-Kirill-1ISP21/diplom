@@ -16,6 +16,7 @@ use App\Http\Controllers\PolicyTypeController;
 use App\Http\Controllers\VehicleCategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\NotificationController;
 
 // Публичные эндпоинты
 Route::post('auth/register', [AuthController::class, 'register']);
@@ -40,11 +41,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', [ProfileController::class, 'show']);
     Route::put('profile', [ProfileController::class, 'update']);
     
+    // Уведомления
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/unread', [NotificationController::class, 'unread']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::put('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
+    
     // Клиент
     Route::middleware(['client'])->prefix('client')->group(function () {
         Route::get('policies', [PolicyController::class, 'myPolicies']);
         Route::get('policies/{policy}', [PolicyController::class, 'showMyPolicy']);
         Route::post('policies/calculate', [PolicyController::class, 'calculate']);
+        Route::post('policies', [PolicyController::class, 'store']);
         Route::post('policies/{policy}/pay', [PolicyController::class, 'pay']);
         Route::post('policies/{policy}/cancel', [PolicyController::class, 'cancel']);
         
@@ -106,6 +116,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('tariffs', [TariffController::class, 'store']);
         Route::put('tariffs/{tariff}', [TariffController::class, 'update']);
         Route::delete('tariffs/{tariff}', [TariffController::class, 'destroy']);
+        
+        Route::post('notifications', [NotificationController::class, 'store']);
         
         Route::get('reports/sales', [ReportController::class, 'sales']);
         Route::get('reports/payments', [ReportController::class, 'payments']);

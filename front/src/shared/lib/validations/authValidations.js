@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-const CURRENT_DATE = new Date(2026, 2, 14);
+const CURRENT_DATE = new Date();
 const CURRENT_YEAR = 2026;
 
 // Общая функция валидации даты в формате YYYY-MM-DD

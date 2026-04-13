@@ -41,4 +41,9 @@ class User extends Authenticatable
     {
         return $this->hasManyThrough(Vehicle::class, ClientProfile::class, 'user_id', 'client_id');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

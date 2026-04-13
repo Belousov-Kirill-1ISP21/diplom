@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             TariffSeeder::class,
             UserSeeder::class,
             VehicleSeeder::class, 
+            NotificationSeeder::class,
         ]);
     }
 }

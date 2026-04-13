@@ -4,7 +4,7 @@ import { PasswordModal } from '../PasswordModal';
 import { PROFILE_FIELDS, PROFILE_FIELD_MAP } from '../../../../shared/config/fields';
 import { useProfileForm } from '../../../../shared/hooks/useProfileForm';
 
-export const MainPanel = (props) => {
+export const MainPanel = () => {
     const {
         isEditing,
         setIsEditing,

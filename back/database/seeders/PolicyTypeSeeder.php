@@ -12,9 +12,6 @@ class PolicyTypeSeeder extends Seeder
         $types = [
             ['name' => 'ОСАГО'],
             ['name' => 'КАСКО'],
-            ['name' => 'Зеленая карта'],
-            ['name' => 'ДСАГО'],
-            ['name' => 'Страхование жизни'],
         ];
 
         foreach ($types as $type) {

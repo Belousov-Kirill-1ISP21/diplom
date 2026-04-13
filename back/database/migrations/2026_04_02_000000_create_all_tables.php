@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('user_types', function (Blueprint $table) {
             $table->id();
             $table->string('name', 30);
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 2. Локации
@@ -22,38 +22,38 @@ return new class extends Migration
             $table->string('region_name', 100);
             $table->string('city_name', 100);
             $table->string('region_code', 10)->nullable();
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 3. Типы документов
         Schema::create('document_types', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50);
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 4. Пользователи
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('email', 50)->unique();
-            $table->string('phone', 10)->unique();
+            $table->string('phone', 20)->unique();
             $table->string('password_hash', 255);
             $table->foreignId('user_type_id')->constrained('user_types');
-            $table->timestamps(); // Изменено: вместо timestamp('created_at')
+            $table->timestamps();
         });
 
         // 5. Типы полисов
         Schema::create('policy_types', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50);
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 6. Категории ТС
         Schema::create('vehicle_categories', function (Blueprint $table) {
             $table->string('code', 10)->primary();
             $table->string('name', 50);
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 7. Профили клиентов
@@ -86,7 +86,7 @@ return new class extends Migration
             $table->integer('driver_experience_years')->default(0);
             $table->string('bonus_malus_class', 10)->default('M');
             $table->boolean('has_accidents_last_year')->default(false);
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 8. Тарифы
@@ -108,7 +108,7 @@ return new class extends Migration
             $table->string('calculation_method', 50);
             
             $table->foreign('vehicle_category')->references('code')->on('vehicle_categories');
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 9. Транспортные средства
@@ -129,7 +129,7 @@ return new class extends Migration
             $table->enum('parking_type', ['garage', 'street', 'parking_lot', 'other'])->nullable();
             
             $table->foreign('category')->references('code')->on('vehicle_categories');
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
         });
 
         // 10. Полисы
@@ -160,7 +160,7 @@ return new class extends Migration
             // Индексы
             $table->index('status');
             $table->index('client_id');
-            $table->timestamps(); // Изменено: вместо timestamp('created_at')
+            $table->timestamps();
         });
 
         // 11. Страховые случаи
@@ -176,12 +176,26 @@ return new class extends Migration
             // Индексы
             $table->index('client_id');
             $table->index('policy_id');
-            $table->timestamps(); // Добавлено
+            $table->timestamps();
+        });
+
+        // 12. Уведомления
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('message', 500);
+            $table->boolean('is_read')->default(false);
+            $table->string('type', 50)->nullable();
+            $table->json('data')->nullable();
+            $table->timestamps();
+            
+            $table->index(['user_id', 'is_read']);
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('notifications');
         Schema::dropIfExists('accidents');
         Schema::dropIfExists('policies');
         Schema::dropIfExists('vehicles');

@@ -1,4 +1,4 @@
-import styles from  './profileStyle.module.css'
+import styles from './profileStyle.module.css'
 import { SidePanel } from '../components/sidePanel/SidePanel'
 import { MainPanel } from '../components/mainPanel/MainPanel'
 import { HistoryPanel } from '../components/HistoryPanel'
@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom'
 export const ProfilePage = () => {
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('profile')
-    const { userData } = useAuth()
+    const { isAuthenticated, loading } = useAuth()
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -33,14 +33,19 @@ export const ProfilePage = () => {
         }
     }
 
-    if (!userData) return null;
+    if (loading) {
+        return <div className={styles.wrapper}>Загрузка...</div>
+    }
+
+    if (!isAuthenticated) {
+        window.location.href = '/SignIn'
+        return null
+    }
 
     return <div className={styles.wrapper}>
         <div className={styles.panelsContainer}>
             <div className={styles.SidePanelContainer}>
                 <SidePanel 
-                    SidePanelHeadH1={`${userData.surname} ${userData.name}`}
-                    SidePanelHeadText={userData.email}
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                 />

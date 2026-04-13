@@ -2,18 +2,36 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/authContext';
 
 export const useProfileForm = () => {
-    const { userData, updateUserData } = useAuth();
+    const { fullUserData, updateUserData, updateUserPassword } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [formData, setFormData] = useState(userData || {});
+    const [formData, setFormData] = useState({});
     const [passwordError, setPasswordError] = useState('');
-    const [tempPassword, setTempPassword] = useState(''); 
+    const [pendingChanges, setPendingChanges] = useState(null);
 
     useEffect(() => {
-        if (userData) {
-            setFormData(userData);
+        if (fullUserData) {
+            setFormData({
+                surname: fullUserData.surname || '',
+                name: fullUserData.name || '',
+                patronymic: fullUserData.patronymic || '',
+                birthDate: fullUserData.birthDate || '',
+                email: fullUserData.email || '',
+                phone: fullUserData.phone || '',
+                passportSeries: fullUserData.passportSeries || '',
+                passportNumber: fullUserData.passportNumber || '',
+                issuedBy: fullUserData.issuedBy || '',
+                issueDate: fullUserData.issueDate || '',
+                licenseSeries: fullUserData.licenseSeries || '',
+                licenseNumber: fullUserData.licenseNumber || '',
+                licenseIssuedBy: fullUserData.licenseIssuedBy || '',
+                licenseIssueDate: fullUserData.licenseIssueDate || '',
+                licenseExpiryDate: fullUserData.licenseExpiryDate || '',
+                licenseCategory: fullUserData.licenseCategory || '',
+                password: '',
+            });
         }
-    }, [userData]);
+    }, [fullUserData]);
 
     const handleInputChange = (label, value, fieldMap) => {
         const key = fieldMap[label];
@@ -22,31 +40,61 @@ export const useProfileForm = () => {
 
     const handleSave = () => {
         setPasswordError('');
-        setTempPassword(''); 
+        setPendingChanges(formData);
         setShowPasswordModal(true);
     };
 
-    const confirmSave = (enteredPassword, onSuccess) => {
-        if (enteredPassword === userData?.password) {
-            updateUserData(formData);
+    const confirmSave = async (enteredPassword, onSuccess) => {
+        try {
+            // Отправляем данные профиля (без пароля)
+            const profileData = { ...pendingChanges };
+            delete profileData.password;
+            
+            await updateUserData(profileData);
+            
+            // Если пароль был изменен
+            if (pendingChanges.password && pendingChanges.password.trim() !== '') {
+                await updateUserPassword(enteredPassword, pendingChanges.password);
+            }
+            
             setShowPasswordModal(false);
             setIsEditing(false);
+            setPendingChanges(null);
             setPasswordError('');
             if (onSuccess) onSuccess();
-        } else {
-            setPasswordError('Неверный пароль');
+        } catch (error) {
+            setPasswordError(error.response?.data?.message || 'Ошибка при сохранении');
         }
     };
 
     const handleCancel = () => {
         setIsEditing(false);
-        setFormData(userData || {});
+        setFormData({
+            surname: fullUserData?.surname || '',
+            name: fullUserData?.name || '',
+            patronymic: fullUserData?.patronymic || '',
+            birthDate: fullUserData?.birthDate || '',
+            email: fullUserData?.email || '',
+            phone: fullUserData?.phone || '',
+            passportSeries: fullUserData?.passportSeries || '',
+            passportNumber: fullUserData?.passportNumber || '',
+            issuedBy: fullUserData?.issuedBy || '',
+            issueDate: fullUserData?.issueDate || '',
+            licenseSeries: fullUserData?.licenseSeries || '',
+            licenseNumber: fullUserData?.licenseNumber || '',
+            licenseIssuedBy: fullUserData?.licenseIssuedBy || '',
+            licenseIssueDate: fullUserData?.licenseIssueDate || '',
+            licenseExpiryDate: fullUserData?.licenseExpiryDate || '',
+            licenseCategory: fullUserData?.licenseCategory || '',
+            password: '',
+        });
+        setPendingChanges(null);
     };
 
     const handleModalClose = () => {
         setShowPasswordModal(false);
         setPasswordError('');
-        setTempPassword('');
+        setPendingChanges(null);
     };
 
     return {
@@ -55,8 +103,6 @@ export const useProfileForm = () => {
         showPasswordModal,
         formData,
         passwordError,
-        tempPassword,
-        setTempPassword,
         handleInputChange,
         handleSave,
         confirmSave,
