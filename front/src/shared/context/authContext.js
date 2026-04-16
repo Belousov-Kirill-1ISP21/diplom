@@ -31,8 +31,6 @@ export const AuthProvider = ({ children }) => {
                     setUserData(user);
                     setProfileData(user.client_profile);
                     setIsAuthenticated(true);
-                    
-                    // Загружаем полисы после успешной авторизации
                     await loadPolicies();
                 })
                 .catch(() => {
@@ -50,8 +48,6 @@ export const AuthProvider = ({ children }) => {
         setUserData(user);
         setProfileData(user.client_profile);
         setIsAuthenticated(true);
-        
-        // Загружаем полисы после логина
         await loadPolicies();
     };
 
@@ -70,7 +66,6 @@ export const AuthProvider = ({ children }) => {
 
     const updateUserData = async (data) => {
         try {
-            // Преобразуем ключи для бэка
             const payload = {
                 last_name: data.surname || data.last_name,
                 first_name: data.name || data.first_name,
@@ -91,11 +86,8 @@ export const AuthProvider = ({ children }) => {
             };
             
             const response = await updateProfile(payload);
-            
-            // Обновляем локальные данные
             setProfileData(prev => ({ ...prev, ...payload }));
             
-            // Если обновили email или phone, обновляем userData
             if (data.email || data.phone) {
                 setUserData(prev => ({
                     ...prev,
@@ -135,7 +127,6 @@ export const AuthProvider = ({ children }) => {
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
-        // Если дата в формате ISO, берем только YYYY-MM-DD
         if (dateString.includes('T')) {
             return dateString.split('T')[0];
         }

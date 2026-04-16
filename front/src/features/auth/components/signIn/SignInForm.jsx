@@ -1,13 +1,14 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './SignInFormStyle.module.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../shared/context/authContext.js';
 import { TextInput } from '../../../../shared/components/TextInput.jsx';
 import { AuthCheckBox } from '../../../../shared/components/auth/AuthCheckBox';
 import { login as apiLogin } from '../../../../api/auth';
+import { Link } from 'react-router-dom';
 
 const signInSchema = yup.object().shape({
   email: yup
@@ -27,10 +28,22 @@ export const SignInForm = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm({
         resolver: yupResolver(signInSchema),
         mode: 'onChange'
     });
+
+    // Загрузка сохраненных данных при монтировании
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('savedEmail');
+        const savedPassword = localStorage.getItem('savedPassword');
+        
+        if (savedEmail && savedPassword) {
+            setValue('email', savedEmail);
+            setValue('password', savedPassword);
+            setValue('rememberMe', true);
+        }
+    }, [setValue]);
 
     const onSubmit = async (data) => {
         setLoading(true);
@@ -39,6 +52,15 @@ export const SignInForm = () => {
         try {
             const response = await apiLogin(data.email, data.password);
             const { token, user } = response.data;
+            
+            // Сохраняем email и пароль если выбран "Запомнить меня"
+            if (data.rememberMe) {
+                localStorage.setItem('savedEmail', data.email);
+                localStorage.setItem('savedPassword', data.password);
+            } else {
+                localStorage.removeItem('savedEmail');
+                localStorage.removeItem('savedPassword');
+            }
             
             login(user, token);
             navigate('/Profile');
@@ -100,11 +122,8 @@ export const SignInForm = () => {
                       labelText='Запомнить меня'
                   />
 
-                  <button 
-                      type="button" 
-                      className={styles.SignInFormFormForgotPasswordButton}
-                  >
-                      Забыли пароль?
+                  <button className={styles.SignInFormFormForgotPasswordButton}>
+                    <Link to="/ForgotPassword" className={styles.SignInFormFormForgotPasswordLink}>Забыли пароль?</Link>
                   </button>
               </div>
               

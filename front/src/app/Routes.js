@@ -5,8 +5,10 @@ import { HomePage } from '../features/home/pages/HomePage';
 import { AboutUsPage } from '../features/about/pages/AboutUsPage';
 import { ProfilePage } from '../features/profile/pages/ProfilePage';
 import { CalculatorPage } from '../features/calculator/pages/CalculatorPage';
+import { AccidentPage } from '../features/accident/pages/AccidentPage';
 import { SignInPage } from '../features/auth/pages/SignInPage';
 import { SignUpPage } from '../features/auth/pages/SignUpPage';
+import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage';
 
 const Routes = () => {
     return (
@@ -17,6 +19,8 @@ const Routes = () => {
             <Route path="/SignIn" element={<SignInPage/>} />
             <Route path="/SignUp" element={<SignUpPage/>} />
             <Route path="/Calculator" element={<CalculatorPage/>} />
+            <Route path="/Accident" element={<AccidentPage/>} />
+            <Route path="/ForgotPassword" element={<ForgotPasswordPage/>} />
         </RouterRoutes>
     );
 };

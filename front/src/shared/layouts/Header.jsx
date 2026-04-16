@@ -19,8 +19,19 @@ export const Header = (props) => {
                 <button className={styles.HeaderLeftButton}>
                     <Link to="/AboutUs" className={styles.HeaderLeftButtonContainerLink}>О компании</Link>
                 </button>
-           
-                <button className={styles.HeaderLeftButton}>Страховой случай</button>
+
+                <button className={styles.HeaderLeftButton}>
+                    {isAuthenticated ? (
+                        <Link to="/Accident" className={styles.HeaderLeftLink}>
+                            Страховой случай
+                        </Link>
+                    ) : (
+                        <Link to="/SignUp" className={styles.HeaderLeftLink}>
+                            Страховой случай
+                        </Link>
+                    )}
+                </button>
+
                 <button className={styles.HeaderLeftContactButton}>
                     <p className={styles.HeaderLeftContactButtonText}>Контакты: </p> 
                     <p className={styles.HeaderLeftContactButtonTextInText}>+7 495 123-45-67</p> 

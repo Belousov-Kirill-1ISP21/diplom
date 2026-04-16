@@ -58,3 +58,7 @@
     border-color: #000033;
     color: white;
 }
+
+.SignInFormFormForgotPasswordLink{
+    text-decoration: none;
+}

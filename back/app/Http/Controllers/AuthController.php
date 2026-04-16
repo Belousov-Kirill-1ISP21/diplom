@@ -165,16 +165,15 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => 'Пользователь с таким email не найден'], 404);
         }
 
-        // Здесь можно отправить email со ссылкой для сброса
-        // Пока просто возвращаем токен для тестирования
-        $token = Str::random(64);
+        // Для диплома - фиксированный код
+        $token = '4444';
         
         return response()->json([
-            'message' => 'Password reset link sent',
-            'token' => $token // только для тестирования, в проде убрать
+            'message' => 'Код сброса отправлен на вашу почту',
+            'token' => $token // в реальном проекте это убрать
         ]);
     }
 
@@ -190,16 +189,20 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => 'Пользователь не найден'], 404);
         }
 
-        // Здесь проверять токен из email
+        // Для диплома - проверяем фиксированный код
+        if ($request->token !== '4444') {
+            return response()->json(['message' => 'Неверный код подтверждения'], 422);
+        }
+
         $user->password_hash = Hash::make($request->password);
         $user->save();
 
         // Удаляем все токены пользователя
         $user->tokens()->delete();
 
-        return response()->json(['message' => 'Password reset successfully']);
+        return response()->json(['message' => 'Пароль успешно изменен']);
     }
 }

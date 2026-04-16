@@ -128,3 +128,45 @@ export const updateProfile = (data) => {
         }
     );
 };
+
+// Запрос на сброс пароля (имитация)
+export const forgotPassword = (email) => {
+    console.log('=== [auth/forgotPassword] НАЧАЛО ===');
+    console.log('Email:', email);
+    
+    return api.post('/auth/forgot-password', { email }).then(
+        (response) => {
+            console.log('=== [auth/forgotPassword] УСПЕХ ===');
+            console.log('Ответ:', response);
+            return response;
+        },
+        (error) => {
+            console.error('=== [auth/forgotPassword] ОШИБКА ===');
+            console.error('error.response:', error.response);
+            throw error;
+        }
+    );
+};
+
+// Сброс пароля
+export const resetPassword = (email, token, password, passwordConfirmation) => {
+    console.log('=== [auth/resetPassword] НАЧАЛО ===');
+    
+    return api.post('/auth/reset-password', {
+        email,
+        token,
+        password,
+        password_confirmation: passwordConfirmation
+    }).then(
+        (response) => {
+            console.log('=== [auth/resetPassword] УСПЕХ ===');
+            console.log('Ответ:', response);
+            return response;
+        },
+        (error) => {
+            console.error('=== [auth/resetPassword] ОШИБКА ===');
+            console.error('error.response:', error.response);
+            throw error;
+        }
+    );
+};
