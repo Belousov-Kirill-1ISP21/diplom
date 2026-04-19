@@ -172,6 +172,7 @@ return new class extends Migration
             $table->decimal('damage_amount', 10, 2)->nullable();
             $table->boolean('is_client_fault')->nullable();
             $table->text('description')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected', 'paid'])->default('pending');
             
             // Индексы
             $table->index('client_id');

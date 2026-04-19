@@ -29,3 +29,4 @@ export const payPolicy = (id) => {
 export const cancelPolicy = (id) => {
     return api.post(`/client/policies/${id}/cancel`);
 };
+

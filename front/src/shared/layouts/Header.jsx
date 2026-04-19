@@ -21,6 +21,14 @@ export const Header = (props) => {
                 </button>
 
                 <button className={styles.HeaderLeftButton}>
+                    <Link to="/Admin" className={styles.HeaderLeftButtonContainerLink}>Админ панель</Link>
+                </button>
+
+                <button className={styles.HeaderLeftButton}>
+                    <Link to="/Agent" className={styles.HeaderLeftButtonContainerLink}>Панель агента</Link>
+                </button>
+
+                <button className={styles.HeaderLeftButton}>
                     {isAuthenticated ? (
                         <Link to="/Accident" className={styles.HeaderLeftLink}>
                             Страховой случай

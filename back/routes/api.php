@@ -82,6 +82,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('policies/{policy}', [PolicyController::class, 'update']);
         Route::post('policies/{policy}/activate', [PolicyController::class, 'activate']);
         Route::post('policies/{policy}/renew', [PolicyController::class, 'renew']);
+        Route::post('policies/{policy}/cancel', [PolicyController::class, 'cancel']);
         Route::delete('policies/{policy}', [PolicyController::class, 'destroy']);
         
         Route::get('accidents', [AccidentController::class, 'index']);
@@ -98,6 +99,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     // Админ
     Route::middleware(['admin'])->prefix('admin')->group(function () {
+        // Пользователи
         Route::get('users', [UserController::class, 'index']);
         Route::get('users/{user}', [UserController::class, 'show']);
         Route::post('users', [UserController::class, 'store']);
@@ -106,28 +108,46 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('users/{user}/block', [UserController::class, 'block']);
         Route::post('users/{user}/unblock', [UserController::class, 'unblock']);
         
+        // Полисы (админ)
+        Route::get('policies', [PolicyController::class, 'index']);
+        Route::get('policies/{policy}', [PolicyController::class, 'show']);
+        Route::post('policies/{policy}/cancel', [PolicyController::class, 'cancel']);
+        Route::delete('policies/{policy}', [PolicyController::class, 'destroy']);
+        
+        // Страховые случаи (админ)
+        Route::get('accidents', [AccidentController::class, 'index']);
+        Route::get('accidents/{accident}', [AccidentController::class, 'show']);
+        Route::put('accidents/{accident}', [AccidentController::class, 'update']);
+        Route::post('accidents/{accident}/pay', [AccidentController::class, 'pay']);
+        
+        // Справочники
         Route::apiResource('locations', LocationController::class);
         Route::apiResource('document-types', DocumentTypeController::class);
         Route::apiResource('policy-types', PolicyTypeController::class);
         Route::apiResource('vehicle-categories', VehicleCategoryController::class);
         
+        // Тарифы
         Route::get('tariffs', [TariffController::class, 'index']);
         Route::get('tariffs/{tariff}', [TariffController::class, 'show']);
         Route::post('tariffs', [TariffController::class, 'store']);
         Route::put('tariffs/{tariff}', [TariffController::class, 'update']);
         Route::delete('tariffs/{tariff}', [TariffController::class, 'destroy']);
         
+        // Уведомления (админ)
         Route::post('notifications', [NotificationController::class, 'store']);
         
+        // Отчеты
         Route::get('reports/sales', [ReportController::class, 'sales']);
         Route::get('reports/payments', [ReportController::class, 'payments']);
         Route::get('reports/accidents', [ReportController::class, 'accidentsStats']);
         Route::get('reports/clients', [ReportController::class, 'clientsStats']);
         Route::get('reports/financial', [ReportController::class, 'financial']);
         
+        // Дашборд
         Route::get('dashboard', [AdminController::class, 'dashboard']);
         Route::get('statistics', [AdminController::class, 'statistics']);
         
+        // Бэкапы
         Route::post('backup/create', [AdminController::class, 'createBackup']);
         Route::get('backup/list', [AdminController::class, 'listBackups']);
         Route::post('backup/restore', [AdminController::class, 'restoreBackup']);

@@ -9,6 +9,10 @@ import { AccidentPage } from '../features/accident/pages/AccidentPage';
 import { SignInPage } from '../features/auth/pages/SignInPage';
 import { SignUpPage } from '../features/auth/pages/SignUpPage';
 import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage';
+import { AdminPage } from '../features/panels/pages/AdminPage';
+import { AgentPage } from '../features/panels/pages/AgentPage';
+import { PaymentPage } from '../features/payment/pages/PaymentPage';
+
 
 const Routes = () => {
     return (
@@ -21,8 +25,11 @@ const Routes = () => {
             <Route path="/Calculator" element={<CalculatorPage/>} />
             <Route path="/Accident" element={<AccidentPage/>} />
             <Route path="/ForgotPassword" element={<ForgotPasswordPage/>} />
+            <Route path="/Admin" element={<AdminPage />} />
+            <Route path="/Agent" element={<AgentPage />} />
+            <Route path="/Payment/:id" element={<PaymentPage />} />
         </RouterRoutes>
     );
 };
 
-export default Routes;
+export default Routes; 

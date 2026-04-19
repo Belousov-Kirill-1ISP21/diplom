@@ -218,18 +218,19 @@ class PolicyController extends Controller
         }
         
         $request->validate([
-            'new_end_date' => 'required|date|after:' . $policy->end_date,
+            'days' => 'required|integer|min:1',
         ]);
         
-        $newEndDate = new \DateTime($request->new_end_date);
+        $newEndDate = new \DateTime($policy->end_date);
+        $newEndDate->modify('+' . $request->days . ' days');
+        
         $oldEndDate = new \DateTime($policy->end_date);
         $extraDays = $oldEndDate->diff($newEndDate)->days;
         
-        // Пересчитываем стоимость
         $pricePerDay = $policy->final_price / 365;
         $additionalPrice = $pricePerDay * $extraDays;
         
-        $policy->end_date = $request->new_end_date;
+        $policy->end_date = $newEndDate;
         $policy->final_price += $additionalPrice;
         $policy->save();
         

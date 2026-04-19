@@ -16,7 +16,8 @@ class UserController extends Controller
         $userType = $request->get('user_type');
         $search = $request->get('search');
         
-        $query = User::with('userType');
+        // ДОБАВЬ 'clientProfile' в with()
+        $query = User::with(['userType', 'clientProfile']);
         
         if ($userType) {
             $query->whereHas('userType', function($q) use ($userType) {

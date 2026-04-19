@@ -136,6 +136,26 @@ class ClientController extends Controller
             return response()->json(['message' => 'User is not a client'], 422);
         }
         
+        $profile = $client->clientProfile;
+        
+        if ($profile) {
+            // Проверяем наличие активных полисов
+            if ($profile->policies()->where('status', 'active')->exists()) {
+                return response()->json(['message' => 'Cannot delete client with active policies'], 422);
+            }
+            
+            // Проверяем наличие страховых случаев
+            if ($profile->accidents()->exists()) {
+                return response()->json(['message' => 'Cannot delete client with accident history'], 422);
+            }
+            
+            // Сначала удаляем связанные данные
+            $profile->vehicles()->delete(); // удаляем автомобили
+            $profile->policies()->delete(); // удаляем полисы
+            $profile->accidents()->delete(); // удаляем страховые случаи
+            $profile->delete(); // удаляем профиль
+        }
+        
         $client->delete();
         
         return response()->json(['message' => 'Client deleted successfully']);

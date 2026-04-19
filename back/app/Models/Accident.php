@@ -15,7 +15,8 @@ class Accident extends Model
         'accident_date',
         'damage_amount',
         'is_client_fault',
-        'description'
+        'description',
+        'status'
     ];
 
     protected $casts = [

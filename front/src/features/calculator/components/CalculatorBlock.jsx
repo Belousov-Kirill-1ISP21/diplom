@@ -4,9 +4,11 @@ import { useAuth } from '../../../shared/context/authContext';
 import { useCalculatorForm } from '../../../shared/hooks/useCalculatorForm';
 import { createPolicy, calculatePolicy } from '../../../api/policies';
 import api from '../../../api/client';
+import { useNavigate } from 'react-router-dom';
 
 export const CalculatorBlock = () => {
     const { isAuthenticated, addPolicy, refreshPolicies, profileData } = useAuth();
+    const navigate = useNavigate();
     const form = useCalculatorForm();
     const [isCalculating, setIsCalculating] = useState(false);
     const [error, setError] = useState(null);
@@ -291,6 +293,11 @@ export const CalculatorBlock = () => {
             const currentData = form.getCurrentData();
             const clientId = profileData?.id;
             
+            console.log('=== СОЗДАНИЕ ПОЛИСА ===');
+            console.log('clientId:', clientId);
+            console.log('vehicleId:', currentData.vehicleId);
+            console.log('tariffId:', currentData.tariffId);
+            
             if (!clientId) throw new Error('Client profile not found');
             if (!currentData.vehicleId) throw new Error('Vehicle not created');
             if (!currentData.tariffId) throw new Error('Tariff not found');
@@ -308,11 +315,15 @@ export const CalculatorBlock = () => {
                 coverage_amount: null
             });
             
+            console.log('ПОЛИС СОЗДАН:', response.data);
+            
             addPolicy(response.data.policy);
             await refreshPolicies();
-            window.location.href = '/Profile?tab=policies';
+            
+            navigate(`/Payment/${response.data.policy.id}`);
         } catch (error) {
             console.error('Error:', error.response?.data);
+            console.error('Полная ошибка:', error);
             setError(error.response?.data?.message || 'Ошибка при оформлении полиса');
         } finally {
             setIsCalculating(false);
@@ -614,7 +625,7 @@ export const CalculatorBlock = () => {
                                         Назад
                                     </button>
                                     <button onClick={handleSubmit} disabled={isCalculating} className={styles.submitButton}>
-                                        {isCalculating ? 'Оформление...' : 'Оформить полис'}
+                                        {isCalculating ? 'Оформление...' : 'Перейти к оплате'}
                                     </button>
                                 </div>
                             </div>

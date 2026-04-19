@@ -1,0 +1,321 @@
+.adminPanel {
+    display: flex;
+    min-height: 100vh;
+    background: #f5f5f5;
+}
+
+.sidebar {
+    width: 260px;
+    background: #000033;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.nav {
+    flex: 1;
+    padding: 20px 0;
+}
+
+.navItem {
+    width: 100%;
+    padding: 14px 24px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.navItem:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.navItem.active {
+    background: #4669B0;
+    color: white;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    background: white;
+    padding: 20px 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.content {
+    flex: 1;
+    padding: 20px 30px;
+    overflow-y: auto;
+}
+
+.searchBar, .filterBar {
+    margin-bottom: 20px;
+}
+
+.searchInput, .filterSelect {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.table {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.table th {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tr:hover {
+    background: #f8f9fa;
+}
+
+.addButton {
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background: #4669B0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.editButton, .deleteButton, .cancelButton, .viewButton {
+    padding: 4px 8px;
+    margin: 0 4px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.editButton {
+    background: #4669B0;
+    color: white;
+}
+
+.deleteButton {
+    background: #dc3545;
+    color: white;
+}
+
+.cancelButton {
+    background: #ffc107;
+    color: #333;
+}
+
+.viewButton {
+    background: #28a745;
+    color: white;
+}
+
+.select, .statusSelect {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.status.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.expired {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status.draft {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.cancelled {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.formGroup {
+    margin-bottom: 16px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.modalButtons button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modalButtons button:first-child {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.modalButtons button:last-child {
+    background: #4669B0;
+    color: white;
+    border: none;
+}
+
+.navIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    vertical-align: middle;
+}
+
+.actionIcon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+/* Тут точно норм было */
+
+.expandedRow {
+    background: #f9f9f9;
+}
+
+.expandedContent {
+    padding: 16px;
+}
+
+.expandedContent h4 {
+    margin: 12px 0 8px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.expandedContent h4:first-child {
+    margin-top: 0;
+}
+
+.expandedGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.vehicleInfo {
+    display: flex;
+    gap: 20px;
+    padding: 8px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
