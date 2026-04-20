@@ -137,9 +137,6 @@ export const licenseSchema = {
             const expiryDate = new Date(expiryYear, expiryMonth - 1, expiryDay);
             
             return expiryDate > issueDate;
-        }),
+        })
     
-    licenseCategory: yup.string()
-        .required('Категория обязательна')
-        .oneOf(['A', 'B', 'C', 'D', 'E'], 'Выберите категорию из списка')
 };

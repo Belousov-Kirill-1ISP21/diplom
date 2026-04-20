@@ -18,7 +18,6 @@ class Vehicle extends Model
         'power_hp',
         'category',
         'vin',
-        'engine_volume',
         'purchase_price',
         'mileage',
         'has_tracker',
@@ -28,7 +27,6 @@ class Vehicle extends Model
     protected $casts = [
         'manufacture_year' => 'integer',
         'power_hp' => 'integer',
-        'engine_volume' => 'decimal:1',
         'purchase_price' => 'decimal:2',
         'mileage' => 'integer',
         'has_tracker' => 'boolean'
@@ -49,13 +47,11 @@ class Vehicle extends Model
         return $this->hasMany(Policy::class);
     }
 
-    // Аксессор для полного названия авто
     public function getFullNameAttribute()
     {
         return "{$this->brand} {$this->model}";
     }
 
-    // Аксессор для возраста авто
     public function getAgeAttribute()
     {
         return $this->manufacture_year ? now()->year - $this->manufacture_year : null;

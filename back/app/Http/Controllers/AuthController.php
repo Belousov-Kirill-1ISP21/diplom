@@ -7,7 +7,6 @@ use App\Models\UserType;
 use App\Models\ClientProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -27,22 +26,21 @@ class AuthController extends Controller
                 'first_name' => 'required|string|max:30',
                 'middle_name' => 'nullable|string|max:30',
                 'birth_date' => 'nullable|date',
-                // Добавляем валидацию для паспортных данных и прав
+                // Паспортные данные
                 'passport_series' => 'nullable|string|max:10',
                 'passport_number' => 'nullable|string|max:20',
                 'passport_issued_by' => 'nullable|string|max:100',
                 'passport_issue_date' => 'nullable|date',
+                // Водительские права
                 'driver_license_series' => 'nullable|string|max:10',
                 'driver_license_number' => 'nullable|string|max:20',
                 'driver_license_issued_by' => 'nullable|string|max:100',
                 'driver_license_issue_date' => 'nullable|date',
                 'driver_license_expiry_date' => 'nullable|date',
-                'driver_categories' => 'nullable|string|max:50',
             ]);
             \Log::info('Validation passed');
             
             $clientType = UserType::where('name', 'client')->first();
-            \Log::info('Client type found:', $clientType ? $clientType->toArray() : 'null');
             
             if (!$clientType) {
                 return response()->json(['message' => 'User type not found'], 500);
@@ -56,7 +54,6 @@ class AuthController extends Controller
             ]);
             \Log::info('User created:', $user->toArray());
             
-            // Добавляем ВСЕ данные из паспорта и прав
             $clientProfile = ClientProfile::create([
                 'user_id' => $user->id,
                 'last_name' => $request->last_name,
@@ -74,12 +71,10 @@ class AuthController extends Controller
                 'driver_license_issued_by' => $request->driver_license_issued_by,
                 'driver_license_issue_date' => $request->driver_license_issue_date,
                 'driver_license_expiry_date' => $request->driver_license_expiry_date,
-                'driver_categories' => $request->driver_categories,
             ]);
             \Log::info('Client profile created:', $clientProfile->toArray());
             
             $token = $user->createToken('auth_token')->plainTextToken;
-            \Log::info('Token generated');
             
             return response()->json([
                 'message' => 'Registration successful',
@@ -90,7 +85,6 @@ class AuthController extends Controller
             
         } catch (\Exception $e) {
             \Log::error('Registration error: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
             return response()->json(['message' => 'Registration failed: ' . $e->getMessage()], 500);
         }
     }
@@ -109,14 +103,13 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // Удаляем старые токены
         $user->tokens()->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => $user->load('userType', 'clientProfile'),
+            'user' => $user->load(['userType', 'clientProfile', 'clientProfile.driverCategories']),
             'token' => $token
         ]);
     }
@@ -125,15 +118,13 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        
         return response()->json(['message' => 'Logged out successfully']);
     }
 
     // Получить текущего пользователя
     public function me(Request $request)
     {
-        $user = $request->user()->load('userType', 'clientProfile');
-        
+        $user = $request->user()->load(['userType', 'clientProfile', 'clientProfile.driverCategories']);
         return response()->json($user);
     }
 
@@ -168,12 +159,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'Пользователь с таким email не найден'], 404);
         }
 
-        // Для диплома - фиксированный код
         $token = '4444';
         
         return response()->json([
             'message' => 'Код сброса отправлен на вашу почту',
-            'token' => $token // в реальном проекте это убрать
+            'token' => $token
         ]);
     }
 
@@ -192,7 +182,6 @@ class AuthController extends Controller
             return response()->json(['message' => 'Пользователь не найден'], 404);
         }
 
-        // Для диплома - проверяем фиксированный код
         if ($request->token !== '4444') {
             return response()->json(['message' => 'Неверный код подтверждения'], 422);
         }
@@ -200,7 +189,6 @@ class AuthController extends Controller
         $user->password_hash = Hash::make($request->password);
         $user->save();
 
-        // Удаляем все токены пользователя
         $user->tokens()->delete();
 
         return response()->json(['message' => 'Пароль успешно изменен']);

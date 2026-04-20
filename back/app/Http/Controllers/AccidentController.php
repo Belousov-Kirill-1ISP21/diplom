@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class AccidentController extends Controller
 {
-    // Список всех страховых случаев (агент/админ)
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 15);
@@ -31,7 +30,6 @@ class AccidentController extends Controller
         return response()->json($accidents);
     }
 
-    // Мои страховые случаи (клиент)
     public function myAccidents(Request $request)
     {
         $user = $request->user();
@@ -49,7 +47,6 @@ class AccidentController extends Controller
         return response()->json($accidents);
     }
 
-    // Показать конкретный страховой случай
     public function show($id)
     {
         $accident = Accident::with(['client.user', 'policy'])->findOrFail($id);
@@ -65,67 +62,53 @@ class AccidentController extends Controller
         return response()->json($accident);
     }
 
-    // Создать страховой случай (клиент)
     public function store(Request $request, $policyId)
-{
-    \Log::info('=== ACCIDENT STORE DEBUG ===');
-    \Log::info('user_id: ' . $request->user()->id);
-    \Log::info('policy_id: ' . $policyId);
-    
-    $profile = ClientProfile::where('user_id', $request->user()->id)->first();
-    \Log::info('profile found: ' . ($profile ? $profile->id : 'null'));
-
-    $user = $request->user();
-
-    \Log::info('DEBUG: user_id = ' . $user->id);
-    \Log::info('DEBUG: user_email = ' . $user->email);
-    
-    $profile = ClientProfile::where('user_id', $user->id)->first();
-    \Log::info('DEBUG: profile = ' . ($profile ? $profile->id : 'null'));
-    
-    // ВРЕМЕННОЕ РЕШЕНИЕ - напрямую через Query Builder
-    $profile = \App\Models\ClientProfile::where('user_id', $user->id)->first();
-    
-    if (!$profile) {
-        return response()->json(['message' => 'Client profile not found'], 404);
-    }
-    
-    $policy = Policy::where('id', $policyId)
-        ->where('client_id', $profile->id)
-        ->where('status', 'active')
-        ->first();
+    {
+        $user = $request->user();
         
-    if (!$policy) {
-        return response()->json(['message' => 'Active policy not found'], 404);
+        $profile = ClientProfile::where('user_id', $user->id)->first();
+        
+        if (!$profile) {
+            return response()->json(['message' => 'Client profile not found'], 404);
+        }
+        
+        $policy = Policy::where('id', $policyId)
+            ->where('client_id', $profile->id)
+            ->where('status', 'active')
+            ->first();
+            
+        if (!$policy) {
+            return response()->json(['message' => 'Active policy not found'], 404);
+        }
+        
+        $request->validate([
+            'accident_date' => 'required|date|before_or_equal:today',
+            'damage_amount' => 'nullable|numeric|min:0',
+            'is_client_fault' => 'required|boolean',
+            'description' => 'nullable|string',
+        ]);
+        
+        $accident = Accident::create([
+            'client_id' => $profile->id,
+            'policy_id' => $policyId,
+            'accident_date' => $request->accident_date,
+            'damage_amount' => $request->damage_amount,
+            'is_client_fault' => $request->is_client_fault,
+            'description' => $request->description,
+            'status' => 'pending'
+        ]);
+        
+        if ($request->is_client_fault) {
+            $this->updateBonusMalus($profile, true);
+        }
+        
+        return response()->json([
+            'message' => 'Accident reported successfully',
+            'accident' => $accident->load('policy')
+        ], 201);
     }
-    
-    $request->validate([
-        'accident_date' => 'required|date|before_or_equal:today',
-        'damage_amount' => 'nullable|numeric|min:0',
-        'is_client_fault' => 'required|boolean',
-        'description' => 'nullable|string',
-    ]);
-    
-    $accident = Accident::create([
-        'client_id' => $profile->id,
-        'policy_id' => $policyId,
-        'accident_date' => $request->accident_date,
-        'damage_amount' => $request->damage_amount,
-        'is_client_fault' => $request->is_client_fault,
-        'description' => $request->description,
-    ]);
-    
-    if ($request->is_client_fault) {
-        $this->updateBonusMalus($profile, true);
-    }
-    
-    return response()->json([
-        'message' => 'Accident reported successfully',
-        'accident' => $accident->load('policy')
-    ], 201);
-}
 
-    // Обновить страховой случай (агент)
+    // Обновить страховой случай (агент/админ)
     public function update(Request $request, $id)
     {
         $accident = Accident::findOrFail($id);
@@ -139,13 +122,20 @@ class AccidentController extends Controller
         
         $accident->update($request->all());
         
+        // Если вина клиента изменилась на true, обновляем бонус-малус
+        if ($request->has('is_client_fault') && $request->is_client_fault && !$accident->is_client_fault) {
+            $profile = ClientProfile::find($accident->client_id);
+            if ($profile) {
+                $this->updateBonusMalus($profile, true);
+            }
+        }
+        
         return response()->json([
             'message' => 'Accident updated successfully',
             'accident' => $accident->load(['client.user', 'policy'])
         ]);
     }
 
-    // Выплата по страховому случаю (агент)
     public function pay($id)
     {
         $accident = Accident::findOrFail($id);
@@ -162,7 +152,6 @@ class AccidentController extends Controller
         ]);
     }
 
-    // Обновление бонус-малус класса
     private function updateBonusMalus($profile, $hasAccident)
     {
         $currentClass = $profile->bonus_malus_class ?? '3';

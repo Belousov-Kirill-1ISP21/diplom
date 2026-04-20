@@ -15,7 +15,7 @@ class VehicleCategory extends Model
 
     protected $fillable = ['code', 'name'];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function vehicles()
     {

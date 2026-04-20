@@ -1,4 +1,4 @@
-.CatalogBlockCard{
+.CatalogBlockCard {
     background-color: white;
     height: 89%;
     width: 44%;
@@ -12,7 +12,7 @@
     padding-right: 5%;
 }
 
-.CatalogBlockCardH1Container{
+.CatalogBlockCardH1Container {
     height: 17%;
     width: 100%;
     display: flex;
@@ -20,24 +20,79 @@
     align-items: center;
 }
 
-.CatalogBlockCardTextContainer{
+.CatalogBlockCardTextContainer {
     height: 55%;
     width: 100%;
     display: flex;
-    justify-content: left;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     flex-direction: column;
+    overflow-y: auto;
 }
 
-.CatalogBlockCardPriceContainer{
+/* Стили для маркированного списка */
+.CatalogBlockCardList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.CatalogBlockCardListItem {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 12px;
+    font-size: 2vh;
+    line-height: 1.4;
+    text-align: left;
+    color: #333;
+}
+
+/* Круглая маркер-точка */
+.CatalogBlockCardListItem::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #000033;
+    font-size: 2.5vh;
+    font-weight: bold;
+}
+
+/* Альтернативный вариант — цветная точка */
+/*
+.CatalogBlockCardListItem::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1.2vh;
+    width: 8px;
+    height: 8px;
+    background-color: #000033;
+    border-radius: 50%;
+}
+*/
+
+/* Альтернативный вариант — галочка */
+/*
+.CatalogBlockCardListItem::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #27ae60;
+    font-size: 2vh;
+    font-weight: bold;
+}
+*/
+
+.CatalogBlockCardPriceContainer {
     height: 18%;
     width: 100%;
     display: flex;
-    justify-content: left;
+    justify-content: flex-start;
     align-items: center;
 }
 
-.CatalogBlockCardButtonContainer{
+.CatalogBlockCardButtonContainer {
     height: 22%;
     width: 100%;
     display: flex;
@@ -45,28 +100,30 @@
     align-items: center;
 }
 
-.CatalogBlockCardH1{
+.CatalogBlockCardH1 {
     font-size: 3vh;
     margin: 1%;
     margin-top: 7%;
 }
 
-.CatalogBlockCardText{
+.CatalogBlockCardText {
     display: inline-block;
     font-size: 1.5vh;
     margin: 4%;
     margin-right: 2%;
+    color: #666;
 }
 
-.CatalogBlockCardTextInText{
+.CatalogBlockCardTextInPrice {
     display: inline-block;
-    font-size: 2vh;
+    font-size: 2.5vh;
     margin: 4%;
     margin-left: 2%;
-    text-align: left;
+    font-weight: bold;
+    color: #000033;
 }
 
-.CatalogBlockCardContainerLink{
+.CatalogBlockCardContainerLink {
     text-decoration: none;
     width: 69%;
     height: 69%;
@@ -74,7 +131,7 @@
     margin-bottom: 13%;
 }
 
-.CatalogBlockCardButton{
+.CatalogBlockCardButton {
     width: 100%;
     height: 100%;
     background-color: #000033;
@@ -82,4 +139,10 @@
     color: white;
     font-size: 2vh;
     border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.CatalogBlockCardButton:hover {
+    background-color: #000066;
 }

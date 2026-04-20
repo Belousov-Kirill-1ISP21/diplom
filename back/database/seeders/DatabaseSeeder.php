@@ -10,13 +10,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserTypeSeeder::class,
-            DocumentTypeSeeder::class,
             PolicyTypeSeeder::class,
             VehicleCategorySeeder::class,
-            LocationSeeder::class,
             TariffSeeder::class,
             UserSeeder::class,
-            VehicleSeeder::class, 
+            VehicleSeeder::class,
+            ClientDriverCategorySeeder::class, 
+            PolicySeeder::class, 
+            AccidentSeeder::class,            
             NotificationSeeder::class,
         ]);
     }

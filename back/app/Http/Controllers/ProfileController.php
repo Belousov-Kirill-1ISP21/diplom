@@ -11,7 +11,7 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-        $profile = $user->clientProfile()->with(['location', 'documentType'])->first();
+        $profile = $user->clientProfile()->with(['driverCategories'])->first();
         
         return response()->json([
             'user' => $user,
@@ -30,8 +30,6 @@ class ProfileController extends Controller
             'first_name' => 'sometimes|string|max:30',
             'middle_name' => 'nullable|string|max:30',
             'birth_date' => 'nullable|date',
-            'location_id' => 'nullable|exists:locations,id',
-            'document_type_id' => 'nullable|exists:document_types,id',
             'passport_series' => 'nullable|string|max:10',
             'passport_number' => 'nullable|string|max:20',
             'passport_issued_by' => 'nullable|string|max:100',
@@ -42,7 +40,6 @@ class ProfileController extends Controller
             'driver_license_issued_by' => 'nullable|string|max:100',
             'driver_license_issue_date' => 'nullable|date',
             'driver_license_expiry_date' => 'nullable|date',
-            'driver_categories' => 'nullable|string|max:50',
             'driver_experience_years' => 'nullable|integer|min:0',
             'bonus_malus_class' => 'nullable|string|max:10',
             'has_accidents_last_year' => 'nullable|boolean',
@@ -68,7 +65,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'profile' => $profile->load(['location', 'documentType'])
+            'profile' => $profile->load(['driverCategories'])
         ]);
     }
 }

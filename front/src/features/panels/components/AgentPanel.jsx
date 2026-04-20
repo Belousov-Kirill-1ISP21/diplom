@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import styles from './Panels.module.css';
 import { useAuth } from '../../../shared/context/authContext';
 import api from '../../../api/client';
-import clientsIcon from '../../../assets/Profile/Profile.webp';
-import policiesIcon from '../../../assets/Profile/History.webp';
-import accidentsIcon from '../../../assets/Profile/History.webp';
-import editIcon from '../../../assets/Profile/Settings.webp';
-import deleteIcon from '../../../assets/Profile/Settings.webp';
-import exitIcon from '../../../assets/Profile/Exit.webp';
+import clientsIcon from '../../../assets/Panels/Profile.webp';
+import policiesIcon from '../../../assets/Panels/Policies.webp';
+import accidentsIcon from '../../../assets/Panels/Accident.webp';
+import editIcon from '../../../assets/Panels/Settings.webp';
+import deleteIcon from '../../../assets/Panels/Delete.webp';
+import exitIcon from '../../../assets/Panels/Exit.webp';
+import { useNavigate } from 'react-router-dom';
 
 export const AgentPanel = () => {
     const { userData } = useAuth();
@@ -22,6 +23,8 @@ export const AgentPanel = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const navigate = useNavigate();
+    const { logout } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         phone: '',
@@ -100,7 +103,7 @@ export const AgentPanel = () => {
     };
 
     const deleteClient = async (id) => {
-        if (window.confirm('Удалить клиента? Все его полисы также будут удалены.')) {
+        if (window.confirm('Удалить клиента?')) {
             try {
                 await api.delete(`/agent/clients/${id}`);
                 loadClients();
@@ -139,6 +142,16 @@ export const AgentPanel = () => {
             } catch (error) {
                 setError('Ошибка продления полиса');
             }
+        }
+    };
+
+    const updatePolicyDiscount = async (id, discount) => {
+        try {
+            await api.put(`/agent/policies/${id}`, { discount_amount: discount });
+            await loadPolicies();
+        } catch (error) {
+            console.error('Error:', error.response?.data);
+            setError('Ошибка обновления скидки');
         }
     };
 
@@ -202,7 +215,7 @@ export const AgentPanel = () => {
                     <button className={`${styles.navItem} ${activeTab === 'accidents' ? styles.active : ''}`} onClick={() => setActiveTab('accidents')}>
                         <img src={accidentsIcon} alt="Страховые случаи" className={styles.navIcon} /> Страховые случаи
                     </button>
-                    <button className={styles.navItem} onClick={() => window.location.href = '/'}>
+                    <button className={styles.navItem} onClick={() => { logout(); navigate('/'); }}>
                         <img src={exitIcon} alt="Выход" className={styles.navIcon} /> Выход
                     </button>
                 </nav>
@@ -244,13 +257,13 @@ export const AgentPanel = () => {
                                                                 <div className={styles.expandedGrid}>
                                                                     <div><strong>Паспорт:</strong> {client.client_profile.passport_series || ''} {client.client_profile.passport_number || '—'}</div>
                                                                     <div><strong>ВУ:</strong> {client.client_profile.driver_license_series || ''} {client.client_profile.driver_license_number || '—'}</div>
-                                                                    <div><strong>Категории:</strong> {client.client_profile.driver_categories || '—'}</div>
+                                                                    <div><strong>Категории прав:</strong> {client.client_profile.driver_categories?.map(cat => cat.code).join(', ') || '—'}</div>
                                                                     <div><strong>Стаж:</strong> {client.client_profile.driver_experience_years || 0} лет</div>
                                                                     <div><strong>Бонус-малус:</strong> {client.client_profile.bonus_malus_class || '—'}</div>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                    </tr>
+                                                         </td>
+                                                     </tr>
                                                 )}
                                             </React.Fragment>
                                         ))}
@@ -274,23 +287,40 @@ export const AgentPanel = () => {
                             </div>
                             {loading ? <div className={styles.loading}>Загрузка...</div> : (
                                 <table className={styles.table}>
-                                    <thead><tr><th>№ полиса</th><th>Клиент</th><th>Автомобиль</th><th>Тип</th><th>Сумма</th><th>Действует до</th><th>Статус</th><th>Действия</th></tr></thead>
+                                    <thead><tr><th>№ полиса</th><th>Клиент</th><th>Автомобиль</th><th>Тип</th><th>Сумма</th><th>Скидка (%)</th><th>Действует до</th><th>Статус</th><th>Действия</th></tr></thead>
                                     <tbody>
-                                        {filteredPolicies.map(policy => (
-                                            <tr key={policy.id}>
-                                                <td>{policy.policy_number}</td>
-                                                <td>{policy.client?.last_name} {policy.client?.first_name}</td>
-                                                <td>{policy.vehicle?.brand} {policy.vehicle?.model}</td>
-                                                <td>{policy.policy_type?.name}</td>
-                                                <td>{policy.final_price?.toLocaleString()} ₽</td>
-                                                <td>{policy.end_date}</td>
-                                                <td><span className={`${styles.status} ${styles[policy.status]}`}>{getStatusText(policy.status)}</span></td>
-                                                <td>
-                                                    {policy.status === 'draft' && (<button className={styles.editButton} onClick={() => activatePolicy(policy.id)}>Активировать</button>)}
-                                                    {policy.status === 'active' && (<><button className={styles.editButton} onClick={() => renewPolicy(policy.id)}>Продлить</button><button className={styles.deleteButton} onClick={() => cancelPolicy(policy.id)}>Отменить</button></>)}
-                                                 </td>
-                                             </tr>
-                                        ))}
+                                        {filteredPolicies.map(policy => {
+                                            const discountValue = policy.discount_amount ? Math.round(parseFloat(policy.discount_amount)) : 0;
+                                            return (
+                                                <tr key={policy.id}>
+                                                    <td>{policy.policy_number}</td>
+                                                    <td>{policy.client?.last_name} {policy.client?.first_name}</td>
+                                                    <td>{policy.vehicle?.brand} {policy.vehicle?.model}</td>
+                                                    <td>{policy.policy_type?.name}</td>
+                                                    <td>{policy.final_price?.toLocaleString()} ₽</td>
+                                                    <td>
+                                                        <input
+                                                            type="text"
+                                                            value={discountValue}
+                                                            onChange={(e) => {
+                                                                let val = e.target.value.replace(/[^0-9]/g, '');
+                                                                if (val === '') val = '0';
+                                                                let num = parseInt(val);
+                                                                if (num > 100) num = 100;
+                                                                updatePolicyDiscount(policy.id, num);
+                                                            }}
+                                                            className={styles.discountInput}
+                                                        />
+                                                    </td>
+                                                    <td>{policy.end_date}</td>
+                                                    <td><span className={`${styles.status} ${styles[policy.status]}`}>{getStatusText(policy.status)}</span></td>
+                                                    <td>
+                                                        {policy.status === 'draft' && (<button className={styles.editButton} onClick={() => activatePolicy(policy.id)}>Активировать</button>)}
+                                                        {policy.status === 'active' && (<><button className={styles.editButton} onClick={() => renewPolicy(policy.id)}>Продлить</button><button className={styles.deleteButton} onClick={() => cancelPolicy(policy.id)}>Отменить</button></>)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             )}

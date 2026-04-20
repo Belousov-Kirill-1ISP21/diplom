@@ -17,8 +17,6 @@ class ClientProfile extends Model
         'first_name',
         'middle_name',
         'birth_date',
-        'location_id',
-        'document_type_id',
         'passport_series',
         'passport_number',
         'passport_issued_by',
@@ -29,7 +27,6 @@ class ClientProfile extends Model
         'driver_license_issued_by',
         'driver_license_issue_date',
         'driver_license_expiry_date',
-        'driver_categories',
         'driver_experience_years',
         'bonus_malus_class',
         'has_accidents_last_year'
@@ -49,16 +46,6 @@ class ClientProfile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
-
-    public function documentType()
-    {
-        return $this->belongsTo(DocumentType::class);
-    }
-
     public function vehicles()
     {
         return $this->hasMany(Vehicle::class, 'client_id');
@@ -74,13 +61,18 @@ class ClientProfile extends Model
         return $this->hasMany(Accident::class, 'client_id');
     }
 
-    // Аксессор для полного имени
+    // Категории водительских прав (связь многие ко многим)
+    public function driverCategories()
+    {
+        return $this->belongsToMany(VehicleCategory::class, 'client_driver_categories', 'client_profile_id', 'category_code', 'id', 'code')
+                    ->withTimestamps();
+    }
+
     public function getFullNameAttribute()
     {
         return "{$this->last_name} {$this->first_name} {$this->middle_name}";
     }
 
-    // Аксессор для возраста
     public function getAgeAttribute()
     {
         return $this->birth_date ? $this->birth_date->age : null;

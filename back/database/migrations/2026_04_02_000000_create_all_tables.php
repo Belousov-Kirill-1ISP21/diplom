@@ -15,24 +15,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Локации
-        Schema::create('locations', function (Blueprint $table) {
-            $table->id();
-            $table->string('citizenship_name', 100);
-            $table->string('region_name', 100);
-            $table->string('city_name', 100);
-            $table->string('region_code', 10)->nullable();
-            $table->timestamps();
-        });
-
-        // 3. Типы документов
-        Schema::create('document_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 50);
-            $table->timestamps();
-        });
-
-        // 4. Пользователи
+        // 2. Пользователи
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('email', 50)->unique();
@@ -42,21 +25,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 5. Типы полисов
-        Schema::create('policy_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 50);
-            $table->timestamps();
-        });
-
-        // 6. Категории ТС
+        // 3. Категории ТС
         Schema::create('vehicle_categories', function (Blueprint $table) {
             $table->string('code', 10)->primary();
             $table->string('name', 50);
             $table->timestamps();
         });
 
-        // 7. Профили клиентов
+        // 4. Профили клиентов
         Schema::create('client_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
@@ -64,10 +40,8 @@ return new class extends Migration
             $table->string('first_name', 30)->nullable();
             $table->string('middle_name', 30)->nullable();
             $table->date('birth_date')->nullable();
-            $table->foreignId('location_id')->nullable()->constrained('locations');
             
             // Паспортные данные
-            $table->foreignId('document_type_id')->nullable()->constrained('document_types');
             $table->string('passport_series', 10)->nullable();
             $table->string('passport_number', 20)->nullable();
             $table->string('passport_issued_by', 100)->nullable();
@@ -80,7 +54,6 @@ return new class extends Migration
             $table->string('driver_license_issued_by', 100)->nullable();
             $table->date('driver_license_issue_date')->nullable();
             $table->date('driver_license_expiry_date')->nullable();
-            $table->string('driver_categories', 50)->nullable();
             
             // Данные для расчета
             $table->integer('driver_experience_years')->default(0);
@@ -89,7 +62,25 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 8. Тарифы
+        // 5. Связь клиентов с категориями водительских прав
+        Schema::create('client_driver_categories', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('client_profile_id')->constrained('client_profiles')->onDelete('cascade');
+            $table->string('category_code', 10);
+            $table->timestamps();
+            
+            $table->foreign('category_code')->references('code')->on('vehicle_categories');
+            $table->unique(['client_profile_id', 'category_code']);
+        });
+
+        // 6. Типы полисов
+        Schema::create('policy_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50);
+            $table->timestamps();
+        });
+
+        // 7. Тарифы
         Schema::create('tariffs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('policy_type_id')->constrained('policy_types');
@@ -111,7 +102,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 9. Транспортные средства
+        // 8. Транспортные средства
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')->nullable()->constrained('client_profiles');
@@ -122,7 +113,6 @@ return new class extends Migration
             $table->integer('power_hp')->nullable();
             $table->string('category', 10)->nullable();
             $table->string('vin', 17)->unique();
-            $table->decimal('engine_volume', 4, 1)->nullable();
             $table->decimal('purchase_price', 12, 2)->nullable();
             $table->integer('mileage')->default(0);
             $table->boolean('has_tracker')->default(false);
@@ -132,7 +122,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 10. Полисы
+        // 9. Полисы
         Schema::create('policies', function (Blueprint $table) {
             $table->id();
             $table->string('policy_number', 20)->unique();
@@ -163,7 +153,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 11. Страховые случаи
+        // 10. Страховые случаи
         Schema::create('accidents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')->constrained('client_profiles');
@@ -180,7 +170,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 12. Уведомления
+        // 11. Уведомления
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -201,12 +191,11 @@ return new class extends Migration
         Schema::dropIfExists('policies');
         Schema::dropIfExists('vehicles');
         Schema::dropIfExists('tariffs');
+        Schema::dropIfExists('policy_types');
+        Schema::dropIfExists('client_driver_categories');
         Schema::dropIfExists('client_profiles');
         Schema::dropIfExists('vehicle_categories');
-        Schema::dropIfExists('policy_types');
         Schema::dropIfExists('users');
-        Schema::dropIfExists('document_types');
-        Schema::dropIfExists('locations');
         Schema::dropIfExists('user_types');
     }
 };

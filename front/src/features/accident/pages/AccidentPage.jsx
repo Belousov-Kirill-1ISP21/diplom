@@ -12,7 +12,7 @@ export const AccidentPage = () => {
         return (
             <div className={styles.wrapper}>
                 <Header />
-                <div style={{ textAlign: 'center', padding: '50px' }}>Загрузка...</div>
+                <div className={styles.loading}>Загрузка...</div>
                 <Footer />
             </div>
         );

@@ -6,8 +6,6 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\UserType;
 use App\Models\ClientProfile;
-use App\Models\Location;
-use App\Models\DocumentType;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -17,9 +15,6 @@ class UserSeeder extends Seeder
         $adminType = UserType::where('name', 'admin')->first()->id;
         $agentType = UserType::where('name', 'agent')->first()->id;
         $clientType = UserType::where('name', 'client')->first()->id;
-        
-        $locationId = Location::first()->id;
-        $docTypeId = DocumentType::where('name', 'Паспорт РФ')->first()->id;
 
         // Админ
         $admin = User::firstOrCreate(
@@ -58,8 +53,6 @@ class UserSeeder extends Seeder
                 'first_name' => 'Иван',
                 'middle_name' => 'Иванович',
                 'birth_date' => '1985-05-15',
-                'location_id' => $locationId,
-                'document_type_id' => $docTypeId,
                 'passport_series' => '4501',
                 'passport_number' => '123456',
                 'passport_issued_by' => 'ОВД г. Москвы',
@@ -70,7 +63,6 @@ class UserSeeder extends Seeder
                 'driver_license_issued_by' => 'ГИБДД г. Москвы',
                 'driver_license_issue_date' => '2015-03-10',
                 'driver_license_expiry_date' => '2025-03-10',
-                'driver_categories' => 'B',
                 'driver_experience_years' => 10,
                 'bonus_malus_class' => '5',
                 'has_accidents_last_year' => false
@@ -94,8 +86,6 @@ class UserSeeder extends Seeder
                 'first_name' => 'Петр',
                 'middle_name' => 'Петрович',
                 'birth_date' => '1992-11-23',
-                'location_id' => $locationId,
-                'document_type_id' => $docTypeId,
                 'passport_series' => '4502',
                 'passport_number' => '654321',
                 'passport_issued_by' => 'ОВД г. Москвы',
@@ -106,7 +96,6 @@ class UserSeeder extends Seeder
                 'driver_license_issued_by' => 'ГИБДД г. Москвы',
                 'driver_license_issue_date' => '2018-01-20',
                 'driver_license_expiry_date' => '2028-01-20',
-                'driver_categories' => 'B',
                 'driver_experience_years' => 5,
                 'bonus_malus_class' => '3',
                 'has_accidents_last_year' => true

@@ -16,8 +16,7 @@ class UserController extends Controller
         $userType = $request->get('user_type');
         $search = $request->get('search');
         
-        // ДОБАВЬ 'clientProfile' в with()
-        $query = User::with(['userType', 'clientProfile']);
+        $query = User::with(['userType', 'clientProfile', 'clientProfile.driverCategories']);
         
         if ($userType) {
             $query->whereHas('userType', function($q) use ($userType) {
@@ -40,8 +39,7 @@ class UserController extends Controller
     // Показать конкретного пользователя
     public function show($id)
     {
-        $user = User::with(['userType', 'clientProfile'])->findOrFail($id);
-        
+        $user = User::with(['userType', 'clientProfile', 'clientProfile.driverCategories'])->findOrFail($id);
         return response()->json($user);
     }
 
@@ -66,7 +64,7 @@ class UserController extends Controller
         
         return response()->json([
             'message' => 'User created successfully',
-            'user' => $user->load('userType')
+            'user' => $user->load(['userType', 'clientProfile'])
         ], 201);
     }
 
@@ -90,7 +88,7 @@ class UserController extends Controller
         
         return response()->json([
             'message' => 'User updated successfully',
-            'user' => $user->load('userType')
+            'user' => $user->load(['userType', 'clientProfile'])
         ]);
     }
 
@@ -99,7 +97,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         
-        // Нельзя удалить самого себя
         if (request()->user()->id === $user->id) {
             return response()->json(['message' => 'Cannot delete yourself'], 422);
         }
@@ -113,14 +110,8 @@ class UserController extends Controller
     public function block($id)
     {
         $user = User::findOrFail($id);
-        
-        // Здесь можно добавить поле is_blocked в таблицу users
-        // Пока просто заглушка
         $user->update(['is_blocked' => true]);
-        
-        // Удаляем все токены заблокированного пользователя
         $user->tokens()->delete();
-        
         return response()->json(['message' => 'User blocked successfully']);
     }
 
@@ -128,9 +119,7 @@ class UserController extends Controller
     public function unblock($id)
     {
         $user = User::findOrFail($id);
-        
         $user->update(['is_blocked' => false]);
-        
         return response()->json(['message' => 'User unblocked successfully']);
     }
 }

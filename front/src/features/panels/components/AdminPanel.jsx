@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import styles from './Panels.module.css';
 import { useAuth } from '../../../shared/context/authContext';
 import api from '../../../api/client';
-import usersIcon from '../../../assets/Profile/Profile.webp';
-import tariffsIcon from '../../../assets/Profile/Tarifs.webp';
-import policiesIcon from '../../../assets/Profile/History.webp';
-import accidentsIcon from '../../../assets/Profile/History.webp';
-import editIcon from '../../../assets/Profile/Settings.webp';
-import deleteIcon from '../../../assets/Profile/Settings.webp';
-import exitIcon from '../../../assets/Profile/Exit.webp';
+import usersIcon from '../../../assets/Panels/Profile.webp';
+import tariffsIcon from '../../../assets/Panels/Tarif.webp';
+import policiesIcon from '../../../assets/Panels/Policies.webp';
+import accidentsIcon from '../../../assets/Panels/Accident.webp';
+import editIcon from '../../../assets/Panels/Settings.webp';
+import deleteIcon from '../../../assets/Panels/Delete.webp';
+import exitIcon from '../../../assets/Panels/Exit.webp';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminPanel = () => {
     const { userData, isAuthenticated, loading: authLoading } = useAuth();
@@ -25,6 +26,8 @@ export const AdminPanel = () => {
     const [formData, setFormData] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     // Загрузка пользователей с их профилями
     const loadUsers = async () => {
@@ -145,6 +148,15 @@ export const AdminPanel = () => {
         }
     };
 
+    const updateAccidentFault = async (id, isClientFault) => {
+        try {
+            await api.put(`/admin/accidents/${id}`, { is_client_fault: isClientFault });
+            loadAccidents();
+        } catch (error) {
+            setError('Ошибка обновления вины клиента');
+        }
+    };
+
     // Обновление статуса страхового случая
     const updateAccidentStatus = async (id, status) => {
         try {
@@ -237,7 +249,13 @@ export const AdminPanel = () => {
                         <img src={accidentsIcon} alt="Страховые случаи" className={styles.navIcon} />
                         Страховые случаи
                     </button>
-                    <button className={styles.navItem} onClick={() => { localStorage.removeItem('token'); window.location.href = '/'; }}>
+                    <button 
+                        className={styles.navItem}
+                        onClick={() => {
+                            logout();
+                            navigate('/');
+                        }}
+                    >
                         <img src={exitIcon} alt="Выход" className={styles.navIcon} />
                         Выход
                     </button>
@@ -314,7 +332,7 @@ export const AdminPanel = () => {
                                                                     <div><strong>Дата рождения:</strong> {user.client_profile?.birth_date || '—'}</div>
                                                                     <div><strong>Паспорт:</strong> {user.client_profile?.passport_series || ''} {user.client_profile?.passport_number || '—'}</div>
                                                                     <div><strong>ВУ:</strong> {user.client_profile?.driver_license_series || ''} {user.client_profile?.driver_license_number || '—'}</div>
-                                                                    <div><strong>Категории:</strong> {user.client_profile?.driver_categories || '—'}</div>
+                                                                    <div><strong>Категории прав:</strong> {user.client_profile?.driver_categories?.map(cat => cat.code).join(', ') || '—'}</div>
                                                                     <div><strong>Стаж:</strong> {user.client_profile?.driver_experience_years || 0} лет</div>
                                                                     <div><strong>Бонус-малус:</strong> {user.client_profile?.bonus_malus_class || '—'}</div>
                                                                 </div>
@@ -445,6 +463,7 @@ export const AdminPanel = () => {
                                             <th>Полис</th>
                                             <th>Дата</th>
                                             <th>Ущерб</th>
+                                            <th>Вина клиента</th>
                                             <th>Статус</th>
                                             <th>Действия</th>
                                         </tr>
@@ -457,6 +476,16 @@ export const AdminPanel = () => {
                                                 <td>{accident.policy?.policy_number}</td>
                                                 <td>{accident.accident_date}</td>
                                                 <td>{Number(accident.damage_amount).toLocaleString()} ₽</td>
+                                                <td>
+                                                    <select
+                                                        value={accident.is_client_fault ? 'true' : 'false'}
+                                                        onChange={(e) => updateAccidentFault(accident.id, e.target.value === 'true')}
+                                                        className={styles.statusSelect}
+                                                    >
+                                                        <option value="false">Нет</option>
+                                                        <option value="true">Да</option>
+                                                    </select>
+                                                </td>
                                                 <td>
                                                     <select
                                                         value={accident.status || 'pending'}

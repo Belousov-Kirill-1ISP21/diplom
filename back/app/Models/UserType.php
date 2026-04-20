@@ -11,7 +11,7 @@ class UserType extends Model
 
     protected $fillable = ['name'];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function users()
     {

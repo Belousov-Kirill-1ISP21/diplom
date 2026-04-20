@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }) => {
         licenseIssuedBy: profileData?.driver_license_issued_by || '',
         licenseIssueDate: formatDate(profileData?.driver_license_issue_date),
         licenseExpiryDate: formatDate(profileData?.driver_license_expiry_date),
-        licenseCategory: profileData?.driver_categories || '',
+        driver_categories: profileData?.driver_categories || [],
         ...profileData,
         ...userData,
     };

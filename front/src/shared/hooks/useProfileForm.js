@@ -11,6 +11,9 @@ export const useProfileForm = () => {
 
     useEffect(() => {
         if (fullUserData) {
+            console.log('=== fullUserData ===');
+            console.log('driver_categories:', fullUserData.driver_categories);
+            
             setFormData({
                 surname: fullUserData.surname || '',
                 name: fullUserData.name || '',
@@ -27,7 +30,9 @@ export const useProfileForm = () => {
                 licenseIssuedBy: fullUserData.licenseIssuedBy || '',
                 licenseIssueDate: fullUserData.licenseIssueDate || '',
                 licenseExpiryDate: fullUserData.licenseExpiryDate || '',
-                licenseCategory: fullUserData.licenseCategory || '',
+                driverCategories: Array.isArray(fullUserData.driver_categories) 
+                    ? fullUserData.driver_categories.map(cat => cat.code).join(', ') 
+                    : (fullUserData.driver_categories || ''),
                 password: '',
             });
         }
@@ -46,13 +51,11 @@ export const useProfileForm = () => {
 
     const confirmSave = async (enteredPassword, onSuccess) => {
         try {
-            // Отправляем данные профиля (без пароля)
             const profileData = { ...pendingChanges };
             delete profileData.password;
             
             await updateUserData(profileData);
             
-            // Если пароль был изменен
             if (pendingChanges.password && pendingChanges.password.trim() !== '') {
                 await updateUserPassword(enteredPassword, pendingChanges.password);
             }
@@ -85,7 +88,9 @@ export const useProfileForm = () => {
             licenseIssuedBy: fullUserData?.licenseIssuedBy || '',
             licenseIssueDate: fullUserData?.licenseIssueDate || '',
             licenseExpiryDate: fullUserData?.licenseExpiryDate || '',
-            licenseCategory: fullUserData?.licenseCategory || '',
+            driverCategories: Array.isArray(fullUserData?.driver_categories) 
+                ? fullUserData.driver_categories.map(cat => cat.code).join(', ') 
+                : (fullUserData?.driver_categories || ''),
             password: '',
         });
         setPendingChanges(null);

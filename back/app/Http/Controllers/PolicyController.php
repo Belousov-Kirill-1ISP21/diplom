@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
 
 class PolicyController extends Controller
 {
-    // Список всех полисов (для агента/админа)
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 15);
@@ -28,7 +27,6 @@ class PolicyController extends Controller
         return response()->json($policies);
     }
 
-    // Мои полисы (для клиента)
     public function myPolicies(Request $request)
     {
         $user = $request->user();
@@ -46,12 +44,10 @@ class PolicyController extends Controller
         return response()->json($policies);
     }
 
-    // Показать конкретный полис
     public function show($id)
     {
         $policy = Policy::with(['policyType', 'client.user', 'vehicle', 'tariff', 'accidents'])->findOrFail($id);
         
-        // Проверка прав
         $user = request()->user();
         if ($user->userType->name === 'client') {
             $profile = $user->clientProfile;
@@ -63,7 +59,6 @@ class PolicyController extends Controller
         return response()->json($policy);
     }
 
-    // Показать мой полис (для клиента)
     public function showMyPolicy($id, Request $request)
     {
         $user = $request->user();
@@ -77,7 +72,6 @@ class PolicyController extends Controller
         return response()->json($policy);
     }
 
-    // Рассчитать стоимость полиса
     public function calculate(Request $request)
     {
         $request->validate([
@@ -91,13 +85,11 @@ class PolicyController extends Controller
         $tariff = Tariff::findOrFail($request->tariff_id);
         $vehicle = Vehicle::findOrFail($request->vehicle_id);
         
-        // Базовые коэффициенты
         $coefficients = [
             'power_coefficient' => $this->getPowerCoefficient($vehicle->power_hp),
             'vehicle_age_coefficient' => $this->getVehicleAgeCoefficient($vehicle->manufacture_year),
         ];
         
-        // Если есть клиент, добавляем его коэффициенты
         if ($request->user()->clientProfile) {
             $client = $request->user()->clientProfile;
             $coefficients['experience_coefficient'] = $this->getExperienceCoefficient($client->driver_experience_years);
@@ -106,7 +98,6 @@ class PolicyController extends Controller
         
         $finalPrice = $tariff->calculatePrice($coefficients);
         
-        // Расчет срока действия
         $startDate = new \DateTime($request->start_date);
         $endDate = new \DateTime($request->end_date);
         $daysDiff = $startDate->diff($endDate)->days;
@@ -122,7 +113,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    // Создать полис
     public function store(Request $request)
     {
         $request->validate([
@@ -134,12 +124,19 @@ class PolicyController extends Controller
             'final_price' => 'required|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
+            'discount_amount' => 'nullable|numeric|min:0|max:100',
             'franchise_amount' => 'nullable|numeric|min:0',
             'coverage_amount' => 'nullable|numeric|min:0',
         ]);
         
-        // Генерируем номер полиса
         $policyNumber = $this->generatePolicyNumber();
+        
+        $finalPrice = $request->final_price;
+        $discountAmount = $request->discount_amount ?? 0;
+        
+        if ($discountAmount > 0) {
+            $finalPrice = $request->final_price * (1 - $discountAmount / 100);
+        }
         
         $policy = Policy::create([
             'policy_number' => $policyNumber,
@@ -148,8 +145,8 @@ class PolicyController extends Controller
             'vehicle_id' => $request->vehicle_id,
             'tariff_id' => $request->tariff_id,
             'base_price' => $request->base_price,
-            'final_price' => $request->final_price,
-            'discount_amount' => $request->base_price - $request->final_price,
+            'final_price' => $finalPrice,
+            'discount_amount' => $discountAmount,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'status' => 'draft',
@@ -163,34 +160,37 @@ class PolicyController extends Controller
         ], 201);
     }
 
-    // Обновить полис
     public function update(Request $request, $id)
     {
         $policy = Policy::findOrFail($id);
         
-        // Нельзя редактировать активные полисы
-        if ($policy->status === 'active') {
-            return response()->json(['message' => 'Cannot edit active policy'], 422);
+        if ($policy->status === 'cancelled') {
+            return response()->json(['message' => 'Cannot edit cancelled policy'], 422);
         }
         
         $request->validate([
             'start_date' => 'sometimes|date',
             'end_date' => 'sometimes|date|after:start_date',
+            'discount_amount' => 'sometimes|integer|min:0|max:100',
             'franchise_amount' => 'nullable|numeric|min:0',
             'coverage_amount' => 'nullable|numeric|min:0',
         ]);
         
-        $policy->update($request->only([
-            'start_date', 'end_date', 'franchise_amount', 'coverage_amount'
-        ]));
+        if ($request->has('discount_amount')) {
+            $discount = (int)$request->discount_amount;
+            $policy->discount_amount = $discount;
+            $policy->final_price = $policy->base_price * (1 - $discount / 100);
+            $policy->save();
+            
+            return response()->json([
+                'message' => 'Discount updated successfully',
+                'policy' => $policy->fresh()
+            ]);
+        }
         
-        return response()->json([
-            'message' => 'Policy updated successfully',
-            'policy' => $policy
-        ]);
+        return response()->json(['message' => 'No changes']);
     }
 
-    // Активировать полис
     public function activate($id)
     {
         $policy = Policy::findOrFail($id);
@@ -208,7 +208,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    // Продлить полис
     public function renew($id, Request $request)
     {
         $policy = Policy::findOrFail($id);
@@ -241,7 +240,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    // Оплатить полис
     public function pay($id)
     {
         $policy = Policy::findOrFail($id);
@@ -250,7 +248,6 @@ class PolicyController extends Controller
             return response()->json(['message' => 'Only draft policies can be paid'], 422);
         }
         
-        // Здесь логика оплаты через платежную систему
         $policy->status = 'active';
         $policy->save();
         
@@ -260,7 +257,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    // Отменить полис
     public function cancel($id)
     {
         $policy = Policy::findOrFail($id);
@@ -278,7 +274,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    // Удалить полис
     public function destroy($id)
     {
         $policy = Policy::findOrFail($id);
@@ -292,14 +287,12 @@ class PolicyController extends Controller
         return response()->json(['message' => 'Policy deleted successfully']);
     }
 
-    // Генератор номера полиса
     private function generatePolicyNumber()
     {
         $prefix = date('Y') . date('m');
         $random = Str::upper(Str::random(6));
         $number = $prefix . $random;
         
-        // Проверка на уникальность
         while (Policy::where('policy_number', $number)->exists()) {
             $random = Str::upper(Str::random(6));
             $number = $prefix . $random;
@@ -308,7 +301,6 @@ class PolicyController extends Controller
         return $number;
     }
 
-    // Вспомогательные методы для коэффициентов
     private function getPowerCoefficient($power)
     {
         if ($power <= 50) return 0.6;

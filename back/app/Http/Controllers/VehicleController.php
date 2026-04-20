@@ -8,16 +8,13 @@ use Illuminate\Http\Request;
 
 class VehicleController extends Controller
 {
-    // Список всех ТС (для агента/админа)
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 15);
         $vehicles = Vehicle::with(['client.user', 'category'])->paginate($perPage);
-        
         return response()->json($vehicles);
     }
 
-    // Мои ТС (для клиента)
     public function myVehicles(Request $request)
     {
         $user = $request->user();
@@ -34,12 +31,10 @@ class VehicleController extends Controller
         return response()->json($vehicles);
     }
 
-    // Показать конкретное ТС
     public function show($id)
     {
         $vehicle = Vehicle::with(['client.user', 'category', 'policies'])->findOrFail($id);
         
-        // Проверка прав
         $user = request()->user();
         if ($user->userType->name === 'client') {
             $profile = $user->clientProfile;
@@ -51,7 +46,6 @@ class VehicleController extends Controller
         return response()->json($vehicle);
     }
 
-    // Создать ТС
     public function store(Request $request)
     {
         $request->validate([
@@ -62,14 +56,12 @@ class VehicleController extends Controller
             'power_hp' => 'nullable|integer|min:1',
             'category' => 'nullable|string|exists:vehicle_categories,code',
             'vin' => 'required|string|max:17|unique:vehicles',
-            'engine_volume' => 'nullable|numeric|min:0',
             'purchase_price' => 'nullable|numeric|min:0',
             'mileage' => 'nullable|integer|min:0',
             'has_tracker' => 'boolean',
             'parking_type' => 'nullable|in:garage,street,parking_lot,other',
         ]);
 
-        // Определяем client_id
         $clientId = $request->client_id;
         
         if (!$clientId && $request->user()->userType->name === 'client') {
@@ -88,18 +80,28 @@ class VehicleController extends Controller
             ['client_id' => $clientId]
         ));
 
+        // Добавляем категорию автомобиля в список категорий водителя
+        if ($vehicle->category && $clientId) {
+            $profile = ClientProfile::find($clientId);
+            if ($profile) {
+                $currentCategories = $profile->driverCategories->pluck('code')->toArray();
+                if (!in_array($vehicle->category, $currentCategories)) {
+                    $currentCategories[] = $vehicle->category;
+                    $profile->driverCategories()->sync($currentCategories);
+                }
+            }
+        }
+
         return response()->json([
             'message' => 'Vehicle created successfully',
             'vehicle' => $vehicle->load('category')
         ], 201);
     }
 
-    // Обновить ТС
     public function update(Request $request, $id)
     {
         $vehicle = Vehicle::findOrFail($id);
         
-        // Проверка прав
         $user = $request->user();
         if ($user->userType->name === 'client') {
             $profile = $user->clientProfile;
@@ -116,14 +118,36 @@ class VehicleController extends Controller
             'power_hp' => 'nullable|integer|min:1',
             'category' => 'nullable|string|exists:vehicle_categories,code',
             'vin' => 'sometimes|string|max:17|unique:vehicles,vin,' . $id,
-            'engine_volume' => 'nullable|numeric|min:0',
             'purchase_price' => 'nullable|numeric|min:0',
             'mileage' => 'nullable|integer|min:0',
             'has_tracker' => 'boolean',
             'parking_type' => 'nullable|in:garage,street,parking_lot,other',
         ]);
 
+        $oldCategory = $vehicle->category;
         $vehicle->update($request->all());
+        
+        if ($request->has('category') && $oldCategory !== $request->category) {
+            $profile = ClientProfile::find($vehicle->client_id);
+            if ($profile) {
+                $currentCategories = $profile->driverCategories->pluck('code')->toArray();
+                
+                $hasOtherVehiclesOfOldCategory = Vehicle::where('client_id', $vehicle->client_id)
+                    ->where('category', $oldCategory)
+                    ->where('id', '!=', $id)
+                    ->exists();
+                
+                if (!$hasOtherVehiclesOfOldCategory && in_array($oldCategory, $currentCategories)) {
+                    $currentCategories = array_values(array_diff($currentCategories, [$oldCategory]));
+                }
+                
+                if (!in_array($request->category, $currentCategories)) {
+                    $currentCategories[] = $request->category;
+                }
+                
+                $profile->driverCategories()->sync($currentCategories);
+            }
+        }
 
         return response()->json([
             'message' => 'Vehicle updated successfully',
@@ -131,12 +155,10 @@ class VehicleController extends Controller
         ]);
     }
 
-    // Удалить ТС
     public function destroy(Request $request, $id)
     {
         $vehicle = Vehicle::findOrFail($id);
         
-        // Проверка прав
         $user = $request->user();
         if ($user->userType->name === 'client') {
             $profile = $user->clientProfile;
@@ -145,12 +167,29 @@ class VehicleController extends Controller
             }
         }
         
-        // Проверяем, есть ли активные полисы
         if ($vehicle->policies()->where('status', 'active')->exists()) {
             return response()->json(['message' => 'Cannot delete vehicle with active policies'], 422);
         }
         
+        $categoryCode = $vehicle->category;
+        $clientId = $vehicle->client_id;
+        
         $vehicle->delete();
+        
+        if ($categoryCode && $clientId) {
+            $profile = ClientProfile::find($clientId);
+            if ($profile) {
+                $hasOtherVehiclesOfCategory = Vehicle::where('client_id', $clientId)
+                    ->where('category', $categoryCode)
+                    ->exists();
+                
+                if (!$hasOtherVehiclesOfCategory) {
+                    $currentCategories = $profile->driverCategories->pluck('code')->toArray();
+                    $currentCategories = array_values(array_diff($currentCategories, [$categoryCode]));
+                    $profile->driverCategories()->sync($currentCategories);
+                }
+            }
+        }
         
         return response()->json(['message' => 'Vehicle deleted successfully']);
     }

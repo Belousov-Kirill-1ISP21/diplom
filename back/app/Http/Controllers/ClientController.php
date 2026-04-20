@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
-    // Список всех клиентов
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 15);
@@ -18,7 +17,7 @@ class ClientController extends Controller
         
         $query = User::whereHas('userType', function($q) {
             $q->where('name', 'client');
-        })->with('clientProfile');
+        })->with(['clientProfile', 'clientProfile.driverCategories']);
         
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -36,17 +35,15 @@ class ClientController extends Controller
         return response()->json($clients);
     }
 
-    // Показать конкретного клиента
     public function show($id)
     {
         $client = User::whereHas('userType', function($q) {
             $q->where('name', 'client');
-        })->with(['clientProfile.location', 'clientProfile.documentType', 'vehicles'])->findOrFail($id);
+        })->with(['clientProfile', 'clientProfile.driverCategories', 'vehicles'])->findOrFail($id);
         
         return response()->json($client);
     }
 
-    // Создать клиента (агентом)
     public function store(Request $request)
     {
         $request->validate([
@@ -74,26 +71,14 @@ class ClientController extends Controller
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
             'birth_date' => $request->birth_date,
-            'location_id' => $request->location_id,
-            'document_type_id' => $request->document_type_id,
-            'passport_series' => $request->passport_series,
-            'passport_number' => $request->passport_number,
-            'passport_issued_by' => $request->passport_issued_by,
-            'passport_issue_date' => $request->passport_issue_date,
-            'passport_expiry_date' => $request->passport_expiry_date,
-            'driver_license_series' => $request->driver_license_series,
-            'driver_license_number' => $request->driver_license_number,
-            'driver_experience_years' => $request->driver_experience_years ?? 0,
-            'bonus_malus_class' => $request->bonus_malus_class ?? '3',
         ]);
 
         return response()->json([
             'message' => 'Client created successfully',
-            'client' => $user->load('clientProfile')
+            'client' => $user->load(['clientProfile', 'clientProfile.driverCategories'])
         ], 201);
     }
 
-    // Обновить клиента
     public function update(Request $request, $id)
     {
         $client = User::findOrFail($id);
@@ -111,27 +96,20 @@ class ClientController extends Controller
 
         if ($client->clientProfile) {
             $client->clientProfile->update($request->only([
-                'last_name', 'first_name', 'middle_name', 'birth_date',
-                'location_id', 'document_type_id', 'passport_series', 
-                'passport_number', 'passport_issued_by', 'passport_issue_date',
-                'passport_expiry_date', 'driver_license_series', 
-                'driver_license_number', 'driver_experience_years', 
-                'bonus_malus_class', 'has_accidents_last_year'
+                'last_name', 'first_name', 'middle_name', 'birth_date'
             ]));
         }
 
         return response()->json([
             'message' => 'Client updated successfully',
-            'client' => $client->load('clientProfile')
+            'client' => $client->load(['clientProfile', 'clientProfile.driverCategories'])
         ]);
     }
 
-    // Удалить клиента
     public function destroy($id)
     {
         $client = User::findOrFail($id);
         
-        // Проверяем, что это клиент
         if ($client->userType->name !== 'client') {
             return response()->json(['message' => 'User is not a client'], 422);
         }
@@ -139,21 +117,19 @@ class ClientController extends Controller
         $profile = $client->clientProfile;
         
         if ($profile) {
-            // Проверяем наличие активных полисов
             if ($profile->policies()->where('status', 'active')->exists()) {
                 return response()->json(['message' => 'Cannot delete client with active policies'], 422);
             }
             
-            // Проверяем наличие страховых случаев
             if ($profile->accidents()->exists()) {
                 return response()->json(['message' => 'Cannot delete client with accident history'], 422);
             }
             
-            // Сначала удаляем связанные данные
-            $profile->vehicles()->delete(); // удаляем автомобили
-            $profile->policies()->delete(); // удаляем полисы
-            $profile->accidents()->delete(); // удаляем страховые случаи
-            $profile->delete(); // удаляем профиль
+            $profile->driverCategories()->detach();
+            $profile->vehicles()->delete();
+            $profile->policies()->delete();
+            $profile->accidents()->delete();
+            $profile->delete();
         }
         
         $client->delete();

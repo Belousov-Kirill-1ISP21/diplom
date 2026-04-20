@@ -40,7 +40,7 @@ class Tariff extends Model
         'franchise_coefficient' => 'decimal:4'
     ];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function policyType()
     {

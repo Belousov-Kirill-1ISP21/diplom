@@ -25,8 +25,6 @@ class Accident extends Model
         'is_client_fault' => 'boolean'
     ];
 
-    public $timestamps = false;
-
     public function client()
     {
         return $this->belongsTo(ClientProfile::class, 'client_id');

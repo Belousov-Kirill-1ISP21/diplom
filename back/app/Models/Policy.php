@@ -61,7 +61,6 @@ class Policy extends Model
         return $this->hasMany(Accident::class);
     }
 
-    // Scope для активных полисов
     public function scopeActive($query)
     {
         return $query->where('status', 'active')
@@ -69,7 +68,6 @@ class Policy extends Model
                      ->where('end_date', '>=', now());
     }
 
-    // Проверка активности
     public function isActive()
     {
         return $this->status === 'active' && 

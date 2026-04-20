@@ -24,7 +24,6 @@ export const SIGNUP_STEP3_FIELDS = [
     { id: 2, placeholder: "Кем выдано ВУ", type: "text", name: 'licenseIssuedBy' },
     { id: 3, placeholder: "Дата выдачи ВУ", type: "date", name: 'licenseIssueDate' },
     { id: 4, placeholder: "Срок действия ВУ", type: "date", name: 'licenseExpiryDate' },
-    { id: 5, placeholder: "Категория", type: "select", name: 'licenseCategory', options: ['A', 'B', 'C', 'D', 'E'] },
 ];
 
 export const SIGNUP_STEP_TITLES = {
@@ -50,7 +49,7 @@ export const PROFILE_FIELDS = [
     {id:12, label:'Кем выдано ВУ', key: 'licenseIssuedBy', type: 'text'},
     {id:13, label:'Дата выдачи ВУ', key: 'licenseIssueDate', type: 'text'},
     {id:14, label:'Дата окончания действия ВУ', key: 'licenseExpiryDate', type: 'text'},
-    {id:15, label:'Категория', key: 'licenseCategory', type: 'text'},
+    {id:15, label: 'Категории прав', key: 'driverCategories', type: 'text', readOnly: true},
     {id:16, label:'Пароль', key: 'password', type: 'password', isPassword: true},
 ];
 
@@ -71,7 +70,7 @@ export const PROFILE_FIELD_MAP = {
     'Кем выдано ВУ': 'licenseIssuedBy',
     'Дата выдачи ВУ': 'licenseIssueDate',
     'Дата окончания действия ВУ': 'licenseExpiryDate',
-    'Категория': 'licenseCategory',
+    'Категории прав': 'driverCategories',
     'Пароль': 'password'
 };
 

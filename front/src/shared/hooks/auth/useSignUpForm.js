@@ -79,7 +79,7 @@ export const useSignUpForm = () => {
             ? ['surname', 'name', 'patronymic', 'birthDate', 'phone', 'email', 'password', 'confirmPassword']
             : step === 2
             ? ['passportSeries', 'passportNumber', 'issuedBy', 'issueDate']
-            : ['licenseSeries', 'licenseNumber', 'licenseIssuedBy', 'licenseIssueDate', 'licenseExpiryDate', 'licenseCategory'];
+            : ['licenseSeries', 'licenseNumber', 'licenseIssuedBy', 'licenseIssueDate', 'licenseExpiryDate'];
         
         const isValid = await trigger(fieldsToValidate);
         
@@ -111,8 +111,7 @@ export const useSignUpForm = () => {
                         licenseNumber: '',
                         licenseIssuedBy: '',
                         licenseIssueDate: '',
-                        licenseExpiryDate: '',
-                        licenseCategory: ''
+                        licenseExpiryDate: ''
                     });
                 }
             }
@@ -184,8 +183,7 @@ export const useSignUpForm = () => {
             driver_license_number: allData.licenseNumber,
             driver_license_issued_by: allData.licenseIssuedBy,
             driver_license_issue_date: allData.licenseIssueDate,
-            driver_license_expiry_date: allData.licenseExpiryDate,
-            driver_categories: allData.licenseCategory,
+            driver_license_expiry_date: allData.licenseExpiryDate
         };
     
         console.log('=== PAYLOAD ДЛЯ БЭКА ===', payloadForBackend);
