@@ -215,3 +215,14 @@
     color: white;
     border: none;
 }
+
+.modalError {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    word-break: break-word;
+}

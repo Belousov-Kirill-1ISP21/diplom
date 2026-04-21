@@ -13,10 +13,12 @@ export const AccidentBlock = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const [validationErrors, setValidationErrors] = useState({});
     const [formData, setFormData] = useState({
         accident_date: '',
         damage_amount: '',
-        description: ''
+        description: '',
+        is_client_fault: false
     });
 
     // Загрузка автомобилей пользователя
@@ -55,21 +57,87 @@ export const AccidentBlock = () => {
         loadPoliciesForVehicle(vehicle.id);
         setStep(2);
         setError(null);
+        setValidationErrors({});
     };
 
     const handleSelectPolicy = (policy) => {
         setSelectedPolicy(policy);
         setStep(3);
         setError(null);
+        setValidationErrors({});
+        setFormData({
+            accident_date: '',
+            damage_amount: '',
+            description: '',
+            is_client_fault: false
+        });
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ 
+            ...prev, 
+            [name]: type === 'checkbox' ? checked : value 
+        }));
+        // Очищаем ошибку для этого поля
+        if (validationErrors[name]) {
+            setValidationErrors(prev => ({ ...prev, [name]: null }));
+        }
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        
+        // Валидация даты
+        if (!formData.accident_date) {
+            errors.accident_date = 'Укажите дату происшествия';
+        } else {
+            const accidentDate = new Date(formData.accident_date);
+            const policyStartDate = new Date(selectedPolicy.start_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (isNaN(accidentDate.getTime())) {
+                errors.accident_date = 'Укажите корректную дату';
+            } else if (accidentDate > today) {
+                errors.accident_date = 'Дата происшествия не может быть в будущем';
+            } else if (accidentDate < policyStartDate) {
+                errors.accident_date = `Дата происшествия не может быть раньше начала действия полиса (${new Date(selectedPolicy.start_date).toLocaleDateString('ru-RU')})`;
+            }
+        }
+        
+        // Валидация суммы ущерба
+        if (formData.damage_amount) {
+            const amount = parseFloat(formData.damage_amount);
+            if (isNaN(amount) || amount < 0) {
+                errors.damage_amount = 'Укажите корректную сумму ущерба';
+            } else if (selectedPolicy.coverage_amount && amount > selectedPolicy.coverage_amount) {
+                errors.damage_amount = `Сумма ущерба не может превышать страховую сумму (${selectedPolicy.coverage_amount.toLocaleString()} ₽)`;
+            } else if (amount === 0) {
+                errors.damage_amount = 'Сумма ущерба не может быть равна 0';
+            }
+        }
+        
+        // Валидация описания
+        if (formData.description && formData.description.length < 10) {
+            errors.description = 'Описание должно содержать минимум 10 символов';
+        }
+        if (formData.description && formData.description.length > 1000) {
+            errors.description = 'Описание не должно превышать 1000 символов';
+        }
+        
+        return errors;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return;
+        }
+        
         setIsSubmitting(true);
         setError(null);
         setSuccess(null);
@@ -77,24 +145,25 @@ export const AccidentBlock = () => {
         try {
             const response = await api.post(`/client/accidents/${selectedPolicy.id}`, {
                 accident_date: formData.accident_date,
-                damage_amount: formData.damage_amount || null,
+                damage_amount: formData.damage_amount ? parseFloat(formData.damage_amount) : null,
                 description: formData.description || null,
-                is_client_fault: false // пока false, позже можно добавить выбор
+                is_client_fault: formData.is_client_fault
             });
 
             setSuccess('Страховой случай успешно зарегистрирован!');
             setFormData({
                 accident_date: '',
                 damage_amount: '',
-                description: ''
+                description: '',
+                is_client_fault: false
             });
             
-            // Через 3 секунды сбросить форму
             setTimeout(() => {
                 setStep(1);
                 setSelectedVehicle(null);
                 setSelectedPolicy(null);
                 setSuccess(null);
+                setValidationErrors({});
             }, 3000);
         } catch (error) {
             console.error('Error submitting accident:', error);
@@ -115,6 +184,7 @@ export const AccidentBlock = () => {
             setSelectedPolicy(null);
         }
         setError(null);
+        setValidationErrors({});
     };
 
     if (!isAuthenticated) {
@@ -237,9 +307,12 @@ export const AccidentBlock = () => {
                                     name="accident_date"
                                     value={formData.accident_date}
                                     onChange={handleInputChange}
-                                    required
                                     max={new Date().toISOString().split('T')[0]}
+                                    className={validationErrors.accident_date ? styles.inputError : ''}
                                 />
+                                {validationErrors.accident_date && (
+                                    <span className={styles.fieldError}>{validationErrors.accident_date}</span>
+                                )}
                             </div>
 
                             <div className={styles.formGroup}>
@@ -251,7 +324,12 @@ export const AccidentBlock = () => {
                                     onChange={handleInputChange}
                                     placeholder="Введите сумму ущерба"
                                     min="0"
+                                    step="0.01"
+                                    className={validationErrors.damage_amount ? styles.inputError : ''}
                                 />
+                                {validationErrors.damage_amount && (
+                                    <span className={styles.fieldError}>{validationErrors.damage_amount}</span>
+                                )}
                             </div>
 
                             <div className={styles.formGroup}>
@@ -260,16 +338,41 @@ export const AccidentBlock = () => {
                                     name="description"
                                     value={formData.description}
                                     onChange={handleInputChange}
-                                    placeholder="Опишите обстоятельства происшествия..."
+                                    placeholder="Опишите обстоятельства происшествия (минимум 10 символов)..."
                                     rows={5}
+                                    className={validationErrors.description ? styles.inputError : ''}
                                 />
+                                {validationErrors.description && (
+                                    <span className={styles.fieldError}>{validationErrors.description}</span>
+                                )}
+                                <span className={styles.charCounter}>
+                                    {formData.description?.length || 0}/1000 символов
+                                </span>
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.checkboxLabel}>
+                                    <input
+                                        type="checkbox"
+                                        name="is_client_fault"
+                                        checked={formData.is_client_fault}
+                                        onChange={handleInputChange}
+                                    />
+                                    Я признаю свою вину в ДТП
+                                </label>
+                                <p className={styles.hint}>
+                                    {formData.is_client_fault 
+                                        ? '⚠️ Признание вины повлияет на ваш бонус-малус класс и стоимость следующего полиса' 
+                                        : 'Если вы не признаёте вину, будет проведена экспертиза'}
+                                </p>
                             </div>
 
                             <div className={styles.infoBlock}>
                                 <h4>Информация о полисе</h4>
                                 <p><strong>Полис:</strong> {selectedPolicy.policy_number}</p>
                                 <p><strong>Автомобиль:</strong> {selectedVehicle?.brand} {selectedVehicle?.model} ({selectedVehicle?.state_number})</p>
-                                <p><strong>Срок действия:</strong> до {new Date(selectedPolicy.end_date).toLocaleDateString('ru-RU')}</p>
+                                <p><strong>Срок действия:</strong> {new Date(selectedPolicy.start_date).toLocaleDateString('ru-RU')} — {new Date(selectedPolicy.end_date).toLocaleDateString('ru-RU')}</p>
+                                <p><strong>Страховая сумма:</strong> {selectedPolicy.coverage_amount?.toLocaleString() || 'не указана'} ₽</p>
                             </div>
 
                             <div className={styles.buttons}>

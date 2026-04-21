@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
-    // Главная дашборд
     public function dashboard(Request $request)
     {
         $dateFrom = $request->get('date_from', now()->subDays(30));
@@ -37,7 +36,6 @@ class AdminController extends Controller
             'new_policies_today' => Policy::whereDate('created_at', today())->count(),
         ];
         
-        // Динамика по дням
         $dailyStats = Policy::select(
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('COUNT(*) as count'),
@@ -58,10 +56,9 @@ class AdminController extends Controller
         ]);
     }
 
-    // Статистика
     public function statistics(Request $request)
     {
-        $type = $request->get('type', 'overview'); // overview, policies, payments, clients
+        $type = $request->get('type', 'overview');
         
         switch ($type) {
             case 'policies':
@@ -80,22 +77,19 @@ class AdminController extends Controller
         return response()->json($data);
     }
 
-    // Создать бэкап
     public function createBackup(Request $request)
     {
-        $type = $request->get('type', 'database'); // database, files, full
+        $type = $request->get('type', 'database');
         
         try {
             if ($type === 'database') {
                 $filename = 'backup_' . date('Y-m-d_H-i-s') . '.sql';
                 $path = storage_path('app/backups/' . $filename);
                 
-                // Создаем директорию если нет
                 if (!is_dir(dirname($path))) {
                     mkdir(dirname($path), 0755, true);
                 }
                 
-                // Команда для дампа БД (нужен mysqldump)
                 $command = sprintf(
                     'mysqldump --user=%s --password=%s --host=%s %s > %s',
                     env('DB_USERNAME'),
@@ -108,20 +102,19 @@ class AdminController extends Controller
                 exec($command);
                 
                 return response()->json([
-                    'message' => 'Backup created successfully',
+                    'message' => 'Резервная копия успешно создана',
                     'filename' => $filename,
                     'path' => $path
                 ]);
             }
             
-            return response()->json(['message' => 'Backup type not implemented yet'], 501);
+            return response()->json(['message' => 'Данный тип резервного копирования пока не реализован'], 501);
             
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Backup failed: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Ошибка создания резервной копии: ' . $e->getMessage()], 500);
         }
     }
 
-    // Список бэкапов
     public function listBackups()
     {
         $backupDir = storage_path('app/backups');
@@ -147,7 +140,6 @@ class AdminController extends Controller
         return response()->json($backups);
     }
 
-    // Восстановить из бэкапа
     public function restoreBackup(Request $request)
     {
         $request->validate([
@@ -158,7 +150,7 @@ class AdminController extends Controller
         $path = storage_path('app/backups/' . $filename);
         
         if (!file_exists($path)) {
-            return response()->json(['message' => 'Backup file not found'], 404);
+            return response()->json(['message' => 'Файл резервной копии не найден'], 404);
         }
         
         try {
@@ -173,14 +165,13 @@ class AdminController extends Controller
             
             exec($command);
             
-            return response()->json(['message' => 'Backup restored successfully']);
+            return response()->json(['message' => 'Резервная копия успешно восстановлена']);
             
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Restore failed: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Ошибка восстановления: ' . $e->getMessage()], 500);
         }
     }
 
-    // Приватные методы для статистики
     private function getOverviewStatistics()
     {
         $totalPremium = Policy::sum('final_price');

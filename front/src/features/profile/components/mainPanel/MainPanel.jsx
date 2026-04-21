@@ -11,11 +11,15 @@ export const MainPanel = () => {
         showPasswordModal,
         formData,
         passwordError,
+        newPassword,
+        confirmNewPassword,
         handleInputChange,
         handleSave,
         confirmSave,
         handleCancel,
-        handleModalClose
+        handleModalClose,
+        setNewPassword,
+        setConfirmNewPassword
     } = useProfileForm();
 
     return (
@@ -63,6 +67,10 @@ export const MainPanel = () => {
                 onClose={handleModalClose}
                 onConfirm={(password) => confirmSave(password, handleModalClose)}
                 error={passwordError}
+                newPassword={newPassword}
+                confirmNewPassword={confirmNewPassword}
+                onNewPasswordChange={setNewPassword}
+                onConfirmNewPasswordChange={setConfirmNewPassword}
             />
         </>
     );

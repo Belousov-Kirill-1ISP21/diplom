@@ -1,4 +1,4 @@
-import AboutBlockImg from "../../../assets/Home/AboutBlock.png";
+import AboutBlockImg from "../../../assets/Home/AboutBlock.webp";
 import styles from './AboutBlockStyle.module.css';
 import { Link } from 'react-router-dom';
 

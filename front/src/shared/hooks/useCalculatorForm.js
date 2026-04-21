@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCalculator } from '../context/сalculatorContext';
-import { validateDates } from '../lib/validations/calculatorValidations';
+import { validateDates, validateVehicleData } from '../lib/validations/calculatorValidations';
 
 export const useCalculatorForm = () => {
     const { calculatorData, updateOsagoData, updateKaskoData } = useCalculator();
@@ -34,6 +34,20 @@ export const useCalculatorForm = () => {
         }
     };
 
+    const validateStep1 = () => {
+        const data = getCurrentData();
+        
+        // Если есть vehicleId, считаем что данные валидны (авто выбрано из списка)
+        if (data.vehicleId) {
+            setErrors({});
+            return true;
+        }
+        
+        const validationErrors = validateVehicleData(data, policyType);
+        setErrors(validationErrors);
+        return Object.keys(validationErrors).length === 0;
+    };
+
     const validateStep2 = () => {
         const data = getCurrentData();
         const validationErrors = validateDates(data.startDate, data.endDate);
@@ -42,9 +56,19 @@ export const useCalculatorForm = () => {
     };
 
     const nextStep = () => {
-        if (step === 2 && !validateStep2()) return;
+        console.log('nextStep called, current step:', step);
+        
+        if (step === 1 && !validateStep1()) {
+            console.log('Step 1 validation failed');
+            return;
+        }
+        if (step === 2 && !validateStep2()) {
+            console.log('Step 2 validation failed');
+            return;
+        }
         
         const newStep = step + 1;
+        console.log('Moving to step:', newStep);
         setStep(newStep);
         if (policyType === 'osago') {
             setOsagoStep(newStep);
@@ -78,7 +102,6 @@ export const useCalculatorForm = () => {
     };
 
     const handlePolicyTypeChange = (type) => {
-        // Сохраняем текущий шаг для текущего типа
         if (policyType === 'osago') {
             setOsagoStep(step);
         } else {
@@ -87,7 +110,6 @@ export const useCalculatorForm = () => {
         
         setPolicyType(type);
         
-        // Восстанавливаем шаг для нового типа
         if (type === 'osago') {
             setStep(osagoStep);
         } else {
@@ -97,7 +119,7 @@ export const useCalculatorForm = () => {
     };
 
     const getMaxSteps = () => {
-        return 3; // У КАСКО тоже 3 шага (авто -> срок -> результат)
+        return 3;
     };
 
     const resetToStep1 = () => {
@@ -115,8 +137,8 @@ export const useCalculatorForm = () => {
         osagoStep,
         kaskoStep,
         errors,
-        calculatorData, 
-        updateOsagoData, 
+        calculatorData,
+        updateOsagoData,
         updateKaskoData,
         getCurrentData,
         updateCurrentData,

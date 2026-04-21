@@ -20,7 +20,8 @@ export const VehiclesPanel = () => {
         has_tracker: false,
         parking_type: 'garage'
     });
-    const [error, setError] = useState(null);
+    const [modalError, setModalError] = useState(null); // Ошибка для модального окна
+    const [globalError, setGlobalError] = useState(null); // Ошибка для основного интерфейса (при удалении и т.д.)
 
     const vehicleCategories = ['A', 'B', 'C', 'D', 'E'];
     const parkingOptions = [
@@ -30,12 +31,38 @@ export const VehiclesPanel = () => {
         { value: 'other', label: 'Другое' }
     ];
 
+    // Функция для форматирования ошибок валидации
+    const formatValidationErrors = (errors) => {
+        if (typeof errors === 'object' && errors !== null) {
+            const messages = [];
+            for (const [field, fieldErrors] of Object.entries(errors)) {
+                const fieldName = {
+                    state_number: 'Госномер',
+                    brand: 'Марка',
+                    model: 'Модель',
+                    manufacture_year: 'Год выпуска',
+                    power_hp: 'Мощность',
+                    category: 'Категория',
+                    vin: 'VIN',
+                    purchase_price: 'Стоимость',
+                    has_tracker: 'Сигнализация',
+                    parking_type: 'Способ парковки'
+                }[field] || field;
+                
+                messages.push(`${fieldName}: ${fieldErrors.join(', ')}`);
+            }
+            return messages.join('; ');
+        }
+        return null;
+    };
+
     const loadVehicles = async () => {
         try {
             const response = await getMyVehicles();
             setVehicles(response.data);
         } catch (error) {
             console.error('Error loading vehicles:', error);
+            setGlobalError('Ошибка при загрузке автомобилей');
         } finally {
             setLoading(false);
         }
@@ -51,19 +78,21 @@ export const VehiclesPanel = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+        // Очищаем ошибку при изменении любого поля
+        if (modalError) setModalError(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
+        setModalError(null);
         
         try {
             await createVehicle({
                 state_number: formData.state_number,
                 brand: formData.brand,
                 model: formData.model,
-                manufacture_year: parseInt(formData.manufacture_year),
-                power_hp: parseInt(formData.power_hp),
+                manufacture_year: formData.manufacture_year ? parseInt(formData.manufacture_year) : null,
+                power_hp: formData.power_hp ? parseInt(formData.power_hp) : null,
                 category: formData.category,
                 vin: formData.vin,
                 purchase_price: formData.purchase_price ? parseFloat(formData.purchase_price) : null,
@@ -72,6 +101,7 @@ export const VehiclesPanel = () => {
             });
             
             setShowModal(false);
+            setModalError(null);
             setFormData({
                 state_number: '',
                 brand: '',
@@ -86,7 +116,20 @@ export const VehiclesPanel = () => {
             });
             await loadVehicles();
         } catch (error) {
-            setError(error.response?.data?.message || 'Ошибка при добавлении автомобиля');
+            console.error('Create vehicle error:', error);
+            
+            // Обработка ошибок валидации
+            const responseData = error.response?.data || {};
+            
+            if (responseData.errors) {
+                // Валидационные ошибки от Laravel
+                const errorMessage = formatValidationErrors(responseData.errors);
+                setModalError(errorMessage || 'Пожалуйста, проверьте правильность заполнения полей');
+            } else if (responseData.message) {
+                setModalError(responseData.message);
+            } else {
+                setModalError('Ошибка при добавлении автомобиля');
+            }
         }
     };
 
@@ -95,12 +138,13 @@ export const VehiclesPanel = () => {
             try {
                 await deleteVehicle(id);
                 await loadVehicles();
+                setGlobalError(null);
             } catch (error) {
                 const errorMessage = error.response?.data?.message || 'Ошибка при удалении';
                 if (errorMessage.includes('foreign key') || errorMessage.includes('policies')) {
-                    setError('Невозможно удалить автомобиль, на который оформлены полисы');
+                    setGlobalError('Невозможно удалить автомобиль, на который оформлены полисы');
                 } else {
-                    setError(errorMessage);
+                    setGlobalError(errorMessage);
                 }
             }
         }
@@ -118,18 +162,24 @@ export const VehiclesPanel = () => {
         <div className={styles.vehiclesPanel}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Мои автомобили</h1>
-                <button onClick={() => setShowModal(true)} className={styles.addButton}>
+                <button onClick={() => {
+                    setModalError(null);
+                    setShowModal(true);
+                }} className={styles.addButton}>
                     + Добавить автомобиль
                 </button>
             </div>
 
-            {error && <div className={styles.error}>{error}</div>}
+            {globalError && <div className={styles.error}>{globalError}</div>}
 
             <div className={styles.vehiclesContainer}>
                 {vehicles.length === 0 ? (
                     <div className={styles.emptyMessage}>
                         <p>У вас пока нет добавленных автомобилей</p>
-                        <button onClick={() => setShowModal(true)} className={styles.addFirstButton}>
+                        <button onClick={() => {
+                            setModalError(null);
+                            setShowModal(true);
+                        }} className={styles.addFirstButton}>
                             Добавить первый автомобиль
                         </button>
                     </div>
@@ -163,9 +213,19 @@ export const VehiclesPanel = () => {
             </div>
 
             {showModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+                <div className={styles.modalOverlay} onClick={() => {
+                    setShowModal(false);
+                    setModalError(null);
+                }}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                         <h2>Добавить автомобиль</h2>
+                        
+                        {modalError && (
+                            <div className={styles.modalError}>
+                                {modalError}
+                            </div>
+                        )}
+                        
                         <form onSubmit={handleSubmit}>
                             <div className={styles.formGroup}>
                                 <label>Государственный номер *</label>
@@ -210,6 +270,8 @@ export const VehiclesPanel = () => {
                                         value={formData.manufacture_year}
                                         onChange={handleInputChange}
                                         placeholder="2020"
+                                        min="1900"
+                                        max={new Date().getFullYear()}
                                     />
                                 </div>
                                 <div className={styles.formGroup}>
@@ -220,6 +282,7 @@ export const VehiclesPanel = () => {
                                         value={formData.power_hp}
                                         onChange={handleInputChange}
                                         placeholder="150"
+                                        min="0"
                                     />
                                 </div>
                             </div>
@@ -256,6 +319,8 @@ export const VehiclesPanel = () => {
                                     value={formData.purchase_price}
                                     onChange={handleInputChange}
                                     placeholder="2000000"
+                                    min="0"
+                                    step="0.01"
                                 />
                             </div>
 
@@ -285,7 +350,10 @@ export const VehiclesPanel = () => {
                             </div>
 
                             <div className={styles.modalButtons}>
-                                <button type="button" onClick={() => setShowModal(false)}>
+                                <button type="button" onClick={() => {
+                                    setShowModal(false);
+                                    setModalError(null);
+                                }}>
                                     Отмена
                                 </button>
                                 <button type="submit">

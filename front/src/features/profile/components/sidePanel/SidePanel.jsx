@@ -1,9 +1,11 @@
 import styles from './SidePanelStyle.module.css'
-import Profile from '../../../../assets/Profile/Profile.png'
+import Profile from '../../../../assets/Profile/Profile.webp'
 import History from '../../../../assets/Profile/History.webp'
-import Notifications from '../../../../assets/Profile/Notifications.png'
+import Notifications from '../../../../assets/Profile/Notifications.webp'
+import AccidentsIcon from '../../../../assets/Profile/Accident.webp'
 import Back from '../../../../assets/Profile/Back.webp'
-import Exit from '../../../../assets/Profile/Exit.png'
+import Exit from '../../../../assets/Profile/Exit.webp'
+import Car from '../../../../assets/Profile/Car.webp'
 import { SidePanelLine } from './SidePanelLine'
 import { useNotifications } from '../../../../shared/context/notificationsContext'
 import { useAuth } from '../../../../shared/context/authContext'
@@ -29,10 +31,11 @@ export const SidePanel = (props) => {
     const SidePanelLineProps = [
         {id:0, SidePanelLineImg: Profile, SidePanelLineButton:'Профиль', tabName: 'profile'},
         {id:1, SidePanelLineImg: History, SidePanelLineButton:'История полисов', tabName: 'policies'},
-        {id:2, SidePanelLineImg: Profile, SidePanelLineButton:'Мои автомобили', tabName: 'vehicles'},  
-        {id:3, SidePanelLineImg: Notifications, SidePanelLineButton:'Уведомления', tabName: 'notifications', badge: unreadCount},
-        {id:4, SidePanelLineImg: Back, SidePanelLineButton:'На главную', isLink: true, LinkPath: "/"},
-        {id:5, SidePanelLineImg: Exit, SidePanelLineButton:'Выход', onClick: handleLogout},
+        {id:2, SidePanelLineImg: Car, SidePanelLineButton:'Мои автомобили', tabName: 'vehicles'},
+        {id:3, SidePanelLineImg: AccidentsIcon, SidePanelLineButton:'Страховые случаи', tabName: 'accidents'},
+        {id:4, SidePanelLineImg: Notifications, SidePanelLineButton:'Уведомления', tabName: 'notifications', badge: unreadCount},
+        {id:5, SidePanelLineImg: Back, SidePanelLineButton:'На главную', isLink: true, LinkPath: "/"},
+        {id:6, SidePanelLineImg: Exit, SidePanelLineButton:'Выход', onClick: handleLogout},
     ];
 
     return <div className={styles.SidePanel}>

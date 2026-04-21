@@ -16,7 +16,6 @@ class UserSeeder extends Seeder
         $agentType = UserType::where('name', 'agent')->first()->id;
         $clientType = UserType::where('name', 'client')->first()->id;
 
-        // Админ
         $admin = User::firstOrCreate(
             ['email' => 'admin@insurancesystem.com'],
             [
@@ -26,7 +25,6 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Агент
         $agent = User::firstOrCreate(
             ['email' => 'agent@insurancesystem.com'],
             [
@@ -36,7 +34,6 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Клиент 1
         $client1 = User::firstOrCreate(
             ['email' => 'ivanov@example.com'],
             [
@@ -57,19 +54,14 @@ class UserSeeder extends Seeder
                 'passport_number' => '123456',
                 'passport_issued_by' => 'ОВД г. Москвы',
                 'passport_issue_date' => '2010-06-20',
-                'passport_expiry_date' => '2030-06-20',
                 'driver_license_series' => '99',
                 'driver_license_number' => '1234567890',
                 'driver_license_issued_by' => 'ГИБДД г. Москвы',
                 'driver_license_issue_date' => '2015-03-10',
                 'driver_license_expiry_date' => '2025-03-10',
-                'driver_experience_years' => 10,
-                'bonus_malus_class' => '5',
-                'has_accidents_last_year' => false
             ]
         );
 
-        // Клиент 2
         $client2 = User::firstOrCreate(
             ['email' => 'petrov@example.com'],
             [
@@ -90,15 +82,11 @@ class UserSeeder extends Seeder
                 'passport_number' => '654321',
                 'passport_issued_by' => 'ОВД г. Москвы',
                 'passport_issue_date' => '2012-08-15',
-                'passport_expiry_date' => '2032-08-15',
                 'driver_license_series' => '77',
                 'driver_license_number' => '0987654321',
                 'driver_license_issued_by' => 'ГИБДД г. Москвы',
                 'driver_license_issue_date' => '2018-01-20',
                 'driver_license_expiry_date' => '2028-01-20',
-                'driver_experience_years' => 5,
-                'bonus_malus_class' => '3',
-                'has_accidents_last_year' => true
             ]
         );
     }

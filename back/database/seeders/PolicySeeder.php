@@ -18,15 +18,21 @@ class PolicySeeder extends Seeder
         $osagoType = PolicyType::where('name', 'ОСАГО')->first();
         $kaskoType = PolicyType::where('name', 'КАСКО')->first();
         
-        // Получаем тарифы
+        if (!$osagoType || !$kaskoType) {
+            return;
+        }
+        
         $osagoTariff = Tariff::where('policy_type_id', $osagoType->id)->where('vehicle_category', 'B')->first();
         $kaskoTariff = Tariff::where('policy_type_id', $kaskoType->id)->where('vehicle_category', 'B')->first();
+        
+        if (!$osagoTariff) {
+            return;
+        }
         
         foreach ($clients as $client) {
             $vehicles = $client->vehicles;
             
             foreach ($vehicles as $vehicle) {
-                // ОСАГО для каждого автомобиля
                 $policyNumber = $this->generatePolicyNumber();
                 $startDate = now()->subDays(rand(0, 30));
                 $endDate = (clone $startDate)->addDays(365);
@@ -47,7 +53,6 @@ class PolicySeeder extends Seeder
                     'coverage_amount' => 400000,
                 ]);
                 
-                // Иногда добавляем КАСКО (50% вероятность)
                 if (rand(0, 1) && $kaskoTariff) {
                     $policyNumber2 = $this->generatePolicyNumber();
                     $startDate2 = now()->subDays(rand(0, 30));

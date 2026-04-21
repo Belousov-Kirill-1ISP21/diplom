@@ -86,7 +86,9 @@ export const PaymentForm = ({ policy }) => {
                             </div>
                             <div className={styles.infoRow}>
                                 <span>Срок действия:</span>
-                                <strong>{policy.start_date} — {policy.end_date}</strong>
+                                <strong>
+                                    {policy.start_date?.split('T')[0] || policy.start_date} — {policy.end_date?.split('T')[0] || policy.end_date}
+                                </strong>
                             </div>
                             <div className={styles.totalRow}>
                                 <span>Сумма к оплате:</span>

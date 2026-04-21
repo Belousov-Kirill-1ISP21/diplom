@@ -1,7 +1,7 @@
-import FacebookImg from "../../assets/Footer/Facebook.png";
-import InstagramImg from "../../assets/Footer/Instagram.png";
-import TwitterImg from "../../assets/Footer/Twitter.png";
-import VKImg from "../../assets/Footer/VK.png";
+import FacebookImg from "../../assets/Footer/Facebook.webp";
+import InstagramImg from "../../assets/Footer/Instagram.webp";
+import TwitterImg from "../../assets/Footer/Twitter.webp";
+import VKImg from "../../assets/Footer/VK.webp";
 import styles from './FooterStyle.module.css';
 import { Link } from 'react-router-dom';
 import { scrollToElement } from "../utils/scrollToElement";
@@ -21,8 +21,9 @@ export const Footer =(props)=>{
             <button className={styles.FooterButton}>
                 <Link to="/AboutUs" className={styles.FooterButtonContainerLink}>О компании</Link>
             </button>
-
-            <button className={styles.FooterButton}>Страховой случай</button>
+            <button className={styles.FooterButton}>
+                <Link to="/Accident" className={styles.FooterButtonContainerLink}>Страховой случай</Link>
+            </button>
             <button className={styles.FooterButton} onClick={() => scrollToElement("Header")}>Контакты</button>
         </div>
 

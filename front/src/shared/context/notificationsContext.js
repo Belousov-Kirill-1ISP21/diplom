@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import api from '../../api/client';
 
 const NotificationsContext = createContext();
@@ -8,7 +8,7 @@ export const NotificationsProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     // Загрузка уведомлений с сервера
-    const loadNotifications = async () => {
+    const loadNotifications = useCallback(async () => {
         try {
             const response = await api.get('/notifications');
             setNotifications(response.data);
@@ -17,11 +17,11 @@ export const NotificationsProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         loadNotifications();
-    }, []);
+    }, [loadNotifications]);
 
     const unreadCount = notifications.filter(n => !n.is_read).length;
 

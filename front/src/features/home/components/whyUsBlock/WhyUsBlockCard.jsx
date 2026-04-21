@@ -1,4 +1,4 @@
-import ProcentImg from "../../../../assets/Home/Procent.png";
+import ProcentImg from "../../../../assets/Home/Procent.webp";
 import styles from './WhyUsBlockCardStyle.module.css';
 
 export const WhyUsBlockCard =(props)=>{

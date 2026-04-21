@@ -3,7 +3,12 @@ import styles from './NotificationsPanel.module.css'
 import { useNotifications } from '../../../shared/context/notificationsContext'
 
 export const NotificationsPanel = () => {
-    const { notifications, loading, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+    const { notifications, loading, unreadCount, markAsRead, markAllAsRead, reloadNotifications } = useNotifications()
+
+    // Перезагружаем уведомления при монтировании компонента
+    useEffect(() => {
+        reloadNotifications()
+    }, []) // Пустой массив - загружает при каждом открытии вкладки
 
     const formatDate = (dateString) => {
         if (!dateString) return '';

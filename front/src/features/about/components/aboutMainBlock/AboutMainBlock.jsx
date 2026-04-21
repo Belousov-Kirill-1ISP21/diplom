@@ -1,8 +1,8 @@
 import styles from './AboutMainBlockStyle.module.css';
 import { AboutBlock } from './AboutBlock'
-import AboutBlock1Img from "../../../../assets/AboutUs/AboutBlock1.png";
-import AboutBlock2Img from "../../../../assets/AboutUs/AboutBlock2.png";
-import AboutBlock3Img from "../../../../assets/AboutUs/AboutBlock3.png";
+import AboutBlock1Img from "../../../../assets/AboutUs/AboutBlock1.webp";
+import AboutBlock2Img from "../../../../assets/AboutUs/AboutBlock2.webp";
+import AboutBlock3Img from "../../../../assets/AboutUs/AboutBlock3.webp";
 
 const AboutBlockProps = [
     {id:0, AboutBlockH1:'Надёжность', AboutBlockText: 'Нашу надежность и финансовую устойчивость подтверждают рейтинги ведущих рейтинговых агентств: ruАAA по шкале «Эксперт РА», ААА |ru| по шкале «Национального Рейтингового Агентства» и AAA.ru по шкале «Национальные Кредитные Рейтинги» (НКР).',

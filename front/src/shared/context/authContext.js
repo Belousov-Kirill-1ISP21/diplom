@@ -22,20 +22,47 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Загрузка данных пользователя
+    const loadUserData = async () => {
+        try {
+            const response = await getMe();
+            const user = response.data;
+            setUserData(user);
+            setProfileData(user.client_profile);
+            setIsAuthenticated(true);
+            return user;
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            localStorage.removeItem('token');
+            setIsAuthenticated(false);
+            setUserData(null);
+            setProfileData(null);
+            return null;
+        }
+    };
+
+    // Функция для обновления данных пользователя (пригодится для ProfilePage)
+    const refreshUserData = async () => {
+        if (!isAuthenticated) return null;
+        try {
+            const response = await getMe();
+            const user = response.data;
+            setUserData(user);
+            setProfileData(user.client_profile);
+            await loadPolicies();
+            return user;
+        } catch (error) {
+            console.error('Error refreshing user data:', error);
+            return null;
+        }
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            getMe()
-                .then(async (response) => {
-                    const user = response.data;
-                    setUserData(user);
-                    setProfileData(user.client_profile);
-                    setIsAuthenticated(true);
-                    await loadPolicies();
-                })
-                .catch(() => {
-                    localStorage.removeItem('token');
-                    setIsAuthenticated(false);
+            loadUserData()
+                .then(async (user) => {
+                    if (user) await loadPolicies();
                 })
                 .finally(() => setLoading(false));
         } else {
@@ -169,7 +196,8 @@ export const AuthProvider = ({ children }) => {
             updateUserPassword,
             addPolicy,
             resetPolicies,
-            refreshPolicies
+            refreshPolicies,
+            refreshUserData  // <-- ДОБАВЛЕНО
         }}>
             {children}
         </AuthContext.Provider>

@@ -5,19 +5,23 @@ export const PasswordModal = ({
     isOpen, 
     onClose, 
     onConfirm, 
-    error
+    error,
+    newPassword,
+    confirmNewPassword,
+    onNewPasswordChange,
+    onConfirmNewPasswordChange
 }) => {
-    const [password, setPassword] = useState('')
+    const [currentPassword, setCurrentPassword] = useState('')
 
     if (!isOpen) return null
 
     const handleConfirm = () => {
-        onConfirm(password)
-        setPassword('')
+        onConfirm(currentPassword)
+        setCurrentPassword('')
     }
 
     const handleClose = () => {
-        setPassword('')
+        setCurrentPassword('')
         onClose()
     }
 
@@ -30,10 +34,29 @@ export const PasswordModal = ({
                     type="password" 
                     placeholder="Текущий пароль"
                     className={styles.modalInput}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
                     autoFocus
                 />
+                
+                <p className={styles.newPasswordHint}>Если хотите сменить пароль, заполните поля ниже</p>
+                
+                <input 
+                    type="password" 
+                    placeholder="Новый пароль (минимум 8 символов)"
+                    className={styles.modalInput}
+                    value={newPassword}
+                    onChange={(e) => onNewPasswordChange(e.target.value)}
+                />
+                
+                <input 
+                    type="password" 
+                    placeholder="Подтверждение нового пароля"
+                    className={styles.modalInput}
+                    value={confirmNewPassword}
+                    onChange={(e) => onConfirmNewPasswordChange(e.target.value)}
+                />
+                
                 {error && <p className={styles.errorMessage}>{error}</p>}
                 
                 <div className={styles.modalButtons}>

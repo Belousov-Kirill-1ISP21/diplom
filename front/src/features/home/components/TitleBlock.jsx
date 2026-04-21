@@ -1,5 +1,5 @@
-import TitleBlockImg from "../../../assets/Home/TitleBlock.png";
-import ArrowImg from "../../../assets/Home/Arrow.png";
+import TitleBlockImg from "../../../assets/Home/TitleBlock.webp";
+import ArrowImg from "../../../assets/Home/Arrow.webp";
 import styles from './TitleBlockStyle.module.css';
 import { Link } from 'react-router-dom';
 

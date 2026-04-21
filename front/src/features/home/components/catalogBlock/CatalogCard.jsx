@@ -27,7 +27,7 @@ export const CatalogCard = (props) => {
             </div>
             
             <div className={styles.CatalogBlockCardButtonContainer}>
-                <Link to="/Catalog" className={styles.CatalogBlockCardContainerLink}>
+                <Link to="/Calculator" className={styles.CatalogBlockCardContainerLink}>
                     <button className={styles.CatalogBlockCardButton}>Заказать</button>
                 </Link>
             </div>

@@ -3,7 +3,7 @@ export const SIGNUP_STEP1_FIELDS = [
     { id: 0, placeholder: "Фамилия", type: "text", name: 'surname' },
     { id: 1, placeholder: "Имя", type: "text", name: 'name' },
     { id: 2, placeholder: "Отчество", type: "text", name: 'patronymic' },
-    { id: 3, placeholder: "Дата рождения", type: "date", name: 'birthDate' },
+    { id: 3, placeholder: "Дата рождения (дд.мм.гггг)", type: "text", name: 'birthDate' },
     { id: 4, placeholder: "Телефон", type: "tel", name: 'phone' },
     { id: 5, placeholder: "Email", type: "email", name: 'email' },
     { id: 6, placeholder: "Пароль", type: "password", name: 'password' },
@@ -15,15 +15,15 @@ export const SIGNUP_STEP2_FIELDS = [
     { id: 1, placeholder: "Серия паспорта", type: "text", name: 'passportSeries' },
     { id: 2, placeholder: "Номер паспорта", type: "text", name: 'passportNumber' },
     { id: 3, placeholder: "Кем выдан", type: "text", name: 'issuedBy' },
-    { id: 4, placeholder: "Дата выдачи", type: "date", name: 'issueDate' },
+    { id: 4, placeholder: "Дата выдачи (дд.мм.гггг)", type: "text", name: 'issueDate' },
 ];
 
 export const SIGNUP_STEP3_FIELDS = [
     { id: 0, placeholder: "Серия ВУ", type: "text", name: 'licenseSeries' },
     { id: 1, placeholder: "Номер ВУ", type: "text", name: 'licenseNumber' },
     { id: 2, placeholder: "Кем выдано ВУ", type: "text", name: 'licenseIssuedBy' },
-    { id: 3, placeholder: "Дата выдачи ВУ", type: "date", name: 'licenseIssueDate' },
-    { id: 4, placeholder: "Срок действия ВУ", type: "date", name: 'licenseExpiryDate' },
+    { id: 3, placeholder: "Дата выдачи ВУ (дд.мм.гггг)", type: "text", name: 'licenseIssueDate' },
+    { id: 4, placeholder: "Дата окончания действия ВУ (дд.мм.гггг)", type: "text", name: 'licenseExpiryDate' },
 ];
 
 export const SIGNUP_STEP_TITLES = {
@@ -73,5 +73,3 @@ export const PROFILE_FIELD_MAP = {
     'Категории прав': 'driverCategories',
     'Пароль': 'password'
 };
-
-

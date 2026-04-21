@@ -10,6 +10,12 @@ import editIcon from '../../../assets/Panels/Settings.webp';
 import deleteIcon from '../../../assets/Panels/Delete.webp';
 import exitIcon from '../../../assets/Panels/Exit.webp';
 import { useNavigate } from 'react-router-dom';
+import { tariffValidationSchema, userTypeSchema } from '../../../shared/lib/validations/panelsValidations';
+
+const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    return dateString.split('T')[0];
+};
 
 export const AdminPanel = () => {
     const { userData, isAuthenticated, loading: authLoading } = useAuth();
@@ -24,65 +30,54 @@ export const AdminPanel = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [expandedRow, setExpandedRow] = useState(null);
     const [formData, setFormData] = useState({});
+    const [validationErrors, setValidationErrors] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const navigate = useNavigate();
     const { logout } = useAuth();
 
-    // Загрузка пользователей с их профилями
     const loadUsers = async () => {
         setLoading(true);
         try {
             const response = await api.get('/admin/users');
-            console.log('Users loaded:', response.data);
             setUsers(response.data.data || []);
         } catch (error) {
-            console.error('Error loading users:', error);
             setError('Ошибка загрузки пользователей: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
     };
 
-    // Загрузка тарифов
     const loadTariffs = async () => {
         setLoading(true);
         try {
             const response = await api.get('/admin/tariffs');
-            console.log('Tariffs loaded:', response.data);
             setTariffs(response.data.data || []);
         } catch (error) {
-            console.error('Error loading tariffs:', error);
             setError('Ошибка загрузки тарифов: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
     };
 
-    // Загрузка полисов
     const loadPolicies = async () => {
         setLoading(true);
         try {
             const response = await api.get('/admin/policies');
-            console.log('Policies loaded:', response.data);
             setPolicies(response.data.data || []);
         } catch (error) {
-            console.error('Error loading policies:', error);
             setError('Ошибка загрузки полисов: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
     };
 
-    // Загрузка страховых случаев
     const loadAccidents = async () => {
         setLoading(true);
         try {
             const response = await api.get('/admin/accidents');
-            console.log('Accidents loaded:', response.data);
             setAccidents(response.data.data || []);
         } catch (error) {
-            console.error('Error loading accidents:', error);
             setError('Ошибка загрузки страховых случаев: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
@@ -96,17 +91,20 @@ export const AdminPanel = () => {
         if (activeTab === 'accidents') loadAccidents();
     }, [activeTab]);
 
-    // Смена типа пользователя
     const changeUserType = async (userId, newType) => {
         try {
+            await userTypeSchema.validate({ user_type: newType }, { abortEarly: false });
             await api.put(`/admin/users/${userId}`, { user_type: newType });
             loadUsers();
-        } catch (error) {
-            setError('Ошибка смены типа пользователя');
+        } catch (err) {
+            if (err.name === 'ValidationError') {
+                setError(err.errors[0]);
+            } else {
+                setError('Ошибка смены типа пользователя');
+            }
         }
     };
 
-    // Удаление тарифа
     const deleteTariff = async (id) => {
         if (window.confirm('Удалить тариф?')) {
             try {
@@ -118,9 +116,20 @@ export const AdminPanel = () => {
         }
     };
 
-    // Сохранение тарифа
     const saveTariff = async (e) => {
         e.preventDefault();
+        
+        try {
+            await tariffValidationSchema.validate(formData, { abortEarly: false });
+        } catch (err) {
+            const errors = {};
+            err.inner.forEach(error => {
+                errors[error.path] = error.message;
+            });
+            setValidationErrors(errors);
+            return;
+        }
+        
         try {
             if (selectedItem) {
                 await api.put(`/admin/tariffs/${selectedItem.id}`, formData);
@@ -130,13 +139,13 @@ export const AdminPanel = () => {
             setShowModal(false);
             setSelectedItem(null);
             setFormData({});
+            setValidationErrors({});
             loadTariffs();
         } catch (error) {
             setError('Ошибка сохранения тарифа');
         }
     };
 
-    // Отмена полиса
     const cancelPolicy = async (id) => {
         if (window.confirm('Отменить полис?')) {
             try {
@@ -157,7 +166,6 @@ export const AdminPanel = () => {
         }
     };
 
-    // Обновление статуса страхового случая
     const updateAccidentStatus = async (id, status) => {
         try {
             await api.put(`/admin/accidents/${id}`, { status });
@@ -181,7 +189,6 @@ export const AdminPanel = () => {
         return statusMap[status] || status;
     };
 
-    // Получение полного ФИО из client_profile
     const getFullName = (user) => {
         const profile = user.client_profile;
         if (!profile) return '—';
@@ -189,7 +196,6 @@ export const AdminPanel = () => {
         return parts.length ? parts.join(' ') : '—';
     };
 
-    // Получение типа пользователя на русском
     const getUserTypeName = (user) => {
         const type = user.user_type?.name;
         if (type === 'admin') return 'Админ';
@@ -198,7 +204,6 @@ export const AdminPanel = () => {
         return '—';
     };
 
-    // Фильтрация
     const filteredUsers = users.filter(user => 
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.phone?.includes(searchTerm) ||
@@ -206,16 +211,12 @@ export const AdminPanel = () => {
         user.client_profile?.first_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const filteredPolicies = policies.filter(policy => 
-        !statusFilter || policy.status === statusFilter
-    );
+    const filteredPolicies = policies.filter(policy => !statusFilter || policy.status === statusFilter);
 
-    // Если еще идет проверка авторизации, показываем загрузку
     if (authLoading) {
         return <div className={styles.loading}>Загрузка...</div>;
     }
 
-    // Если не авторизован или не админ
     if (!isAuthenticated) {
         window.location.href = '/SignIn';
         return null;
@@ -229,35 +230,22 @@ export const AdminPanel = () => {
     return (
         <div className={styles.adminPanel}>
             <div className={styles.sidebar}>
-                <div className={styles.logo}>
-                    <h2>Админ-панель</h2>
-                </div>
+                <div className={styles.logo}><h2>Админ-панель</h2></div>
                 <nav className={styles.nav}>
                     <button className={`${styles.navItem} ${activeTab === 'users' ? styles.active : ''}`} onClick={() => setActiveTab('users')}>
-                        <img src={usersIcon} alt="Пользователи" className={styles.navIcon} />
-                        Пользователи
+                        <img src={usersIcon} alt="Пользователи" className={styles.navIcon} /> Пользователи
                     </button>
                     <button className={`${styles.navItem} ${activeTab === 'tariffs' ? styles.active : ''}`} onClick={() => setActiveTab('tariffs')}>
-                        <img src={tariffsIcon} alt="Тарифы" className={styles.navIcon} />
-                        Тарифы
+                        <img src={tariffsIcon} alt="Тарифы" className={styles.navIcon} /> Тарифы
                     </button>
                     <button className={`${styles.navItem} ${activeTab === 'policies' ? styles.active : ''}`} onClick={() => setActiveTab('policies')}>
-                        <img src={policiesIcon} alt="Полисы" className={styles.navIcon} />
-                        Полисы
+                        <img src={policiesIcon} alt="Полисы" className={styles.navIcon} /> Полисы
                     </button>
                     <button className={`${styles.navItem} ${activeTab === 'accidents' ? styles.active : ''}`} onClick={() => setActiveTab('accidents')}>
-                        <img src={accidentsIcon} alt="Страховые случаи" className={styles.navIcon} />
-                        Страховые случаи
+                        <img src={accidentsIcon} alt="Страховые случаи" className={styles.navIcon} /> Страховые случаи
                     </button>
-                    <button 
-                        className={styles.navItem}
-                        onClick={() => {
-                            logout();
-                            navigate('/');
-                        }}
-                    >
-                        <img src={exitIcon} alt="Выход" className={styles.navIcon} />
-                        Выход
+                    <button className={styles.navItem} onClick={() => { logout(); navigate('/'); }}>
+                        <img src={exitIcon} alt="Выход" className={styles.navIcon} /> Выход
                     </button>
                 </nav>
             </div>
@@ -275,31 +263,16 @@ export const AdminPanel = () => {
                 {error && <div className={styles.error}>{error}</div>}
 
                 <div className={styles.content}>
-                    {/* ==================== ПОЛЬЗОВАТЕЛИ ==================== */}
+                    {/* ПОЛЬЗОВАТЕЛИ */}
                     {activeTab === 'users' && (
                         <div>
                             <div className={styles.searchBar}>
-                                <input
-                                    type="text"
-                                    placeholder="Поиск по email, телефону, ФИО..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={styles.searchInput}
-                                />
+                                <input type="text" placeholder="Поиск по email, телефону, ФИО..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className={styles.searchInput} />
                             </div>
-                            {loading ? (
-                                <div className={styles.loading}>Загрузка...</div>
-                            ) : (
+                            {loading ? <div className={styles.loading}>Загрузка...</div> : (
                                 <table className={styles.table}>
                                     <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Email</th>
-                                            <th>Телефон</th>
-                                            <th>ФИО</th>
-                                            <th>Тип</th>
-                                            <th>Действия</th>
-                                        </tr>
+                                        <tr><th>ID</th><th>Email</th><th>Телефон</th><th>ФИО</th><th>Тип</th><th>Действия</th></tr>
                                     </thead>
                                     <tbody>
                                         {filteredUsers.map(user => (
@@ -321,7 +294,7 @@ export const AdminPanel = () => {
                                                             <option value="agent">Агент</option>
                                                             <option value="admin">Админ</option>
                                                         </select>
-                                                    </td>
+                                                     </td>
                                                 </tr>
                                                 {expandedRow === user.id && (
                                                     <tr className={styles.expandedRow}>
@@ -329,7 +302,7 @@ export const AdminPanel = () => {
                                                             <div className={styles.expandedContent}>
                                                                 <h4>Дополнительная информация</h4>
                                                                 <div className={styles.expandedGrid}>
-                                                                    <div><strong>Дата рождения:</strong> {user.client_profile?.birth_date || '—'}</div>
+                                                                    <div><strong>Дата рождения:</strong> {formatDate(user.client_profile?.birth_date)}</div>
                                                                     <div><strong>Паспорт:</strong> {user.client_profile?.passport_series || ''} {user.client_profile?.passport_number || '—'}</div>
                                                                     <div><strong>ВУ:</strong> {user.client_profile?.driver_license_series || ''} {user.client_profile?.driver_license_number || '—'}</div>
                                                                     <div><strong>Категории прав:</strong> {user.client_profile?.driver_categories?.map(cat => cat.code).join(', ') || '—'}</div>
@@ -348,25 +321,17 @@ export const AdminPanel = () => {
                         </div>
                     )}
 
-                    {/* ==================== ТАРИФЫ ==================== */}
+                    {/* ТАРИФЫ */}
                     {activeTab === 'tariffs' && (
                         <div>
-                            <button className={styles.addButton} onClick={() => { setSelectedItem(null); setFormData({}); setShowModal(true); }}>
+                            <button className={styles.addButton} onClick={() => { setSelectedItem(null); setFormData({}); setValidationErrors({}); setShowModal(true); }}>
                                 + Добавить тариф
                             </button>
-                            {loading ? (
-                                <div className={styles.loading}>Загрузка...</div>
-                            ) : (
+                            {loading ? <div className={styles.loading}>Загрузка...</div> : (
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Тип полиса</th>
-                                            <th>Категория ТС</th>
-                                            <th>Базовая ставка</th>
-                                            <th>Мин.</th>
-                                            <th>Макс.</th>
-                                            <th>Действия</th>
+                                            <th>ID</th><th>Тип полиса</th><th>Категория ТС</th><th>Базовая ставка</th><th>Мин.</th><th>Макс.</th><th>Действия</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -379,7 +344,7 @@ export const AdminPanel = () => {
                                                 <td>{Number(tariff.min_rate).toLocaleString()} ₽</td>
                                                 <td>{Number(tariff.max_rate).toLocaleString()} ₽</td>
                                                 <td>
-                                                    <button className={styles.editButton} onClick={() => { setSelectedItem(tariff); setFormData(tariff); setShowModal(true); }}>
+                                                    <button className={styles.editButton} onClick={() => { setSelectedItem(tariff); setFormData(tariff); setValidationErrors({}); setShowModal(true); }}>
                                                         <img src={editIcon} alt="Редактировать" className={styles.actionIcon} />
                                                     </button>
                                                     <button className={styles.deleteButton} onClick={() => deleteTariff(tariff.id)}>
@@ -394,7 +359,7 @@ export const AdminPanel = () => {
                         </div>
                     )}
 
-                    {/* ==================== ПОЛИСЫ ==================== */}
+                    {/* ПОЛИСЫ */}
                     {activeTab === 'policies' && (
                         <div>
                             <div className={styles.filterBar}>
@@ -406,19 +371,11 @@ export const AdminPanel = () => {
                                     <option value="cancelled">Отменён</option>
                                 </select>
                             </div>
-                            {loading ? (
-                                <div className={styles.loading}>Загрузка...</div>
-                            ) : (
+                            {loading ? <div className={styles.loading}>Загрузка...</div> : (
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
-                                            <th>№ полиса</th>
-                                            <th>Клиент</th>
-                                            <th>Автомобиль</th>
-                                            <th>Тип</th>
-                                            <th>Сумма</th>
-                                            <th>Статус</th>
-                                            <th>Действия</th>
+                                            <th>№ полиса</th><th>Клиент</th><th>Автомобиль</th><th>Тип</th><th>Сумма</th><th>Статус</th><th>Действия</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -429,19 +386,13 @@ export const AdminPanel = () => {
                                                 <td>{policy.vehicle?.brand} {policy.vehicle?.model}</td>
                                                 <td>{policy.policy_type?.name}</td>
                                                 <td>{Number(policy.final_price).toLocaleString()} ₽</td>
-                                                <td>
-                                                    <span className={`${styles.status} ${styles[policy.status]}`}>
-                                                        {getStatusText(policy.status)}
-                                                    </span>
-                                                 </td>
+                                                <td><span className={`${styles.status} ${styles[policy.status]}`}>{getStatusText(policy.status)}</span></td>
                                                 <td>
                                                     {policy.status === 'active' && (
-                                                        <button className={styles.cancelButton} onClick={() => cancelPolicy(policy.id)}>
-                                                            Отменить
-                                                        </button>
+                                                        <button className={styles.cancelButton} onClick={() => cancelPolicy(policy.id)}>Отменить</button>
                                                     )}
-                                                 </td>
-                                             </tr>
+                                                </td>
+                                            </tr>
                                         ))}
                                     </tbody>
                                 </table>
@@ -449,23 +400,14 @@ export const AdminPanel = () => {
                         </div>
                     )}
 
-                    {/* ==================== СТРАХОВЫЕ СЛУЧАИ ==================== */}
+                    {/* СТРАХОВЫЕ СЛУЧАИ */}
                     {activeTab === 'accidents' && (
                         <div>
-                            {loading ? (
-                                <div className={styles.loading}>Загрузка...</div>
-                            ) : (
+                            {loading ? <div className={styles.loading}>Загрузка...</div> : (
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Клиент</th>
-                                            <th>Полис</th>
-                                            <th>Дата</th>
-                                            <th>Ущерб</th>
-                                            <th>Вина клиента</th>
-                                            <th>Статус</th>
-                                            <th>Действия</th>
+                                            <th>ID</th><th>Клиент</th><th>Полис</th><th>Дата</th><th>Ущерб</th><th>Вина клиента</th><th>Статус</th><th>Действия</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -474,7 +416,7 @@ export const AdminPanel = () => {
                                                 <td>{accident.id}</td>
                                                 <td>{accident.client?.last_name} {accident.client?.first_name}</td>
                                                 <td>{accident.policy?.policy_number}</td>
-                                                <td>{accident.accident_date}</td>
+                                                <td>{formatDate(accident.accident_date)}</td>
                                                 <td>{Number(accident.damage_amount).toLocaleString()} ₽</td>
                                                 <td>
                                                     <select
@@ -497,13 +439,13 @@ export const AdminPanel = () => {
                                                         <option value="paid">Выплачено</option>
                                                         <option value="rejected">Отклонено</option>
                                                     </select>
-                                                 </td>
+                                                </td>
                                                 <td>
                                                     <button className={styles.viewButton} onClick={() => { setSelectedItem(accident); setShowModal(true); }}>
                                                         Просмотр
                                                     </button>
-                                                 </td>
-                                             </tr>
+                                                </td>
+                                            </tr>
                                         ))}
                                     </tbody>
                                 </table>
@@ -520,16 +462,17 @@ export const AdminPanel = () => {
                         <h2>{selectedItem ? 'Редактировать тариф' : 'Новый тариф'}</h2>
                         <form onSubmit={saveTariff}>
                             <div className={styles.formGroup}>
-                                <label>Тип полиса</label>
-                                <select value={formData.policy_type_id || ''} onChange={(e) => setFormData({...formData, policy_type_id: e.target.value})} required>
+                                <label>Тип полиса *</label>
+                                <select value={formData.policy_type_id || ''} onChange={(e) => setFormData({...formData, policy_type_id: e.target.value})} className={validationErrors.policy_type_id ? styles.errorInput : ''}>
                                     <option value="">Выберите тип</option>
                                     <option value="1">ОСАГО</option>
                                     <option value="2">КАСКО</option>
                                 </select>
+                                {validationErrors.policy_type_id && <span className={styles.fieldError}>{validationErrors.policy_type_id}</span>}
                             </div>
                             <div className={styles.formGroup}>
-                                <label>Категория ТС</label>
-                                <select value={formData.vehicle_category || ''} onChange={(e) => setFormData({...formData, vehicle_category: e.target.value})} required>
+                                <label>Категория ТС *</label>
+                                <select value={formData.vehicle_category || ''} onChange={(e) => setFormData({...formData, vehicle_category: e.target.value})} className={validationErrors.vehicle_category ? styles.errorInput : ''}>
                                     <option value="">Выберите категорию</option>
                                     <option value="A">A - Мотоциклы</option>
                                     <option value="B">B - Легковые</option>
@@ -537,18 +480,22 @@ export const AdminPanel = () => {
                                     <option value="D">D - Автобусы</option>
                                     <option value="E">E - Прицепы</option>
                                 </select>
+                                {validationErrors.vehicle_category && <span className={styles.fieldError}>{validationErrors.vehicle_category}</span>}
                             </div>
                             <div className={styles.formGroup}>
-                                <label>Базовая ставка (₽)</label>
-                                <input type="number" value={formData.base_rate || ''} onChange={(e) => setFormData({...formData, base_rate: e.target.value})} required />
+                                <label>Базовая ставка (₽) *</label>
+                                <input type="number" value={formData.base_rate || ''} onChange={(e) => setFormData({...formData, base_rate: e.target.value})} className={validationErrors.base_rate ? styles.errorInput : ''} />
+                                {validationErrors.base_rate && <span className={styles.fieldError}>{validationErrors.base_rate}</span>}
                             </div>
                             <div className={styles.formGroup}>
-                                <label>Минимальная ставка (₽)</label>
-                                <input type="number" value={formData.min_rate || ''} onChange={(e) => setFormData({...formData, min_rate: e.target.value})} required />
+                                <label>Минимальная ставка (₽) *</label>
+                                <input type="number" value={formData.min_rate || ''} onChange={(e) => setFormData({...formData, min_rate: e.target.value})} className={validationErrors.min_rate ? styles.errorInput : ''} />
+                                {validationErrors.min_rate && <span className={styles.fieldError}>{validationErrors.min_rate}</span>}
                             </div>
                             <div className={styles.formGroup}>
-                                <label>Максимальная ставка (₽)</label>
-                                <input type="number" value={formData.max_rate || ''} onChange={(e) => setFormData({...formData, max_rate: e.target.value})} required />
+                                <label>Максимальная ставка (₽) *</label>
+                                <input type="number" value={formData.max_rate || ''} onChange={(e) => setFormData({...formData, max_rate: e.target.value})} className={validationErrors.max_rate ? styles.errorInput : ''} />
+                                {validationErrors.max_rate && <span className={styles.fieldError}>{validationErrors.max_rate}</span>}
                             </div>
                             <div className={styles.formGroup}>
                                 <label>Метод расчета</label>
@@ -574,7 +521,7 @@ export const AdminPanel = () => {
                         <div className={styles.details}>
                             <p><strong>Клиент:</strong> {selectedItem.client?.last_name} {selectedItem.client?.first_name}</p>
                             <p><strong>Полис:</strong> {selectedItem.policy?.policy_number}</p>
-                            <p><strong>Дата происшествия:</strong> {selectedItem.accident_date}</p>
+                            <p><strong>Дата происшествия:</strong> {formatDate(selectedItem.accident_date)}</p>
                             <p><strong>Сумма ущерба:</strong> {Number(selectedItem.damage_amount).toLocaleString()} ₽</p>
                             <p><strong>Статус:</strong> {getStatusText(selectedItem.status)}</p>
                             <p><strong>Описание:</strong> {selectedItem.description || '—'}</p>

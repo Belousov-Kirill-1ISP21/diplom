@@ -13,6 +13,10 @@ class VehicleSeeder extends Seeder
         $client1 = ClientProfile::first();
         $client2 = ClientProfile::skip(1)->first();
 
+        if (!$client1 || !$client2) {
+            return;
+        }
+
         $vehicles = [
             [
                 'client_id' => $client1->id,

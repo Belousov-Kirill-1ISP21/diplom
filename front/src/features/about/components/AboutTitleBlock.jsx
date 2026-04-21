@@ -1,5 +1,5 @@
 import styles from './AboutTitleBlockStyle.module.css';
-import AboutTitle from '../../../assets/AboutUs/AboutTitle.png'
+import AboutTitle from '../../../assets/AboutUs/AboutTitle.webp'
 export const AboutTitleBlock =(props)=>{
     return <div className={styles.AboutTitleBlock}>
 

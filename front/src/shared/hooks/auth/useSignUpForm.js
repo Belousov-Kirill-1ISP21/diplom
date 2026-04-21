@@ -12,12 +12,39 @@ import {
 } from '../../lib/validations/authValidations';
 import { register as apiRegister } from '../../../api/auth';
 
+// Функция для проверки формата ДД.ММ.ГГГГ
+const isValidDateDDMMYYYY = (value) => {
+    if (!value) return false;
+    const regex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
+    if (!regex.test(value)) return false;
+    
+    const [day, month, year] = value.split('.').map(Number);
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+    if (year < 1900 || year > new Date().getFullYear()) return false;
+    
+    const date = new Date(year, month - 1, day);
+    return date.getDate() === day && date.getMonth() === month - 1;
+};
+
+// Функция конвертации ДД.ММ.ГГГГ -> ГГГГ-ММ-ДД для бэка
+const convertToISO = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('.');
+    if (parts.length !== 3) return dateStr;
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+};
+
 const step1Schema = yup.object().shape({
     ...personalInfoSchema,
     birthDate: yup.string()
         .required('Дата рождения обязательна')
-        .test('valid-format', 'Дата должна быть в формате дд.мм.гггг', (value) => {
-            return true;
+        .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
+        .test('not-future', 'Дата рождения не может быть в будущем', (value) => {
+            if (!value) return false;
+            const [day, month, year] = value.split('.').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date <= new Date();
         }),
     password: yup.string()
         .required('Пароль обязателен')
@@ -32,8 +59,48 @@ const step1Schema = yup.object().shape({
         .oneOf([yup.ref('password')], 'Пароли должны совпадать'),
 });
 
-const step2Schema = yup.object().shape(passportSchema);
-const step3Schema = yup.object().shape(licenseSchema);
+const step2Schema = yup.object().shape({
+    ...passportSchema,
+    issueDate: yup.string()
+        .required('Дата выдачи обязательна')
+        .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
+        .test('not-future', 'Дата выдачи не может быть в будущем', (value) => {
+            if (!value) return false;
+            const [day, month, year] = value.split('.').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date <= new Date();
+        })
+        .test('not-too-old', 'Дата выдачи не может быть раньше 1991 года', (value) => {
+            if (!value) return false;
+            const [day, month, year] = value.split('.').map(Number);
+            return year >= 1991;
+        }),
+});
+
+const step3Schema = yup.object().shape({
+    ...licenseSchema,
+    licenseIssueDate: yup.string()
+        .required('Дата выдачи ВУ обязательна')
+        .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
+        .test('not-future', 'Дата выдачи ВУ не может быть в будущем', (value) => {
+            if (!value) return false;
+            const [day, month, year] = value.split('.').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date <= new Date();
+        }),
+    
+    licenseExpiryDate: yup.string()
+        .required('Дата окончания действия ВУ обязательна')
+        .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
+        .test('after-issue', 'Дата окончания должна быть позже даты выдачи', function(value) {
+            if (!value || !this.parent.licenseIssueDate) return false;
+            const [expiryDay, expiryMonth, expiryYear] = value.split('.').map(Number);
+            const [issueDay, issueMonth, issueYear] = this.parent.licenseIssueDate.split('.').map(Number);
+            const expiry = new Date(expiryYear, expiryMonth - 1, expiryDay);
+            const issue = new Date(issueYear, issueMonth - 1, issueDay);
+            return expiry > issue;
+        }),
+});
 
 export const useSignUpForm = () => {
     const navigate = useNavigate();
@@ -160,9 +227,7 @@ export const useSignUpForm = () => {
         console.log('step2Data:', step2Data);
         console.log('step3Data:', step3Data);
         
-        // Теперь отправляем ВСЕ данные на бэк
         const payloadForBackend = {
-            // Шаг 1
             email: allData.email,
             phone: allData.phone,
             password: allData.password,
@@ -170,20 +235,16 @@ export const useSignUpForm = () => {
             last_name: allData.surname,
             first_name: allData.name,
             middle_name: allData.patronymic || '',
-            birth_date: allData.birthDate,
-            
-            // Шаг 2 - Паспортные данные
+            birth_date: convertToISO(allData.birthDate),
             passport_series: allData.passportSeries,
             passport_number: allData.passportNumber,
             passport_issued_by: allData.issuedBy,
-            passport_issue_date: allData.issueDate,
-            
-            // Шаг 3 - Водительские права
+            passport_issue_date: convertToISO(allData.issueDate),
             driver_license_series: allData.licenseSeries,
             driver_license_number: allData.licenseNumber,
             driver_license_issued_by: allData.licenseIssuedBy,
-            driver_license_issue_date: allData.licenseIssueDate,
-            driver_license_expiry_date: allData.licenseExpiryDate
+            driver_license_issue_date: convertToISO(allData.licenseIssueDate),
+            driver_license_expiry_date: convertToISO(allData.licenseExpiryDate)
         };
     
         console.log('=== PAYLOAD ДЛЯ БЭКА ===', payloadForBackend);

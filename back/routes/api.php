@@ -42,12 +42,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('profile', [ProfileController::class, 'update']);
     
     // Уведомления
+    Route::post('notifications', [NotificationController::class, 'store']);
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('notifications/unread', [NotificationController::class, 'unread']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::put('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::delete('notifications/read/all', [NotificationController::class, 'deleteRead']);
+    Route::delete('notifications/all', [NotificationController::class, 'deleteAll']);
     
     // Клиент
     Route::middleware(['client'])->prefix('client')->group(function () {
@@ -95,6 +98,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
         Route::get('reports/daily', [ReportController::class, 'agentDaily']);
         Route::get('reports/monthly', [ReportController::class, 'agentMonthly']);
+        
+        // Уведомления для агента (все уведомления всех клиентов)
+        Route::get('notifications/all', [NotificationController::class, 'allForAgent']);
     });
     
     // Админ
@@ -132,16 +138,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('tariffs', [TariffController::class, 'store']);
         Route::put('tariffs/{tariff}', [TariffController::class, 'update']);
         Route::delete('tariffs/{tariff}', [TariffController::class, 'destroy']);
-        
-        // Уведомления (админ)
-        Route::post('notifications', [NotificationController::class, 'store']);
-        
-        // Отчеты
-        Route::get('reports/sales', [ReportController::class, 'sales']);
-        Route::get('reports/payments', [ReportController::class, 'payments']);
-        Route::get('reports/accidents', [ReportController::class, 'accidentsStats']);
-        Route::get('reports/clients', [ReportController::class, 'clientsStats']);
-        Route::get('reports/financial', [ReportController::class, 'financial']);
         
         // Дашборд
         Route::get('dashboard', [AdminController::class, 'dashboard']);

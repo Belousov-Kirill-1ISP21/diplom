@@ -37,7 +37,6 @@ export const CalculatorBlock = () => {
         }));
     };
 
-    // Загрузка автомобилей пользователя
     const loadMyVehicles = async () => {
         if (!isAuthenticated) return;
         try {
@@ -160,31 +159,21 @@ export const CalculatorBlock = () => {
             parkingType: vehicle.parking_type,
             vehicleId: vehicle.id
         });
+        // Очищаем ошибки валидации
+        form.setErrors({});
     };
 
     const calculatePrice = async () => {
-        console.log('=== НАЧАЛО calculatePrice ===');
         setIsCalculating(true);
         setError(null);
         
         try {
             const currentData = form.getCurrentData();
-            console.log('currentData:', currentData);
             
             let vehicleId = currentData.vehicleId;
             
-            // Если нет vehicleId, проверяем или создаем
-            if (!vehicleId) {
-                // Проверяем обязательные поля
-                if (!currentData.stateNumber) throw new Error('Госномер обязателен');
-                if (!currentData.vin) throw new Error('VIN обязателен');
-                if (!currentData.category) throw new Error('Категория обязательна');
-                if (!currentData.brand) throw new Error('Марка обязательна');
-                if (!currentData.model) throw new Error('Модель обязательна');
-                if (!currentData.manufactureYear) throw new Error('Год выпуска обязателен');
-                if (!currentData.powerHp) throw new Error('Мощность обязательна');
-                
-                // Проверяем, существует ли уже такой автомобиль
+            if (!vehicleId && isAuthenticated) {
+                // Проверяем, существует ли такой автомобиль
                 const existingVehicle = myVehicles.find(v => 
                     v.state_number === currentData.stateNumber || 
                     v.vin === currentData.vin
@@ -193,7 +182,7 @@ export const CalculatorBlock = () => {
                 if (existingVehicle) {
                     vehicleId = existingVehicle.id;
                     form.updateCurrentData({ ...currentData, vehicleId: vehicleId });
-                } else {
+                } else if (currentData.stateNumber && currentData.vin) {
                     // Создаем новый
                     const vehicleResponse = await api.post('/client/vehicles', {
                         state_number: currentData.stateNumber,
@@ -214,18 +203,18 @@ export const CalculatorBlock = () => {
                 }
             }
             
-            if (!currentData.startDate) throw new Error('Дата начала обязательна');
-            if (!currentData.endDate) throw new Error('Дата окончания обязательна');
+            if (!vehicleId) {
+                throw new Error('Автомобиль не найден. Заполните все поля или выберите авто из списка');
+            }
             
-            // Получаем tariff_id
             const policyTypeId = form.policyType === 'osago' ? 1 : 2;
             const tariffsResponse = await api.get('/tariffs/public', {
                 params: { policy_type_id: policyTypeId }
             });
             
             const categoryCode = typeof currentData.category === 'object' 
-            ? currentData.category?.code 
-            : currentData.category;
+                ? currentData.category?.code 
+                : currentData.category;
             
             const tariff = tariffsResponse.data.find(t => t.vehicle_category?.code === categoryCode);
             
@@ -233,7 +222,6 @@ export const CalculatorBlock = () => {
                 throw new Error('Тариф не найден для категории ' + currentData.category);
             }
             
-            // Рассчитываем стоимость
             const response = await api.post('/client/policies/calculate', {
                 policy_type_id: policyTypeId,
                 vehicle_id: vehicleId,
@@ -250,15 +238,10 @@ export const CalculatorBlock = () => {
                 calculatedPrice: calculatedPrice
             });
             
-            form.setStep(3);
-            if (form.policyType === 'osago') {
-                form.setOsagoStep(3);
-            } else {
-                form.setKaskoStep(3);
-            }
+            form.nextStep();
             
         } catch (error) {
-            console.error('=== ОШИБКА В calculatePrice ===', error);
+            console.error('Error in calculatePrice:', error);
             let errorMessage = error.message || 'Ошибка при расчете';
             if (error.response?.data?.errors) {
                 const errors = Object.values(error.response.data.errors).flat();
@@ -293,11 +276,6 @@ export const CalculatorBlock = () => {
             const currentData = form.getCurrentData();
             const clientId = profileData?.id;
             
-            console.log('=== СОЗДАНИЕ ПОЛИСА ===');
-            console.log('clientId:', clientId);
-            console.log('vehicleId:', currentData.vehicleId);
-            console.log('tariffId:', currentData.tariffId);
-            
             if (!clientId) throw new Error('Client profile not found');
             if (!currentData.vehicleId) throw new Error('Vehicle not created');
             if (!currentData.tariffId) throw new Error('Tariff not found');
@@ -315,15 +293,12 @@ export const CalculatorBlock = () => {
                 coverage_amount: null
             });
             
-            console.log('ПОЛИС СОЗДАН:', response.data);
-            
             addPolicy(response.data.policy);
             await refreshPolicies();
             
             navigate(`/Payment/${response.data.policy.id}`);
         } catch (error) {
             console.error('Error:', error.response?.data);
-            console.error('Полная ошибка:', error);
             setError(error.response?.data?.message || 'Ошибка при оформлении полиса');
         } finally {
             setIsCalculating(false);
@@ -331,17 +306,7 @@ export const CalculatorBlock = () => {
     };
 
     const handleNextStep = () => {
-        if (form.step === 1) {
-            // На первом шаге проверяем выбран ли автомобиль
-            if (isAuthenticated && myVehicles.length > 0 && !selectedVehicle) {
-                setError('Выберите автомобиль из списка');
-                return;
-            }
-            if (!isAuthenticated && !form.getCurrentData().stateNumber) {
-                setError('Заполните данные об автомобиле');
-                return;
-            }
-        }
+        // Валидация через хук
         form.nextStep();
         setError(null);
     };
@@ -437,7 +402,7 @@ export const CalculatorBlock = () => {
                                     <input
                                         type="text"
                                         name="stateNumber"
-                                        value={form.getCurrentData().stateNumber}
+                                        value={form.getCurrentData().stateNumber || ''}
                                         onChange={form.handleInputChange}
                                         placeholder="А123ВС777"
                                         className={form.errors.stateNumber ? styles.error : ''}
@@ -451,7 +416,7 @@ export const CalculatorBlock = () => {
                                         <input
                                             type="text"
                                             name="brand"
-                                            value={form.getCurrentData().brand}
+                                            value={form.getCurrentData().brand || ''}
                                             onChange={form.handleInputChange}
                                             placeholder="Toyota"
                                             className={form.errors.brand ? styles.error : ''}
@@ -463,7 +428,7 @@ export const CalculatorBlock = () => {
                                         <input
                                             type="text"
                                             name="model"
-                                            value={form.getCurrentData().model}
+                                            value={form.getCurrentData().model || ''}
                                             onChange={form.handleInputChange}
                                             placeholder="Camry"
                                             className={form.errors.model ? styles.error : ''}
@@ -478,7 +443,7 @@ export const CalculatorBlock = () => {
                                         <input
                                             type="number"
                                             name="manufactureYear"
-                                            value={form.getCurrentData().manufactureYear}
+                                            value={form.getCurrentData().manufactureYear || ''}
                                             onChange={form.handleInputChange}
                                             placeholder="2020"
                                             className={form.errors.manufactureYear ? styles.error : ''}
@@ -490,7 +455,7 @@ export const CalculatorBlock = () => {
                                         <input
                                             type="number"
                                             name="powerHp"
-                                            value={form.getCurrentData().powerHp}
+                                            value={form.getCurrentData().powerHp || ''}
                                             onChange={form.handleInputChange}
                                             placeholder="150"
                                             className={form.errors.powerHp ? styles.error : ''}
@@ -503,7 +468,7 @@ export const CalculatorBlock = () => {
                                     <label>Категория ТС</label>
                                     <select
                                         name="category"
-                                        value={form.getCurrentData().category}
+                                        value={form.getCurrentData().category || 'B'}
                                         onChange={form.handleInputChange}
                                     >
                                         {vehicleCategories.map(cat => (
@@ -517,7 +482,7 @@ export const CalculatorBlock = () => {
                                     <input
                                         type="text"
                                         name="vin"
-                                        value={form.getCurrentData().vin}
+                                        value={form.getCurrentData().vin || ''}
                                         onChange={form.handleInputChange}
                                         placeholder="JTDBE32KX00123456"
                                         className={form.errors.vin ? styles.error : ''}
@@ -531,7 +496,7 @@ export const CalculatorBlock = () => {
                                         <input
                                             type="number"
                                             name="purchasePrice"
-                                            value={form.getCurrentData().purchasePrice}
+                                            value={form.getCurrentData().purchasePrice || ''}
                                             onChange={form.handleInputChange}
                                             placeholder="2000000"
                                             className={form.errors.purchasePrice ? styles.error : ''}
@@ -565,7 +530,7 @@ export const CalculatorBlock = () => {
                                 <input
                                     type="date"
                                     name="startDate"
-                                    value={form.getCurrentData().startDate}
+                                    value={form.getCurrentData().startDate || ''}
                                     onChange={form.handleInputChange}
                                     className={form.errors.startDate ? styles.error : ''}
                                 />
@@ -576,7 +541,7 @@ export const CalculatorBlock = () => {
                                 <input
                                     type="date"
                                     name="endDate"
-                                    value={form.getCurrentData().endDate}
+                                    value={form.getCurrentData().endDate || ''}
                                     onChange={form.handleInputChange}
                                     className={form.errors.endDate ? styles.error : ''}
                                 />

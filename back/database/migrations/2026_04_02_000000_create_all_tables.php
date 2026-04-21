@@ -176,7 +176,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('message', 500);
             $table->boolean('is_read')->default(false);
-            $table->string('type', 50)->nullable();
             $table->json('data')->nullable();
             $table->timestamps();
             

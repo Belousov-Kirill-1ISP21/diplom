@@ -10,6 +10,78 @@ use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
+    /**
+     * Кастомные сообщения для валидации
+     */
+    private $validationMessages = [
+        // Email
+        'email.required' => 'Email обязателен для заполнения',
+        'email.email' => 'Введите корректный email адрес (например: user@example.com)',
+        'email.unique' => 'Пользователь с таким email уже зарегистрирован',
+        
+        // Телефон
+        'phone.required' => 'Номер телефона обязателен для заполнения',
+        'phone.string' => 'Номер телефона должен быть строкой',
+        'phone.regex' => 'Телефон должен быть в формате +7XXXXXXXXXX (10 цифр после +7)',
+        'phone.unique' => 'Пользователь с таким номером телефона уже зарегистрирован',
+        
+        // Пароль
+        'password.required' => 'Пароль обязателен для заполнения',
+        'password.min' => 'Пароль должен содержать минимум :min символов',
+        
+        // ФИО
+        'last_name.required' => 'Фамилия обязательна для заполнения',
+        'last_name.string' => 'Фамилия должна быть строкой',
+        'last_name.max' => 'Фамилия не может превышать :max символов',
+        'last_name.regex' => 'Фамилия должна начинаться с заглавной буквы и содержать только русские буквы. Допускается дефис (например: Иванов, Смирнов-Петров)',
+        
+        'first_name.required' => 'Имя обязательно для заполнения',
+        'first_name.string' => 'Имя должно быть строкой',
+        'first_name.max' => 'Имя не может превышать :max символов',
+        'first_name.regex' => 'Имя должно начинаться с заглавной буквы и содержать только русские буквы (например: Иван)',
+        
+        'middle_name.string' => 'Отчество должно быть строкой',
+        'middle_name.max' => 'Отчество не может превышать :max символов',
+        'middle_name.regex' => 'Отчество должно начинаться с заглавной буквы и содержать только русские буквы (например: Иванович)',
+        
+        // Дата рождения
+        'birth_date.date' => 'Дата рождения должна быть корректной датой',
+        'birth_date.before_or_equal' => 'Дата рождения не может быть в будущем',
+        'birth_date.after' => 'Дата рождения должна быть позже 01.01.1900',
+        
+        // Паспортные данные
+        'passport_series.size' => 'Серия паспорта должна содержать ровно :size цифры',
+        'passport_series.regex' => 'Серия паспорта должна содержать только цифры (4 цифры)',
+        
+        'passport_number.size' => 'Номер паспорта должен содержать ровно :size цифр',
+        'passport_number.regex' => 'Номер паспорта должен содержать только цифры (6 цифр)',
+        
+        'passport_issued_by.string' => 'Название органа выдачи должно быть строкой',
+        'passport_issued_by.min' => 'Название органа выдачи должно содержать минимум :min символов',
+        'passport_issued_by.max' => 'Название органа выдачи не может превышать :max символов',
+        
+        'passport_issue_date.date' => 'Дата выдачи паспорта должна быть корректной датой',
+        'passport_issue_date.before_or_equal' => 'Дата выдачи паспорта не может быть в будущем',
+        'passport_issue_date.after' => 'Дата выдачи паспорта должна быть позже 31.12.1990',
+        
+        // Водительское удостоверение
+        'driver_license_series.size' => 'Серия ВУ должна содержать ровно :size цифры',
+        'driver_license_series.regex' => 'Серия ВУ должна содержать только цифры (4 цифры)',
+        
+        'driver_license_number.size' => 'Номер ВУ должен содержать ровно :size цифр',
+        'driver_license_number.regex' => 'Номер ВУ должен содержать только цифры (6 цифр)',
+        
+        'driver_license_issued_by.string' => 'Название органа выдачи ВУ должно быть строкой',
+        'driver_license_issued_by.min' => 'Название органа выдачи ВУ должно содержать минимум :min символов',
+        'driver_license_issued_by.max' => 'Название органа выдачи ВУ не может превышать :max символов',
+        
+        'driver_license_issue_date.date' => 'Дата выдачи ВУ должна быть корректной датой',
+        'driver_license_issue_date.before_or_equal' => 'Дата выдачи ВУ не может быть в будущем',
+        
+        'driver_license_expiry_date.date' => 'Дата окончания ВУ должна быть корректной датой',
+        'driver_license_expiry_date.after' => 'Дата окончания ВУ должна быть позже даты выдачи',
+    ];
+
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 15);
@@ -46,64 +118,114 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|unique:users',
-            'phone' => 'required|string|unique:users',
-            'password' => 'required|min:6',
-            'last_name' => 'required|string|max:30',
-            'first_name' => 'required|string|max:30',
-            'middle_name' => 'nullable|string|max:30',
-            'birth_date' => 'nullable|date',
-        ]);
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email|unique:users',
+                'phone' => 'required|string|regex:/^\+7\d{10}$/|unique:users',
+                'password' => 'required|min:6',
+                'last_name' => 'required|string|max:30|regex:/^[А-ЯЁ][а-яё]+(-[А-ЯЁ][а-яё]+)?$/u',
+                'first_name' => 'required|string|max:30|regex:/^[А-ЯЁ][а-яё]+$/u',
+                'middle_name' => 'nullable|string|max:30|regex:/^[А-ЯЁ][а-яё]+$/u',
+                'birth_date' => 'nullable|date|before_or_equal:today|after:1900-01-01',
+                'passport_series' => 'nullable|string|size:4|regex:/^\d{4}$/',
+                'passport_number' => 'nullable|string|size:6|regex:/^\d{6}$/',
+                'passport_issued_by' => 'nullable|string|min:10|max:200',
+                'passport_issue_date' => 'nullable|date|before_or_equal:today|after:1990-12-31',
+                'driver_license_series' => 'nullable|string|size:4|regex:/^\d{4}$/',
+                'driver_license_number' => 'nullable|string|size:6|regex:/^\d{6}$/',
+                'driver_license_issued_by' => 'nullable|string|min:10|max:200',
+                'driver_license_issue_date' => 'nullable|date|before_or_equal:today',
+                'driver_license_expiry_date' => 'nullable|date|after:driver_license_issue_date',
+            ], $this->validationMessages);
 
-        $clientType = UserType::where('name', 'client')->first();
+            $clientType = UserType::where('name', 'client')->first();
+            
+            if (!$clientType) {
+                return response()->json(['message' => 'Тип пользователя "client" не найден'], 500);
+            }
 
-        $user = User::create([
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password_hash' => Hash::make($request->password),
-            'user_type_id' => $clientType->id,
-        ]);
+            $user = User::create([
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'password_hash' => Hash::make($validated['password']),
+                'user_type_id' => $clientType->id,
+            ]);
 
-        $clientProfile = ClientProfile::create([
-            'user_id' => $user->id,
-            'last_name' => $request->last_name,
-            'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
-            'birth_date' => $request->birth_date,
-        ]);
+            $clientProfile = ClientProfile::create([
+                'user_id' => $user->id,
+                'last_name' => $validated['last_name'],
+                'first_name' => $validated['first_name'],
+                'middle_name' => $validated['middle_name'] ?? null,
+                'birth_date' => $validated['birth_date'] ?? null,
+                'passport_series' => $validated['passport_series'] ?? null,
+                'passport_number' => $validated['passport_number'] ?? null,
+                'passport_issued_by' => $validated['passport_issued_by'] ?? null,
+                'passport_issue_date' => $validated['passport_issue_date'] ?? null,
+                'driver_license_series' => $validated['driver_license_series'] ?? null,
+                'driver_license_number' => $validated['driver_license_number'] ?? null,
+                'driver_license_issued_by' => $validated['driver_license_issued_by'] ?? null,
+                'driver_license_issue_date' => $validated['driver_license_issue_date'] ?? null,
+                'driver_license_expiry_date' => $validated['driver_license_expiry_date'] ?? null,
+            ]);
 
-        return response()->json([
-            'message' => 'Client created successfully',
-            'client' => $user->load(['clientProfile', 'clientProfile.driverCategories'])
-        ], 201);
+            return response()->json([
+                'message' => 'Клиент успешно создан',
+                'client' => $user->load(['clientProfile', 'clientProfile.driverCategories'])
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Ошибка валидации данных',
+                'errors' => $e->errors()
+            ], 422);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $client = User::findOrFail($id);
-        
-        $request->validate([
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'phone' => 'sometimes|string|unique:users,phone,' . $id,
-            'last_name' => 'sometimes|string|max:30',
-            'first_name' => 'sometimes|string|max:30',
-            'middle_name' => 'nullable|string|max:30',
-            'birth_date' => 'nullable|date',
-        ]);
+        try {
+            $client = User::findOrFail($id);
+            
+            $validated = $request->validate([
+                'email' => 'sometimes|email|unique:users,email,' . $id,
+                'phone' => 'sometimes|string|regex:/^\+7\d{10}$/|unique:users,phone,' . $id,
+                'last_name' => 'sometimes|string|max:30|regex:/^[А-ЯЁ][а-яё]+(-[А-ЯЁ][а-яё]+)?$/u',
+                'first_name' => 'sometimes|string|max:30|regex:/^[А-ЯЁ][а-яё]+$/u',
+                'middle_name' => 'nullable|string|max:30|regex:/^[А-ЯЁ][а-яё]+$/u',
+                'birth_date' => 'nullable|date|before_or_equal:today|after:1900-01-01',
+                'passport_series' => 'nullable|string|size:4|regex:/^\d{4}$/',
+                'passport_number' => 'nullable|string|size:6|regex:/^\d{6}$/',
+                'passport_issued_by' => 'nullable|string|min:10|max:200',
+                'passport_issue_date' => 'nullable|date|before_or_equal:today|after:1990-12-31',
+                'driver_license_series' => 'nullable|string|size:4|regex:/^\d{4}$/',
+                'driver_license_number' => 'nullable|string|size:6|regex:/^\d{6}$/',
+                'driver_license_issued_by' => 'nullable|string|min:10|max:200',
+                'driver_license_issue_date' => 'nullable|date|before_or_equal:today',
+                'driver_license_expiry_date' => 'nullable|date|after:driver_license_issue_date',
+            ], $this->validationMessages);
 
-        $client->update($request->only(['email', 'phone']));
+            $client->update($request->only(['email', 'phone']));
 
-        if ($client->clientProfile) {
-            $client->clientProfile->update($request->only([
-                'last_name', 'first_name', 'middle_name', 'birth_date'
-            ]));
+            if ($client->clientProfile) {
+                $client->clientProfile->update($request->only([
+                    'last_name', 'first_name', 'middle_name', 'birth_date',
+                    'passport_series', 'passport_number', 'passport_issued_by', 'passport_issue_date',
+                    'driver_license_series', 'driver_license_number', 'driver_license_issued_by',
+                    'driver_license_issue_date', 'driver_license_expiry_date'
+                ]));
+            }
+
+            return response()->json([
+                'message' => 'Клиент успешно обновлён',
+                'client' => $client->load(['clientProfile', 'clientProfile.driverCategories'])
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Ошибка валидации данных',
+                'errors' => $e->errors()
+            ], 422);
         }
-
-        return response()->json([
-            'message' => 'Client updated successfully',
-            'client' => $client->load(['clientProfile', 'clientProfile.driverCategories'])
-        ]);
     }
 
     public function destroy($id)
@@ -111,29 +233,43 @@ class ClientController extends Controller
         $client = User::findOrFail($id);
         
         if ($client->userType->name !== 'client') {
-            return response()->json(['message' => 'User is not a client'], 422);
+            return response()->json(['message' => 'Пользователь не является клиентом'], 422);
         }
         
         $profile = $client->clientProfile;
         
         if ($profile) {
             if ($profile->policies()->where('status', 'active')->exists()) {
-                return response()->json(['message' => 'Cannot delete client with active policies'], 422);
+                return response()->json(['message' => 'Невозможно удалить клиента с активными полисами. Сначала отмените или завершите полисы'], 422);
             }
             
             if ($profile->accidents()->exists()) {
-                return response()->json(['message' => 'Cannot delete client with accident history'], 422);
+                return response()->json(['message' => 'Невозможно удалить клиента с историей ДТП. Сначала удалите записи о ДТП'], 422);
             }
+            
+            // Удаляем связанные данные
+            $vehiclesCount = $profile->vehicles()->count();
+            $policiesCount = $profile->policies()->count();
+            $accidentsCount = $profile->accidents()->count();
             
             $profile->driverCategories()->detach();
             $profile->vehicles()->delete();
             $profile->policies()->delete();
             $profile->accidents()->delete();
             $profile->delete();
+            
+            return response()->json([
+                'message' => 'Клиент успешно удалён',
+                'deleted_data' => [
+                    'vehicles' => $vehiclesCount,
+                    'policies' => $policiesCount,
+                    'accidents' => $accidentsCount
+                ]
+            ]);
         }
         
         $client->delete();
         
-        return response()->json(['message' => 'Client deleted successfully']);
+        return response()->json(['message' => 'Клиент успешно удалён']);
     }
 }

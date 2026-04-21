@@ -4,14 +4,17 @@ import { MainPanel } from '../components/mainPanel/MainPanel'
 import { HistoryPanel } from '../components/HistoryPanel'
 import { NotificationsPanel } from '../components/NotificationsPanel'
 import { VehiclesPanel } from '../components/VehiclesPanel';
-import { useState, useEffect } from 'react'
+import { AccidentsPanel } from '../components/AccidentsPanel';
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../../../shared/context/authContext'
 import { useLocation } from 'react-router-dom'
 
 export const ProfilePage = () => {
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('profile')
-    const { isAuthenticated, loading } = useAuth()
+    const { isAuthenticated, loading, refreshUserData, refreshPolicies } = useAuth()
+    const [refreshKey, setRefreshKey] = useState(0)
+    const hasRefreshed = useRef(false) // Флаг, чтобы обновить только 1 раз
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -21,20 +24,50 @@ export const ProfilePage = () => {
         }
     }, [location]);
 
-    const renderMainPanel = () => {
+    // ОДИН РАЗ после загрузки страницы обновляем данные
+    useEffect(() => {
+        if (!loading && !hasRefreshed.current) {
+            hasRefreshed.current = true
+            const refreshData = async () => {
+                await refreshUserData()
+                await refreshPolicies()
+                setRefreshKey(prev => prev + 1)
+            }
+            refreshData()
+        }
+    }, [loading, refreshUserData, refreshPolicies])
+
+    // Функция для обновления данных пользователя при смене вкладок
+    const handleTabChange = useCallback(async (tab) => {
+        setActiveTab(tab)
+        setRefreshKey(prev => prev + 1)
+        
+        if (tab === 'profile') {
+            await refreshUserData()
+        }
+        
+        if (tab === 'policies') {
+            await refreshPolicies()
+        }
+    }, [refreshUserData, refreshPolicies])
+
+    // Функция для рендера с пробросом refreshKey для принудительного обновления
+    const renderMainPanel = useCallback(() => {
         switch(activeTab) {
             case 'profile':
-                return <MainPanel />
+                return <MainPanel key={`profile-${refreshKey}`} />
             case 'policies':
-                return <HistoryPanel />
+                return <HistoryPanel key={`policies-${refreshKey}`} />
             case 'notifications':
-                return <NotificationsPanel />
+                return <NotificationsPanel key={`notifications-${refreshKey}`} />
             case 'vehicles': 
-                return <VehiclesPanel />
+                return <VehiclesPanel key={`vehicles-${refreshKey}`} />
+            case 'accidents':
+                return <AccidentsPanel key={`accidents-${refreshKey}`} />
             default:
-                return <MainPanel />
+                return <MainPanel key={`profile-${refreshKey}`} />
         }
-    }
+    }, [activeTab, refreshKey])
 
     if (loading) {
         return <div className={styles.wrapper}>Загрузка...</div>
@@ -50,7 +83,7 @@ export const ProfilePage = () => {
             <div className={styles.SidePanelContainer}>
                 <SidePanel 
                     activeTab={activeTab}
-                    setActiveTab={setActiveTab}
+                    setActiveTab={handleTabChange}
                 />
             </div>
             <div className={styles.MainPanelContainer}>

@@ -11,12 +11,17 @@ class TariffSeeder extends Seeder
 {
     public function run(): void
     {
-        // Получаем ID типов полисов
-        $osagoId = PolicyType::where('name', 'ОСАГО')->first()->id;
-        $kaskoId = PolicyType::where('name', 'КАСКО')->first()->id;
+        $osagoType = PolicyType::where('name', 'ОСАГО')->first();
+        $kaskoType = PolicyType::where('name', 'КАСКО')->first();
+        
+        if (!$osagoType || !$kaskoType) {
+            return;
+        }
+        
+        $osagoId = $osagoType->id;
+        $kaskoId = $kaskoType->id;
         
         $tariffs = [
-            // ОСАГО для мотоциклов (A)
             [
                 'policy_type_id' => $osagoId,
                 'vehicle_category' => 'A',
@@ -33,7 +38,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
-            // ОСАГО для легковых (B)
             [
                 'policy_type_id' => $osagoId,
                 'vehicle_category' => 'B',
@@ -50,7 +54,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
-            // ОСАГО для грузовых (C)
             [
                 'policy_type_id' => $osagoId,
                 'vehicle_category' => 'C',
@@ -67,7 +70,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
-            // ОСАГО для автобусов (D)
             [
                 'policy_type_id' => $osagoId,
                 'vehicle_category' => 'D',
@@ -84,7 +86,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
-            // ОСАГО для прицепов (E)
             [
                 'policy_type_id' => $osagoId,
                 'vehicle_category' => 'E',
@@ -101,8 +102,7 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 1.0,
                 'calculation_method' => 'basic'
             ],
-             // КАСКО для мотоциклов (A)
-             [
+            [
                 'policy_type_id' => $kaskoId,
                 'vehicle_category' => 'A',
                 'base_rate' => 30000.00,
@@ -118,7 +118,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 0.7,
                 'calculation_method' => 'coefficient'
             ],
-            // КАСКО для легковых (B)
             [
                 'policy_type_id' => $kaskoId,
                 'vehicle_category' => 'B',
@@ -135,7 +134,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 0.7,
                 'calculation_method' => 'coefficient'
             ],
-            // КАСКО для грузовых (C)
             [
                 'policy_type_id' => $kaskoId,
                 'vehicle_category' => 'C',
@@ -152,7 +150,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 0.7,
                 'calculation_method' => 'coefficient'
             ],
-            // КАСКО для автобусов (D)
             [
                 'policy_type_id' => $kaskoId,
                 'vehicle_category' => 'D',
@@ -169,7 +166,6 @@ class TariffSeeder extends Seeder
                 'franchise_coefficient' => 0.7,
                 'calculation_method' => 'coefficient'
             ],
-            // КАСКО для прицепов (E)
             [
                 'policy_type_id' => $kaskoId,
                 'vehicle_category' => 'E',

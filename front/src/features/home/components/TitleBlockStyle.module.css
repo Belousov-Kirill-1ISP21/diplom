@@ -17,7 +17,7 @@
     flex-direction: column;
     text-align: center;
     align-items: center;
-    background-image: linear-gradient(to right, rgb(232 232 232 / 10.8%), rgb(72 100 111 / 60%)), url("../../../assets/SideBackground/SideBackground.png");
+    background-image: linear-gradient(to right, rgb(232 232 232 / 10.8%), rgb(72 100 111 / 60%)), url("../../../assets/SideBackground/SideBackground.webp");
     background-repeat: no-repeat, no-repeat;
     background-size: cover, cover;
     background-position: center, center;
