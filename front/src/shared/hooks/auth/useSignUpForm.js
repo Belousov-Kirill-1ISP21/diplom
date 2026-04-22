@@ -12,7 +12,6 @@ import {
 } from '../../lib/validations/authValidations';
 import { register as apiRegister } from '../../../api/auth';
 
-// Функция для проверки формата ДД.ММ.ГГГГ
 const isValidDateDDMMYYYY = (value) => {
     if (!value) return false;
     const regex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
@@ -27,7 +26,6 @@ const isValidDateDDMMYYYY = (value) => {
     return date.getDate() === day && date.getMonth() === month - 1;
 };
 
-// Функция конвертации ДД.ММ.ГГГГ -> ГГГГ-ММ-ДД для бэка
 const convertToISO = (dateStr) => {
     if (!dateStr) return '';
     const parts = dateStr.split('.');

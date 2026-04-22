@@ -1,13 +1,11 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import styles from './ForgotPasswordForm.module.css';
-import { Link, useNavigate } from 'react-router-dom';
-import { forgotPassword, resetPassword } from '../../../../api/auth';
+import { Link } from 'react-router-dom';
 import { TextInput } from '../../../../shared/components/TextInput.jsx';
+import { useForgotPassword } from '../../../../shared/hooks/auth/useForgotPassword.js';
 
-// Схема для email
 const emailSchema = yup.object().shape({
     email: yup
         .string()
@@ -15,7 +13,6 @@ const emailSchema = yup.object().shape({
         .email('Введите корректный email')
 });
 
-// Схема для кода
 const codeSchema = yup.object().shape({
     code: yup
         .string()
@@ -24,7 +21,6 @@ const codeSchema = yup.object().shape({
         .matches(/^\d+$/, 'Код должен содержать только цифры')
 });
 
-// Схема для нового пароля
 const resetSchema = yup.object().shape({
     password: yup
         .string()
@@ -37,12 +33,17 @@ const resetSchema = yup.object().shape({
 });
 
 export const ForgotPasswordForm = () => {
-    const navigate = useNavigate();
-    const [step, setStep] = useState(1);
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(false);
+    const {
+        step,
+        email,
+        error,
+        success,
+        loading,
+        onSendCode,
+        onVerifyCode,
+        onResetPassword,
+        goBack
+    } = useForgotPassword();
 
     const { register: registerEmail, handleSubmit: handleSubmitEmail, formState: { errors: emailErrors } } = useForm({
         resolver: yupResolver(emailSchema),
@@ -58,61 +59,6 @@ export const ForgotPasswordForm = () => {
         resolver: yupResolver(resetSchema),
         mode: 'onChange'
     });
-
-    const onSendCode = async (data) => {
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-            const response = await forgotPassword(data.email);
-            setEmail(data.email);
-            setStep(2);
-            setSuccess(`Код подтверждения отправлен на ${data.email}`);
-        } catch (error) {
-            setError(error.response?.data?.message || 'Пользователь с таким email не найден');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const onVerifyCode = async (data) => {
-        setLoading(true);
-        setError('');
-        
-        try {
-            // Проверяем код (для демо - 4444)
-            if (data.code !== '4444') {
-                setError('Неверный код подтверждения');
-                setLoading(false);
-                return;
-            }
-            setStep(3);
-            setSuccess('Код подтвержден. Введите новый пароль');
-        } catch (error) {
-            setError('Ошибка проверки кода');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const onResetPassword = async (data) => {
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-            await resetPassword(email, '4444', data.password, data.confirmPassword);
-            setSuccess('Пароль успешно изменен! Сейчас вы будете перенаправлены на страницу входа');
-            setTimeout(() => {
-                navigate('/SignIn');
-            }, 3000);
-        } catch (error) {
-            setError(error.response?.data?.message || 'Ошибка при сбросе пароля');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <div className={styles.forgotPasswordForm}>
@@ -194,7 +140,7 @@ export const ForgotPasswordForm = () => {
                         <div className={styles.links}>
                             <button 
                                 type="button"
-                                onClick={() => setStep(1)}
+                                onClick={goBack}
                                 className={styles.linkButton}
                             >
                                 Назад

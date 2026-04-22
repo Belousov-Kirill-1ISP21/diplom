@@ -7,7 +7,6 @@ export const NotificationsProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Загрузка уведомлений с сервера
     const loadNotifications = useCallback(async () => {
         try {
             const response = await api.get('/notifications');

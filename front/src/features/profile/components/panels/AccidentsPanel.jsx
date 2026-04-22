@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './AccidentsPanel.module.css';
-import api from '../../../api/client';
+import api from '../../../../api/client';
 import { useNavigate } from 'react-router-dom';
 
 const formatDate = (dateString) => {

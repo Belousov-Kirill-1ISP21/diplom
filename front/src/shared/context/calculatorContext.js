@@ -33,7 +33,6 @@ export const CalculatorProvider = ({ children }) => {
         }
     });
 
-    // Загрузка при монтировании
     useEffect(() => {
         const saved = localStorage.getItem('calculatorData');
         if (saved) {
@@ -41,7 +40,6 @@ export const CalculatorProvider = ({ children }) => {
         }
     }, []);
 
-    // Сохранение при изменении
     useEffect(() => {
         localStorage.setItem('calculatorData', JSON.stringify(calculatorData));
     }, [calculatorData]);

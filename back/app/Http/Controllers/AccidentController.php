@@ -13,7 +13,6 @@ class AccidentController extends Controller
      * Кастомные сообщения для валидации
      */
     private $validationMessages = [
-        // Поля для создания/обновления ДТП
         'accident_date.required' => 'Дата ДТП обязательна для заполнения',
         'accident_date.date' => 'Дата ДТП должна быть корректной датой',
         'accident_date.before_or_equal' => 'Дата ДТП не может быть в будущем',
@@ -110,14 +109,12 @@ class AccidentController extends Controller
                 'description' => 'nullable|string',
             ], $this->validationMessages);
             
-            // Проверка, что дата ДТП не раньше даты начала полиса
             if ($validated['accident_date'] < $policy->start_date) {
                 return response()->json([
                     'message' => 'Дата ДТП не может быть раньше даты начала действия полиса (' . $policy->start_date . ')'
                 ], 422);
             }
             
-            // Проверка, что дата ДТП не позже даты окончания полиса
             if ($validated['accident_date'] > $policy->end_date) {
                 return response()->json([
                     'message' => 'Дата ДТП не может быть позже даты окончания действия полиса (' . $policy->end_date . ')'
@@ -169,7 +166,6 @@ class AccidentController extends Controller
                 'status' => 'sometimes|string|in:pending,approved,rejected,paid',
             ], $this->validationMessages);
             
-            // Если статус меняется на paid, проверяем, что нет вины клиента
             if (isset($validated['status']) && $validated['status'] === 'paid') {
                 $currentFault = $validated['is_client_fault'] ?? $accident->is_client_fault;
                 if ($currentFault) {

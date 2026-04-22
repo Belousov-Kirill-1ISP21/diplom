@@ -7,7 +7,7 @@ import {
     SIGNUP_STEP3_FIELDS,
     SIGNUP_STEP_TITLES 
 } from '../../../../shared/config/fields';
-import { useSignUpForm } from '../../../../shared/hooks/auth/useSignUpForm';
+import { useSignUpForm } from '../../../../shared/hooks/auth/useSignUpForm.js';
 
 export const SignUpForm = () => {
     const {

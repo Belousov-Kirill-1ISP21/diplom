@@ -1,7 +1,7 @@
 .MainPanel{
     height: 90%;
-    width: 90%;  /* увеличил с 69% */
-    margin-left: 5%;  /* уменьшил отступ */
+    width: 90%;  
+    margin-left: 5%;  
     display: flex;
     flex-direction: column;
 }

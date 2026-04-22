@@ -22,7 +22,6 @@ export const SidePanel = (props) => {
         navigate('/')
     }
 
-    // Формируем отображаемое имя из полей surname и name
     const displayName = fullUserData?.surname && fullUserData?.name 
         ? `${fullUserData.surname} ${fullUserData.name}`
         : fullUserData?.email?.split('@')[0] || 'Пользователь'

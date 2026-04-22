@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '../../context/authContext';
 
 export const useProfileForm = () => {
     const { fullUserData, updateUserData, updateUserPassword } = useAuth();
@@ -55,7 +55,7 @@ export const useProfileForm = () => {
 
     const validateNewPassword = (password) => {
         if (!password || password.trim() === '') {
-            return null; // Пароль не меняется
+            return null; 
         }
         if (password.length < 8) {
             return 'Новый пароль должен содержать минимум 8 символов';
@@ -76,13 +76,11 @@ export const useProfileForm = () => {
     };
 
     const confirmSave = async (enteredPassword, onSuccess) => {
-        // Валидация текущего пароля
         if (!enteredPassword || enteredPassword.trim() === '') {
             setPasswordError('Введите текущий пароль');
             return;
         }
         
-        // Валидация нового пароля
         const newPwd = pendingChanges?.password;
         if (newPwd && newPwd.trim() !== '') {
             const validationError = validateNewPassword(newPwd);

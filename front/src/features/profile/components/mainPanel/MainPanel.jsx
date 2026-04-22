@@ -1,8 +1,8 @@
 import styles from './MainPanelStyle.module.css';
 import { MainPanelLine } from './MainPanelLine';
-import { PasswordModal } from '../PasswordModal';
+import { PasswordModal } from '../panels/PasswordModal';
 import { PROFILE_FIELDS, PROFILE_FIELD_MAP } from '../../../../shared/config/fields';
-import { useProfileForm } from '../../../../shared/hooks/useProfileForm';
+import { useProfileForm } from '../../../../shared/hooks/profile/useProfileForm';
 
 export const MainPanel = () => {
     const {

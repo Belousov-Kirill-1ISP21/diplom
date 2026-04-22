@@ -33,7 +33,6 @@ export const SignInForm = () => {
         mode: 'onChange'
     });
 
-    // Загрузка сохраненных данных при монтировании
     useEffect(() => {
         const savedEmail = localStorage.getItem('savedEmail');
         const savedPassword = localStorage.getItem('savedPassword');
@@ -53,7 +52,6 @@ export const SignInForm = () => {
             const response = await apiLogin(data.email, data.password);
             const { token, user } = response.data;
             
-            // Сохраняем email и пароль если выбран "Запомнить меня"
             if (data.rememberMe) {
                 localStorage.setItem('savedEmail', data.email);
                 localStorage.setItem('savedPassword', data.password);
@@ -64,7 +62,6 @@ export const SignInForm = () => {
             
             login(user, token);
             
-            // Перенаправление в зависимости от роли
             const userType = user.user_type?.name;
             if (userType === 'admin') {
                 navigate('/Admin');

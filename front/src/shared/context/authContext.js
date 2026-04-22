@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [userPolicies, setUserPolicies] = useState([]);
 
-    // Загрузка полисов с бэка
     const loadPolicies = async () => {
         try {
             const response = await getMyPolicies();
@@ -22,7 +21,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Загрузка данных пользователя
     const loadUserData = async () => {
         try {
             const response = await getMe();
@@ -41,7 +39,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Функция для обновления данных пользователя (пригодится для ProfilePage)
     const refreshUserData = async () => {
         if (!isAuthenticated) return null;
         try {
@@ -197,7 +194,7 @@ export const AuthProvider = ({ children }) => {
             addPolicy,
             resetPolicies,
             refreshPolicies,
-            refreshUserData  // <-- ДОБАВЛЕНО
+            refreshUserData  
         }}>
             {children}
         </AuthContext.Provider>

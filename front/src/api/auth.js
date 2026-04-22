@@ -1,4 +1,4 @@
-import api from './client'; // Добавьте этот импорт
+import api from './client';
 
 export const register = (data) => {
     console.log('=== [auth/register] НАЧАЛО ===');
@@ -14,13 +14,11 @@ export const register = (data) => {
         middle_name: data.middle_name || '',
         birth_date: data.birth_date,
         
-        // Паспортные данные
         passport_series: data.passport_series,
         passport_number: data.passport_number,
         passport_issued_by: data.passport_issued_by,
         passport_issue_date: data.passport_issue_date,
         
-        // Водительские права
         driver_license_series: data.driver_license_series,
         driver_license_number: data.driver_license_number,
         driver_license_issued_by: data.driver_license_issued_by,
@@ -129,7 +127,6 @@ export const updateProfile = (data) => {
     );
 };
 
-// Запрос на сброс пароля (имитация)
 export const forgotPassword = (email) => {
     console.log('=== [auth/forgotPassword] НАЧАЛО ===');
     console.log('Email:', email);
@@ -148,7 +145,6 @@ export const forgotPassword = (email) => {
     );
 };
 
-// Сброс пароля
 export const resetPassword = (email, token, password, passwordConfirmation) => {
     console.log('=== [auth/resetPassword] НАЧАЛО ===');
     

@@ -73,3 +73,71 @@ export const PROFILE_FIELD_MAP = {
     'Категории прав': 'driverCategories',
     'Пароль': 'password'
 };
+
+// Поля для калькулятора (шаг 1 - автомобиль)
+export const CALCULATOR_VEHICLE_FIELDS = [
+    { name: 'stateNumber', label: 'Государственный номер', type: 'text', placeholder: 'А123ВС777' },
+    { name: 'brand', label: 'Марка', type: 'text', placeholder: 'Toyota' },
+    { name: 'model', label: 'Модель', type: 'text', placeholder: 'Camry' },
+    { name: 'manufactureYear', label: 'Год выпуска', type: 'number', placeholder: '2020' },
+    { name: 'powerHp', label: 'Мощность (л.с.)', type: 'number', placeholder: '150' },
+    { name: 'category', label: 'Категория ТС', type: 'select', options: ['A', 'B', 'C', 'D', 'E'] },
+    { name: 'vin', label: 'VIN', type: 'text', placeholder: 'JTDBE32KX00123456' },
+];
+
+// Поля для КАСКО (дополнительные)
+export const KASKO_EXTRA_FIELDS = [
+    { name: 'purchasePrice', label: 'Стоимость автомобиля (₽)', type: 'number', placeholder: '2000000' },
+];
+
+// Поля для калькулятора (шаг 2 - срок)
+export const CALCULATOR_DATE_FIELDS = [
+    { name: 'startDate', label: 'Дата начала', type: 'date' },
+    { name: 'endDate', label: 'Дата окончания', type: 'date' },
+];
+
+// Поля для добавления нового автомобиля (модальное окно)
+export const NEW_VEHICLE_FIELDS = [
+    { name: 'state_number', label: 'Государственный номер *', type: 'text', required: true },
+    { name: 'brand', label: 'Марка *', type: 'text', required: true },
+    { name: 'model', label: 'Модель *', type: 'text', required: true },
+    { name: 'manufacture_year', label: 'Год выпуска', type: 'number', placeholder: '2020' },
+    { name: 'power_hp', label: 'Мощность (л.с.)', type: 'number', placeholder: '150' },
+    { name: 'category', label: 'Категория ТС', type: 'select', options: ['A', 'B', 'C', 'D', 'E'] },
+    { name: 'vin', label: 'VIN *', type: 'text', required: true },
+    { name: 'purchase_price', label: 'Стоимость автомобиля (₽)', type: 'number', placeholder: '2000000' },
+    { name: 'parking_type', label: 'Способ парковки', type: 'select', options: [
+        { value: 'garage', label: 'Гараж' },
+        { value: 'street', label: 'Улица' },
+        { value: 'parking_lot', label: 'Охраняемая парковка' },
+        { value: 'other', label: 'Другое' }
+    ]},
+    { name: 'has_tracker', label: 'Наличие спутниковой сигнализации', type: 'checkbox' },
+];
+
+// Поля для оплаты
+export const PAYMENT_FIELDS = [
+    { name: 'cardNumber', label: 'Номер карты', type: 'text', placeholder: '1234 5678 9012 3456', maxLength: 19 },
+    { name: 'cardHolder', label: 'Владелец карты', type: 'text', placeholder: 'IVAN IVANOV' },
+    { name: 'expiryDate', label: 'Срок действия', type: 'text', placeholder: 'MM/YY', maxLength: 5 },
+    { name: 'cvv', label: 'CVV', type: 'text', placeholder: '123', maxLength: 3 },
+];
+
+// Поля для страхового случая (шаг 3)
+export const ACCIDENT_FIELDS = [
+    { name: 'accident_date', label: 'Дата происшествия *', type: 'date' },
+    { name: 'damage_amount', label: 'Сумма ущерба (₽)', type: 'number', placeholder: 'Введите сумму ущерба' },
+    { name: 'description', label: 'Описание происшествия', type: 'textarea', placeholder: 'Опишите обстоятельства происшествия (минимум 10 символов)...', rows: 5 },
+    { name: 'is_client_fault', label: 'Я признаю свою вину в ДТП', type: 'checkbox' },
+];
+
+// Категории ТС для селектов
+export const VEHICLE_CATEGORIES = ['A', 'B', 'C', 'D', 'E'];
+
+// Опции парковки
+export const PARKING_OPTIONS = [
+    { value: 'garage', label: 'Гараж' },
+    { value: 'street', label: 'Улица' },
+    { value: 'parking_lot', label: 'Охраняемая парковка' },
+    { value: 'other', label: 'Другое' }
+];

@@ -1,8 +1,7 @@
 import styles from './HistoryPanel.module.css'
-import { useAuth } from '../../../shared/context/authContext'
+import { useAuth } from '../../../../shared/context/authContext'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { getMyPolicies } from '../../../api/policies'
 
 export const HistoryPanel = () => {
     const { userPolicies, refreshPolicies } = useAuth();

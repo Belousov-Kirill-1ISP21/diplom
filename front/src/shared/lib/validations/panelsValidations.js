@@ -1,7 +1,5 @@
-// panelsValidations.js
 import * as yup from 'yup';
 
-// ==================== ВАЛИДАЦИЯ КЛИЕНТА ====================
 export const clientValidationSchema = yup.object().shape({
     email: yup
         .string()
@@ -42,7 +40,6 @@ export const clientValidationSchema = yup.object().shape({
         })
 });
 
-// ==================== ВАЛИДАЦИЯ ТАРИФА ====================
 export const tariffValidationSchema = yup.object().shape({
     policy_type_id: yup
         .string()
@@ -74,7 +71,6 @@ export const tariffValidationSchema = yup.object().shape({
         .oneOf(['basic', 'coefficient'], 'Выберите корректный метод расчета')
 });
 
-// ==================== ВАЛИДАЦИЯ СКИДКИ ПОЛИСА ====================
 export const policyDiscountSchema = yup.object().shape({
     discount_amount: yup
         .number()
@@ -85,7 +81,6 @@ export const policyDiscountSchema = yup.object().shape({
         .typeError('Введите число')
 });
 
-// ==================== ВАЛИДАЦИЯ ПРОДЛЕНИЯ ПОЛИСА ====================
 export const policyRenewSchema = yup.object().shape({
     days: yup
         .number()
@@ -96,7 +91,6 @@ export const policyRenewSchema = yup.object().shape({
         .typeError('Введите число')
 });
 
-// ==================== ВАЛИДАЦИЯ СТРАХОВОГО СЛУЧАЯ ====================
 export const accidentStatusSchema = yup.object().shape({
     status: yup
         .string()
@@ -110,7 +104,6 @@ export const accidentFaultSchema = yup.object().shape({
         .required('Укажите вину клиента')
 });
 
-// ==================== ВАЛИДАЦИЯ СМЕНЫ ТИПА ПОЛЬЗОВАТЕЛЯ ====================
 export const userTypeSchema = yup.object().shape({
     user_type: yup
         .string()
@@ -118,14 +111,12 @@ export const userTypeSchema = yup.object().shape({
         .oneOf(['client', 'agent', 'admin'], 'Выберите корректный тип пользователя')
 });
 
-// ==================== ОБЩИЕ ФУНКЦИИ ДЛЯ ВАЛИДАЦИИ ====================
-
-// Валидация телефона на лету
+// Валидация телефона
 export const validatePhone = (phone) => {
     return /^\+7\d{10}$/.test(phone);
 };
 
-// Валидация ФИО на лету
+// Валидация ФИО
 export const validateRussianName = (name) => {
     return /^[А-ЯЁ][а-яё]*$/.test(name);
 };
