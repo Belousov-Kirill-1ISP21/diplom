@@ -11,61 +11,34 @@ use Illuminate\Support\Str;
 
 class PolicyController extends Controller
 {
-    /**
-     * Кастомные сообщения для валидации
-     */
     private $validationMessages = [
-        // Общие сообщения
-        'required' => 'Поле :attribute обязательно для заполнения',
-        'exists' => 'Выбранный :attribute не существует',
-        'numeric' => 'Поле :attribute должно быть числом',
-        'min' => 'Поле :attribute должно быть минимум :min',
-        'max' => 'Поле :attribute не может превышать :max',
-        'date' => 'Поле :attribute должно быть корректной датой',
-        'integer' => 'Поле :attribute должно быть целым числом',
-        'string' => 'Поле :attribute должно быть строкой',
-        'boolean' => 'Поле :attribute должно быть true или false',
-        
-        // Специфичные сообщения для полисов
-        'policy_type_id.required' => 'Тип полиса обязателен для заполнения',
-        'policy_type_id.exists' => 'Выбранный тип полиса не существует',
-        
-        'vehicle_id.required' => 'Транспортное средство обязательно для выбора',
-        'vehicle_id.exists' => 'Выбранное транспортное средство не существует',
-        
-        'client_id.required' => 'Клиент обязателен для заполнения',
-        'client_id.exists' => 'Выбранный клиент не существует',
-        
-        'tariff_id.required' => 'Тариф обязателен для заполнения',
-        'tariff_id.exists' => 'Выбранный тариф не существует',
-        
+        'policy_type_id.required' => 'Тип полиса обязателен',
+        'policy_type_id.exists' => 'Тип полиса не найден',
+        'vehicle_id.required' => 'Транспортное средство обязательно',
+        'vehicle_id.exists' => 'Транспортное средство не найдено',
+        'client_id.required' => 'Клиент обязателен',
+        'client_id.exists' => 'Клиент не найден',
+        'tariff_id.required' => 'Тариф обязателен',
+        'tariff_id.exists' => 'Тариф не найден',
         'base_price.required' => 'Базовая цена обязательна',
         'base_price.min' => 'Базовая цена не может быть отрицательной',
-        
         'final_price.required' => 'Итоговая цена обязательна',
         'final_price.min' => 'Итоговая цена не может быть отрицательной',
-        
-        'start_date.required' => 'Дата начала действия полиса обязательна',
-        'start_date.after' => 'Дата начала действия полиса должна быть позже сегодняшнего дня',
-        
-        'end_date.required' => 'Дата окончания действия полиса обязательна',
-        'end_date.after' => 'Дата окончания действия полиса должна быть позже даты начала',
-        
-        'discount_amount.numeric' => 'Сумма скидки должна быть числом',
-        'discount_amount.min' => 'Сумма скидки не может быть отрицательной',
+        'start_date.required' => 'Дата начала обязательна',
+        'start_date.after_or_equal' => 'Дата начала должна быть не раньше сегодняшнего дня',
+        'end_date.required' => 'Дата окончания обязательна',
+        'end_date.after' => 'Дата окончания должна быть позже даты начала',
+        'discount_amount.numeric' => 'Скидка должна быть числом',
+        'discount_amount.min' => 'Скидка не может быть отрицательной',
         'discount_amount.max' => 'Скидка не может превышать 100%',
-        
-        'franchise_amount.numeric' => 'Сумма франшизы должна быть числом',
-        'franchise_amount.min' => 'Сумма франшизы не может быть отрицательной',
-        
+        'franchise_amount.numeric' => 'Франшиза должна быть числом',
+        'franchise_amount.min' => 'Франшиза не может быть отрицательной',
         'coverage_amount.numeric' => 'Сумма покрытия должна быть числом',
         'coverage_amount.min' => 'Сумма покрытия не может быть отрицательной',
-        
-        // Продление полиса
-        'days.required' => 'Количество дней для продления обязательно',
+        'days.required' => 'Количество дней обязательно',
         'days.integer' => 'Количество дней должно быть целым числом',
-        'days.min' => 'Количество дней для продления должно быть минимум :min',
-        'days.max' => 'Количество дней для продления не может превышать :max',
+        'days.min' => 'Минимальное количество дней - :min',
+        'days.max' => 'Максимальное количество дней - :max',
     ];
 
     public function index(Request $request)
@@ -101,21 +74,6 @@ class PolicyController extends Controller
         return response()->json($policies);
     }
 
-    public function show($id)
-    {
-        $policy = Policy::with(['policyType', 'client.user', 'vehicle', 'tariff', 'accidents'])->findOrFail($id);
-        
-        $user = request()->user();
-        if ($user->userType->name === 'client') {
-            $profile = $user->clientProfile;
-            if (!$profile || $policy->client_id !== $profile->id) {
-                return response()->json(['message' => 'Доступ запрещён'], 403);
-            }
-        }
-        
-        return response()->json($policy);
-    }
-
     public function showMyPolicy($id, Request $request)
     {
         $user = $request->user();
@@ -134,20 +92,34 @@ class PolicyController extends Controller
         try {
             $validated = $request->validate([
                 'policy_type_id' => 'required|exists:policy_types,id',
-                'vehicle_id' => 'required|exists:vehicles,id',
+                'vehicle_id' => 'required',
                 'tariff_id' => 'required|exists:tariffs,id',
-                'start_date' => 'required|date|after:today',
+                'start_date' => 'required|date|after_or_equal:today',
                 'end_date' => 'required|date|after:start_date',
             ], $this->validationMessages);
             
             $tariff = Tariff::findOrFail($validated['tariff_id']);
-            $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+            
+            $powerHp = $request->get('power_hp', 100);
+            $manufactureYear = $request->get('manufacture_year', date('Y') - 5);
+            
+            $coefficients = [
+                'power_coefficient' => $this->getPowerCoefficient($powerHp),
+                'vehicle_age_coefficient' => $this->getVehicleAgeCoefficient($manufactureYear),
+            ];
+            
+            if ($request->user() && $request->user()->clientProfile) {
+                $client = $request->user()->clientProfile;
+                $coefficients['experience_coefficient'] = $this->getExperienceCoefficient($client->driver_experience_years);
+                $coefficients['bonus_malus_coefficient'] = $this->getBonusMalusCoefficient($client->bonus_malus_class);
+            }
+            
+            $finalPrice = $tariff->calculatePrice($coefficients);
             
             $startDate = new \DateTime($validated['start_date']);
             $endDate = new \DateTime($validated['end_date']);
             $daysDiff = $startDate->diff($endDate)->days;
             
-            // Валидация длительности страхования
             if ($daysDiff < 30) {
                 return response()->json(['message' => 'Минимальный срок страхования — 30 дней'], 422);
             }
@@ -155,19 +127,6 @@ class PolicyController extends Controller
             if ($daysDiff > 365) {
                 return response()->json(['message' => 'Максимальный срок страхования — 365 дней'], 422);
             }
-            
-            $coefficients = [
-                'power_coefficient' => $this->getPowerCoefficient($vehicle->power_hp),
-                'vehicle_age_coefficient' => $this->getVehicleAgeCoefficient($vehicle->manufacture_year),
-            ];
-            
-            if ($request->user()->clientProfile) {
-                $client = $request->user()->clientProfile;
-                $coefficients['experience_coefficient'] = $this->getExperienceCoefficient($client->driver_experience_years);
-                $coefficients['bonus_malus_coefficient'] = $this->getBonusMalusCoefficient($client->bonus_malus_class);
-            }
-            
-            $finalPrice = $tariff->calculatePrice($coefficients);
             
             if ($daysDiff < 365) {
                 $finalPrice = $finalPrice * ($daysDiff / 365);
@@ -181,7 +140,7 @@ class PolicyController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'message' => 'Ошибка валидации данных',
+                'message' => 'Ошибка валидации',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -197,14 +156,13 @@ class PolicyController extends Controller
                 'tariff_id' => 'required|exists:tariffs,id',
                 'base_price' => 'required|numeric|min:0',
                 'final_price' => 'required|numeric|min:0',
-                'start_date' => 'required|date|after:today',
+                'start_date' => 'required|date|after_or_equal:today',
                 'end_date' => 'required|date|after:start_date',
                 'discount_amount' => 'nullable|numeric|min:0|max:100',
                 'franchise_amount' => 'nullable|numeric|min:0',
                 'coverage_amount' => 'nullable|numeric|min:0',
             ], $this->validationMessages);
             
-            // Валидация длительности страхования
             $startDate = new \DateTime($validated['start_date']);
             $endDate = new \DateTime($validated['end_date']);
             $daysDiff = $startDate->diff($endDate)->days;
@@ -218,9 +176,8 @@ class PolicyController extends Controller
             }
             
             $policyNumber = $this->generatePolicyNumber();
-            
-            $finalPrice = $validated['final_price'];
             $discountAmount = $validated['discount_amount'] ?? 0;
+            $finalPrice = $validated['final_price'];
             
             if ($discountAmount > 0) {
                 $finalPrice = $validated['final_price'] * (1 - $discountAmount / 100);
@@ -243,13 +200,13 @@ class PolicyController extends Controller
             ]);
             
             return response()->json([
-                'message' => 'Полис успешно создан',
+                'message' => 'Полис создан',
                 'policy' => $policy->load(['policyType', 'client.user', 'vehicle'])
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'message' => 'Ошибка валидации данных',
+                'message' => 'Ошибка валидации',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -264,49 +221,17 @@ class PolicyController extends Controller
                 return response()->json(['message' => 'Нельзя редактировать отменённый полис'], 422);
             }
             
-            $validated = $request->validate([
-                'start_date' => 'sometimes|date|after:today',
-                'end_date' => 'sometimes|date|after:start_date',
-                'discount_amount' => 'sometimes|integer|min:0|max:100',
-                'franchise_amount' => 'nullable|numeric|min:0',
-                'coverage_amount' => 'nullable|numeric|min:0',
-            ], $this->validationMessages);
-            
-            // Если меняются даты, проверяем длительность
-            if ($request->has('start_date') && $request->has('end_date')) {
-                $startDate = new \DateTime($validated['start_date']);
-                $endDate = new \DateTime($validated['end_date']);
-                $daysDiff = $startDate->diff($endDate)->days;
-                
-                if ($daysDiff < 30) {
-                    return response()->json(['message' => 'Минимальный срок страхования — 30 дней'], 422);
-                }
-                
-                if ($daysDiff > 365) {
-                    return response()->json(['message' => 'Максимальный срок страхования — 365 дней'], 422);
-                }
-            } elseif ($request->has('end_date')) {
-                $startDate = new \DateTime($policy->start_date);
-                $endDate = new \DateTime($validated['end_date']);
-                $daysDiff = $startDate->diff($endDate)->days;
-                
-                if ($daysDiff < 30) {
-                    return response()->json(['message' => 'Минимальный срок страхования — 30 дней'], 422);
-                }
-                
-                if ($daysDiff > 365) {
-                    return response()->json(['message' => 'Максимальный срок страхования — 365 дней'], 422);
-                }
-            }
-            
             if ($request->has('discount_amount')) {
-                $discount = (int)$validated['discount_amount'];
+                $discount = (int)$request->discount_amount;
+                if ($discount < 0 || $discount > 100) {
+                    return response()->json(['message' => 'Скидка должна быть от 0 до 100'], 422);
+                }
                 $policy->discount_amount = $discount;
                 $policy->final_price = $policy->base_price * (1 - $discount / 100);
                 $policy->save();
                 
                 return response()->json([
-                    'message' => 'Скидка успешно обновлена',
+                    'message' => 'Скидка обновлена',
                     'policy' => $policy->fresh()
                 ]);
             }
@@ -315,7 +240,7 @@ class PolicyController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'message' => 'Ошибка валидации данных',
+                'message' => 'Ошибка валидации',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -326,16 +251,13 @@ class PolicyController extends Controller
         $policy = Policy::findOrFail($id);
         
         if ($policy->status !== 'draft') {
-            return response()->json(['message' => 'Только черновики могут быть активированы. Текущий статус: ' . $policy->status], 422);
+            return response()->json(['message' => 'Только черновики можно активировать'], 422);
         }
         
         $policy->status = 'active';
         $policy->save();
         
-        return response()->json([
-            'message' => 'Полис успешно активирован',
-            'policy' => $policy
-        ]);
+        return response()->json(['message' => 'Полис активирован', 'policy' => $policy]);
     }
 
     public function renew($id, Request $request)
@@ -344,7 +266,7 @@ class PolicyController extends Controller
             $policy = Policy::findOrFail($id);
             
             if ($policy->status !== 'active' && $policy->status !== 'expired') {
-                return response()->json(['message' => 'Только активные или просроченные полисы можно продлить. Текущий статус: ' . $policy->status], 422);
+                return response()->json(['message' => 'Только активные или просроченные полисы можно продлить'], 422);
             }
             
             $validated = $request->validate([
@@ -365,14 +287,14 @@ class PolicyController extends Controller
             $policy->save();
             
             return response()->json([
-                'message' => 'Полис успешно продлён на ' . $validated['days'] . ' дней',
+                'message' => 'Полис продлён на ' . $validated['days'] . ' дней',
                 'policy' => $policy,
                 'additional_price' => round($additionalPrice, 2)
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'message' => 'Ошибка валидации данных',
+                'message' => 'Ошибка валидации',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -383,16 +305,13 @@ class PolicyController extends Controller
         $policy = Policy::findOrFail($id);
         
         if ($policy->status !== 'draft') {
-            return response()->json(['message' => 'Только черновики можно оплатить. Текущий статус: ' . $policy->status], 422);
+            return response()->json(['message' => 'Только черновики можно оплатить'], 422);
         }
         
         $policy->status = 'active';
         $policy->save();
         
-        return response()->json([
-            'message' => 'Полис успешно оплачен и активирован',
-            'policy' => $policy
-        ]);
+        return response()->json(['message' => 'Полис оплачен и активирован', 'policy' => $policy]);
     }
 
     public function cancel($id)
@@ -410,27 +329,7 @@ class PolicyController extends Controller
         $policy->status = 'cancelled';
         $policy->save();
         
-        return response()->json([
-            'message' => 'Полис успешно отменён',
-            'policy' => $policy
-        ]);
-    }
-
-    public function destroy($id)
-    {
-        $policy = Policy::findOrFail($id);
-        
-        if ($policy->status === 'active') {
-            return response()->json(['message' => 'Нельзя удалить активный полис. Сначала отмените его'], 422);
-        }
-        
-        if ($policy->status === 'expired') {
-            return response()->json(['message' => 'Нельзя удалить просроченный полис'], 422);
-        }
-        
-        $policy->delete();
-        
-        return response()->json(['message' => 'Полис успешно удалён']);
+        return response()->json(['message' => 'Полис отменён', 'policy' => $policy]);
     }
 
     private function generatePolicyNumber()

@@ -10,75 +10,28 @@ use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
-    /**
-     * Кастомные сообщения для валидации
-     */
     private $validationMessages = [
-        // Email
         'email.required' => 'Email обязателен для заполнения',
-        'email.email' => 'Введите корректный email адрес (например: user@example.com)',
+        'email.email' => 'Введите корректный email адрес',
         'email.unique' => 'Пользователь с таким email уже зарегистрирован',
-        
-        // Телефон
-        'phone.required' => 'Номер телефона обязателен для заполнения',
-        'phone.string' => 'Номер телефона должен быть строкой',
-        'phone.regex' => 'Телефон должен быть в формате +7XXXXXXXXXX (10 цифр после +7)',
+        'phone.required' => 'Номер телефона обязателен',
+        'phone.regex' => 'Телефон должен быть в формате +7XXXXXXXXXX',
         'phone.unique' => 'Пользователь с таким номером телефона уже зарегистрирован',
-        
-        // Пароль
-        'password.required' => 'Пароль обязателен для заполнения',
+        'password.required' => 'Пароль обязателен',
         'password.min' => 'Пароль должен содержать минимум :min символов',
-        
-        // ФИО
-        'last_name.required' => 'Фамилия обязательна для заполнения',
-        'last_name.string' => 'Фамилия должна быть строкой',
-        'last_name.max' => 'Фамилия не может превышать :max символов',
-        'last_name.regex' => 'Фамилия должна начинаться с заглавной буквы и содержать только русские буквы. Допускается дефис (например: Иванов, Смирнов-Петров)',
-        
-        'first_name.required' => 'Имя обязательно для заполнения',
-        'first_name.string' => 'Имя должно быть строкой',
-        'first_name.max' => 'Имя не может превышать :max символов',
-        'first_name.regex' => 'Имя должно начинаться с заглавной буквы и содержать только русские буквы (например: Иван)',
-        
-        'middle_name.string' => 'Отчество должно быть строкой',
-        'middle_name.max' => 'Отчество не может превышать :max символов',
-        'middle_name.regex' => 'Отчество должно начинаться с заглавной буквы и содержать только русские буквы (например: Иванович)',
-        
-        // Дата рождения
-        'birth_date.date' => 'Дата рождения должна быть корректной датой',
+        'last_name.required' => 'Фамилия обязательна',
+        'last_name.regex' => 'Фамилия должна содержать только русские буквы',
+        'first_name.required' => 'Имя обязательно',
+        'first_name.regex' => 'Имя должно содержать только русские буквы',
+        'middle_name.regex' => 'Отчество должно содержать только русские буквы',
         'birth_date.before_or_equal' => 'Дата рождения не может быть в будущем',
-        'birth_date.after' => 'Дата рождения должна быть позже 01.01.1900',
-        
-        // Паспортные данные
-        'passport_series.size' => 'Серия паспорта должна содержать ровно :size цифры',
-        'passport_series.regex' => 'Серия паспорта должна содержать только цифры (4 цифры)',
-        
-        'passport_number.size' => 'Номер паспорта должен содержать ровно :size цифр',
-        'passport_number.regex' => 'Номер паспорта должен содержать только цифры (6 цифр)',
-        
-        'passport_issued_by.string' => 'Название органа выдачи должно быть строкой',
-        'passport_issued_by.min' => 'Название органа выдачи должно содержать минимум :min символов',
-        'passport_issued_by.max' => 'Название органа выдачи не может превышать :max символов',
-        
-        'passport_issue_date.date' => 'Дата выдачи паспорта должна быть корректной датой',
-        'passport_issue_date.before_or_equal' => 'Дата выдачи паспорта не может быть в будущем',
+        'passport_series.size' => 'Серия паспорта должна содержать 4 цифры',
+        'passport_number.size' => 'Номер паспорта должен содержать 6 цифр',
+        'passport_issued_by.min' => 'Название органа выдачи слишком короткое',
         'passport_issue_date.after' => 'Дата выдачи паспорта должна быть позже 31.12.1990',
-        
-        // Водительское удостоверение
-        'driver_license_series.size' => 'Серия ВУ должна содержать ровно :size цифры',
-        'driver_license_series.regex' => 'Серия ВУ должна содержать только цифры (4 цифры)',
-        
-        'driver_license_number.size' => 'Номер ВУ должен содержать ровно :size цифр',
-        'driver_license_number.regex' => 'Номер ВУ должен содержать только цифры (6 цифр)',
-        
-        'driver_license_issued_by.string' => 'Название органа выдачи ВУ должно быть строкой',
-        'driver_license_issued_by.min' => 'Название органа выдачи ВУ должно содержать минимум :min символов',
-        'driver_license_issued_by.max' => 'Название органа выдачи ВУ не может превышать :max символов',
-        
-        'driver_license_issue_date.date' => 'Дата выдачи ВУ должна быть корректной датой',
+        'driver_license_series.size' => 'Серия ВУ должна содержать 4 цифры',
+        'driver_license_number.size' => 'Номер ВУ должен содержать 6 цифр',
         'driver_license_issue_date.before_or_equal' => 'Дата выдачи ВУ не может быть в будущем',
-        
-        'driver_license_expiry_date.date' => 'Дата окончания ВУ должна быть корректной датой',
         'driver_license_expiry_date.after' => 'Дата окончания ВУ должна быть позже даты выдачи',
     ];
 
@@ -107,15 +60,6 @@ class ClientController extends Controller
         return response()->json($clients);
     }
 
-    public function show($id)
-    {
-        $client = User::whereHas('userType', function($q) {
-            $q->where('name', 'client');
-        })->with(['clientProfile', 'clientProfile.driverCategories', 'vehicles'])->findOrFail($id);
-        
-        return response()->json($client);
-    }
-
     public function store(Request $request)
     {
         try {
@@ -141,7 +85,7 @@ class ClientController extends Controller
             $clientType = UserType::where('name', 'client')->first();
             
             if (!$clientType) {
-                return response()->json(['message' => 'Тип пользователя "client" не найден'], 500);
+                return response()->json(['message' => 'Тип пользователя не найден'], 500);
             }
 
             $user = User::create([
@@ -151,7 +95,7 @@ class ClientController extends Controller
                 'user_type_id' => $clientType->id,
             ]);
 
-            $clientProfile = ClientProfile::create([
+            ClientProfile::create([
                 'user_id' => $user->id,
                 'last_name' => $validated['last_name'],
                 'first_name' => $validated['first_name'],
@@ -240,32 +184,14 @@ class ClientController extends Controller
         
         if ($profile) {
             if ($profile->policies()->where('status', 'active')->exists()) {
-                return response()->json(['message' => 'Невозможно удалить клиента с активными полисами. Сначала отмените или завершите полисы'], 422);
+                return response()->json(['message' => 'Нельзя удалить клиента с активными полисами'], 422);
             }
-            
-            if ($profile->accidents()->exists()) {
-                return response()->json(['message' => 'Невозможно удалить клиента с историей ДТП. Сначала удалите записи о ДТП'], 422);
-            }
-            
-            // Удаляем связанные данные
-            $vehiclesCount = $profile->vehicles()->count();
-            $policiesCount = $profile->policies()->count();
-            $accidentsCount = $profile->accidents()->count();
             
             $profile->driverCategories()->detach();
             $profile->vehicles()->delete();
             $profile->policies()->delete();
             $profile->accidents()->delete();
             $profile->delete();
-            
-            return response()->json([
-                'message' => 'Клиент успешно удалён',
-                'deleted_data' => [
-                    'vehicles' => $vehiclesCount,
-                    'policies' => $policiesCount,
-                    'accidents' => $accidentsCount
-                ]
-            ]);
         }
         
         $client->delete();

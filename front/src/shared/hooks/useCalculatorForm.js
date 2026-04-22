@@ -98,6 +98,12 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
 
     const handleSelectVehicle = (vehicle) => {
         setSelectedVehicle(vehicle);
+        
+        let categoryValue = vehicle.category;
+        if (typeof categoryValue === 'object' && categoryValue !== null) {
+            categoryValue = categoryValue.value || categoryValue.code || 'B';
+        }
+        
         updateCurrentData({
             ...getCurrentData(),
             stateNumber: vehicle.state_number,
@@ -105,7 +111,7 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
             model: vehicle.model,
             manufactureYear: vehicle.manufacture_year,
             powerHp: vehicle.power_hp,
-            category: vehicle.category,
+            category: categoryValue, 
             vin: vehicle.vin,
             purchasePrice: vehicle.purchase_price,
             hasTracker: vehicle.has_tracker,
@@ -117,20 +123,56 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
 
     const handleAddNewVehicle = async (e) => {
         e.preventDefault();
-        try {
-            const response = await api.post('/client/vehicles', {
-                state_number: newVehicleData.state_number,
-                brand: newVehicleData.brand,
-                model: newVehicleData.model,
-                manufacture_year: parseInt(newVehicleData.manufacture_year),
-                power_hp: parseInt(newVehicleData.power_hp),
-                category: newVehicleData.category,
-                vin: newVehicleData.vin,
-                purchase_price: newVehicleData.purchase_price ? parseFloat(newVehicleData.purchase_price) : null,
-                has_tracker: newVehicleData.has_tracker,
-                parking_type: newVehicleData.parking_type
+        
+        const vehicleToAdd = {
+            state_number: newVehicleData.state_number,
+            brand: newVehicleData.brand,
+            model: newVehicleData.model,
+            manufacture_year: parseInt(newVehicleData.manufacture_year),
+            power_hp: parseInt(newVehicleData.power_hp),
+            category: newVehicleData.category,
+            vin: newVehicleData.vin,
+            purchase_price: newVehicleData.purchase_price ? parseFloat(newVehicleData.purchase_price) : null,
+            has_tracker: newVehicleData.has_tracker,
+            parking_type: newVehicleData.parking_type
+        };
+
+        if (!isAuthenticated) {
+            const newVehicle = { id: Date.now(), ...vehicleToAdd };
+            setMyVehicles(prev => [...prev, newVehicle]);
+            setSelectedVehicle(newVehicle);
+            updateCurrentData({
+                ...getCurrentData(),
+                stateNumber: newVehicle.state_number,
+                brand: newVehicle.brand,
+                model: newVehicle.model,
+                manufactureYear: newVehicle.manufacture_year,
+                powerHp: newVehicle.power_hp,
+                category: newVehicle.category,
+                vin: newVehicle.vin,
+                purchasePrice: newVehicle.purchase_price,
+                hasTracker: newVehicle.has_tracker,
+                parkingType: newVehicle.parking_type,
+                vehicleId: newVehicle.id
             });
-            
+            setShowVehicleModal(false);
+            setNewVehicleData({
+                state_number: '',
+                brand: '',
+                model: '',
+                manufacture_year: '',
+                power_hp: '',
+                category: 'B',
+                vin: '',
+                purchase_price: '',
+                has_tracker: false,
+                parking_type: 'garage'
+            });
+            return;
+        }
+
+        try {
+            const response = await api.post('/client/vehicles', vehicleToAdd);
             const newVehicle = response.data.vehicle;
             setMyVehicles(prev => [...prev, newVehicle]);
             setSelectedVehicle(newVehicle);
@@ -179,9 +221,25 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
 
     const validateStep2 = () => {
         const data = getCurrentData();
-        const validationErrors = validateDates(data.startDate, data.endDate);
-        setErrors(validationErrors);
-        return Object.keys(validationErrors).length === 0;
+        const errorsList = {};
+        
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        if (!data.startDate) {
+            errorsList.startDate = 'Укажите дату начала';
+        } else if (data.startDate < todayStr) {
+            errorsList.startDate = 'Дата начала не может быть раньше сегодняшнего дня';
+        }
+        
+        if (!data.endDate) {
+            errorsList.endDate = 'Укажите дату окончания';
+        } else if (data.endDate <= data.startDate) {
+            errorsList.endDate = 'Дата окончания должна быть позже даты начала';
+        }
+        
+        setErrors(errorsList);
+        return Object.keys(errorsList).length === 0;
     };
 
     const calculatePrice = async () => {
@@ -192,43 +250,80 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
             const currentData = getCurrentData();
             let vehicleId = currentData.vehicleId;
             
-            if (!vehicleId && isAuthenticated && currentData.stateNumber && currentData.vin) {
-                const vehicleResponse = await api.post('/client/vehicles', {
-                    state_number: currentData.stateNumber,
-                    brand: currentData.brand,
-                    model: currentData.model,
-                    manufacture_year: parseInt(currentData.manufactureYear),
-                    power_hp: parseInt(currentData.powerHp),
-                    category: currentData.category,
-                    vin: currentData.vin,
-                    purchase_price: currentData.purchasePrice ? parseFloat(currentData.purchasePrice) : null,
-                    has_tracker: currentData.hasTracker || false,
-                    parking_type: currentData.parkingType || 'garage'
-                });
-                vehicleId = vehicleResponse.data.vehicle.id;
+            if (!isAuthenticated && !vehicleId) {
+                vehicleId = Date.now();
                 updateCurrentData({ ...currentData, vehicleId });
-                await loadMyVehicles();
+            }
+    
+            if (isAuthenticated && !vehicleId && currentData.stateNumber && currentData.vin) {
+                try {
+                    let categoryValue = currentData.category;
+                    if (typeof categoryValue === 'object' && categoryValue !== null) {
+                        categoryValue = categoryValue.value || categoryValue.code || 'B';
+                    }
+                    
+                    const vehicleResponse = await api.post('/client/vehicles', {
+                        state_number: currentData.stateNumber,
+                        brand: currentData.brand,
+                        model: currentData.model,
+                        manufacture_year: parseInt(currentData.manufactureYear),
+                        power_hp: parseInt(currentData.powerHp),
+                        category: categoryValue, 
+                        vin: currentData.vin,
+                        purchase_price: currentData.purchasePrice ? parseFloat(currentData.purchasePrice) : null,
+                        has_tracker: currentData.hasTracker || false,
+                        parking_type: currentData.parkingType || 'garage'
+                    });
+                    vehicleId = vehicleResponse.data.vehicle.id;
+                    updateCurrentData({ ...currentData, vehicleId });
+                    await loadMyVehicles();
+                } catch (err) {
+                    console.error('Error creating vehicle:', err);
+                    throw new Error('Не удалось создать автомобиль');
+                }
             }
             
             if (!vehicleId) throw new Error('Автомобиль не найден');
             
             const policyTypeId = policyType === 'osago' ? 1 : 2;
             const tariffsResponse = await api.get('/tariffs/public', { params: { policy_type_id: policyTypeId } });
-            const tariff = tariffsResponse.data.find(t => t.vehicle_category?.code === currentData.category);
             
-            if (!tariff) throw new Error('Тариф не найден');
+            let categoryForTariff = currentData.category;
+            if (typeof categoryForTariff === 'object' && categoryForTariff !== null) {
+                categoryForTariff = categoryForTariff.value || categoryForTariff.code || 'B';
+            }
             
-            const response = await api.post('/client/policies/calculate', {
+            console.log('Looking for tariff with category:', categoryForTariff);
+            console.log('Available tariffs:', tariffsResponse.data);
+            
+            const tariff = tariffsResponse.data.find(t => {
+                const tariffCategory = t.vehicle_category?.code || t.vehicle_category;
+                return tariffCategory === categoryForTariff;
+            });
+            
+            if (!tariff) {
+                throw new Error('Тариф не найден для категории ' + categoryForTariff);
+            }
+            
+            const response = await api.post('/policies/calculate', {
                 policy_type_id: policyTypeId,
                 vehicle_id: vehicleId,
                 tariff_id: tariff.id,
                 start_date: currentData.startDate,
-                end_date: currentData.endDate
+                end_date: currentData.endDate,
+                power_hp: currentData.powerHp,
+                manufacture_year: currentData.manufactureYear
             });
             
             updateCurrentData({ ...currentData, tariffId: tariff.id, calculatedPrice: response.data.calculated_price });
-            nextStep();
+            setStep(3);
+            if (policyType === 'osago') {
+                setOsagoStep(3);
+            } else {
+                setKaskoStep(3);
+            }
         } catch (error) {
+            console.error('Calculate price error:', error);
             setError(error.response?.data?.message || error.message || 'Ошибка при расчете');
         } finally {
             setIsCalculating(false);
@@ -237,18 +332,44 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
 
     const handleSubmitOrder = async () => {
         if (!isAuthenticated) {
-            localStorage.setItem('pendingCalculatorData', JSON.stringify({
-                osago: calculatorData.osago,
-                kasko: calculatorData.kasko,
-                policyType,
-                step,
-                osagoStep,
-                kaskoStep
-            }));
+            const currentData = getCurrentData();
+            
+            const vehicleData = {
+                state_number: currentData.stateNumber,
+                brand: currentData.brand,
+                model: currentData.model,
+                manufacture_year: currentData.manufactureYear,
+                power_hp: currentData.powerHp,
+                category: currentData.category,
+                vin: currentData.vin,
+                purchase_price: currentData.purchasePrice,
+                has_tracker: currentData.hasTracker || false,
+                parking_type: currentData.parkingType || 'garage'
+            };
+            
+            const policyData = {
+                policy_type_id: policyType === 'osago' ? 1 : 2,
+                tariffId: currentData.tariffId,
+                calculatedPrice: currentData.calculatedPrice,
+                startDate: currentData.startDate,
+                endDate: currentData.endDate
+            };
+            
+            console.log('=== handleSubmitOrder for non-authenticated ===');
+            console.log('currentData:', currentData);
+            console.log('vehicleData to save:', vehicleData);
+            console.log('policyData to save:', policyData);
+            
+            localStorage.setItem('pendingVehicle', JSON.stringify(vehicleData));
+            localStorage.setItem('pendingPolicy', JSON.stringify(policyData));
+            
+            console.log('After save - pendingVehicle:', localStorage.getItem('pendingVehicle'));
+            console.log('After save - pendingPolicy:', localStorage.getItem('pendingPolicy'));
+            
             window.location.href = '/SignUp';
             return;
         }
-    
+        
         setIsCalculating(true);
         try {
             const currentData = getCurrentData();

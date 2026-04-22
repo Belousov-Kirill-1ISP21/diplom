@@ -2,27 +2,35 @@
 export const validateVehicleData = (data, policyType) => {
     const errors = {};
     
+    // Госномер
     if (!data.stateNumber?.trim()) {
         errors.stateNumber = 'Госномер обязателен';
     } else {
         const cleaned = data.stateNumber.replace(/[\s-]/g, '').toUpperCase();
         if (!/^[АВЕКМНОРСТУХ]{1}\d{3}[АВЕКМНОРСТУХ]{2}\d{3}$/i.test(cleaned)) {
-            errors.stateNumber = 'Формат госномера: А123ВС777 (Кириллица)';
+            errors.stateNumber = 'Формат госномера: А123АА124 (русские буквы А,В,Е,К,М,Н,О,Р,С,Т,У,Х)';
         }
     }
     
+    // Марка
     if (!data.brand?.trim()) {
         errors.brand = 'Марка обязательна';
-    } else if (data.brand.length < 2) {
+    } else if (data.brand.trim().length < 2) {
         errors.brand = 'Марка должна содержать минимум 2 символа';
+    } else if (data.brand.trim().length > 30) {
+        errors.brand = 'Марка не должна превышать 30 символов';
     }
     
+    // Модель
     if (!data.model?.trim()) {
         errors.model = 'Модель обязательна';
-    } else if (data.model.length < 1) {
+    } else if (data.model.trim().length < 1) {
         errors.model = 'Модель должна содержать минимум 1 символ';
+    } else if (data.model.trim().length > 30) {
+        errors.model = 'Модель не должна превышать 30 символов';
     }
     
+    // Год выпуска
     if (!data.manufactureYear) {
         errors.manufactureYear = 'Год выпуска обязателен';
     } else {
@@ -33,6 +41,7 @@ export const validateVehicleData = (data, policyType) => {
         }
     }
     
+    // Мощность
     if (!data.powerHp) {
         errors.powerHp = 'Мощность обязательна';
     } else {
@@ -42,17 +51,29 @@ export const validateVehicleData = (data, policyType) => {
         }
     }
     
+    // VIN
     if (!data.vin?.trim()) {
         errors.vin = 'VIN обязателен';
-    } else if (!/^[A-HJ-NPR-Z0-9]{17}$/i.test(data.vin)) {
-        errors.vin = 'VIN должен содержать 17 символов (латиница, цифры)';
+    } else {
+        const vinClean = data.vin.trim().toUpperCase();
+        if (vinClean.length !== 17) {
+            errors.vin = 'VIN должен содержать ровно 17 символов';
+        } else if (!/^[A-HJ-NPR-Z0-9]{17}$/i.test(vinClean)) {
+            errors.vin = 'VIN может содержать только латинские буквы (кроме I,O,Q) и цифры';
+        }
     }
     
+    // Категория
+    if (!data.category) {
+        errors.category = 'Выберите категорию ТС';
+    }
+    
+    // Стоимость для КАСКО
     if (policyType === 'kasko') {
         if (!data.purchasePrice) {
             errors.purchasePrice = 'Стоимость автомобиля обязательна';
         } else {
-            const price = parseInt(data.purchasePrice);
+            const price = parseFloat(data.purchasePrice);
             if (isNaN(price) || price < 10000) {
                 errors.purchasePrice = 'Стоимость должна быть не менее 10 000 ₽';
             }

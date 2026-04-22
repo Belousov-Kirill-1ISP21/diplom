@@ -62,14 +62,6 @@ export const SignInForm = () => {
             
             login(user, token);
             
-            const userType = user.user_type?.name;
-            if (userType === 'admin') {
-                navigate('/Admin');
-            } else if (userType === 'agent') {
-                navigate('/Agent');
-            } else {
-                navigate('/Profile');
-            }
         } catch (error) {
             const message = error.response?.data?.message || 'Неверный email или пароль';
             setError(message);

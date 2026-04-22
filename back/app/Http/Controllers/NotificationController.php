@@ -7,17 +7,11 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    /**
-     * Кастомные сообщения для валидации
-     */
     private $validationMessages = [
-        'user_id.required' => 'ID пользователя обязателен для заполнения',
-        'user_id.exists' => 'Выбранный пользователь не существует',
-        
-        'message.required' => 'Текст уведомления обязателен для заполнения',
-        'message.string' => 'Текст уведомления должен быть строкой',
+        'user_id.required' => 'ID пользователя обязателен',
+        'user_id.exists' => 'Пользователь не найден',
+        'message.required' => 'Текст уведомления обязателен',
         'message.max' => 'Текст уведомления не может превышать :max символов',
-        
         'data.array' => 'Дополнительные данные должны быть в формате массива',
     ];
 
@@ -32,7 +26,6 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
-    // Для агента - все уведомления всех клиентов
     public function allForAgent(Request $request)
     {
         $notifications = Notification::with('user.clientProfile')
@@ -42,28 +35,6 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
-    public function unread(Request $request)
-    {
-        $notifications = $request->user()
-            ->notifications()
-            ->unread()
-            ->with('user.clientProfile')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        
-        return response()->json($notifications);
-    }
-
-    public function unreadCount(Request $request)
-    {
-        $count = $request->user()
-            ->notifications()
-            ->unread()
-            ->count();
-        
-        return response()->json(['count' => $count]);
-    }
-
     public function markAsRead(Request $request, $id)
     {
         $notification = $request->user()
@@ -71,7 +42,7 @@ class NotificationController extends Controller
             ->findOrFail($id);
         
         if ($notification->is_read) {
-            return response()->json(['message' => 'Уведомление уже было прочитано'], 422);
+            return response()->json(['message' => 'Уведомление уже прочитано'], 422);
         }
         
         $notification->update(['is_read' => true]);
@@ -87,7 +58,7 @@ class NotificationController extends Controller
             ->count();
         
         if ($unreadCount === 0) {
-            return response()->json(['message' => 'Непрочитанных уведомлений нет'], 422);
+            return response()->json(['message' => 'Нет непрочитанных уведомлений'], 422);
         }
         
         $request->user()
@@ -118,13 +89,13 @@ class NotificationController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Уведомление успешно создано',
+                'message' => 'Уведомление создано',
                 'notification' => $notification->load('user.clientProfile')
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'message' => 'Ошибка валидации данных',
+                'message' => 'Ошибка валидации',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -138,54 +109,6 @@ class NotificationController extends Controller
         
         $notification->delete();
         
-        return response()->json(['message' => 'Уведомление успешно удалено']);
-    }
-
-    /**
-     * Дополнительный метод: удалить все прочитанные уведомления
-     */
-    public function deleteRead(Request $request)
-    {
-        $readCount = $request->user()
-            ->notifications()
-            ->where('is_read', true)
-            ->count();
-        
-        if ($readCount === 0) {
-            return response()->json(['message' => 'Нет прочитанных уведомлений для удаления'], 422);
-        }
-        
-        $request->user()
-            ->notifications()
-            ->where('is_read', true)
-            ->delete();
-        
-        return response()->json([
-            'message' => 'Все прочитанные уведомления удалены',
-            'deleted_count' => $readCount
-        ]);
-    }
-
-    /**
-     * Дополнительный метод: удалить все уведомления
-     */
-    public function deleteAll(Request $request)
-    {
-        $totalCount = $request->user()
-            ->notifications()
-            ->count();
-        
-        if ($totalCount === 0) {
-            return response()->json(['message' => 'Нет уведомлений для удаления'], 422);
-        }
-        
-        $request->user()
-            ->notifications()
-            ->delete();
-        
-        return response()->json([
-            'message' => 'Все уведомления удалены',
-            'deleted_count' => $totalCount
-        ]);
+        return response()->json(['message' => 'Уведомление удалено']);
     }
 }

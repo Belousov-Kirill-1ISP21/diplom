@@ -9,27 +9,13 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Кастомные сообщения для валидации
-     */
     private $validationMessages = [
-        // Email
-        'email.required' => 'Email обязателен для заполнения',
-        'email.email' => 'Введите корректный email адрес (например: user@example.com)',
+        'email.required' => 'Email обязателен',
+        'email.email' => 'Введите корректный email адрес',
         'email.unique' => 'Пользователь с таким email уже зарегистрирован',
-        
-        // Телефон
-        'phone.required' => 'Номер телефона обязателен для заполнения',
-        'phone.string' => 'Номер телефона должен быть строкой',
+        'phone.required' => 'Номер телефона обязателен',
         'phone.unique' => 'Пользователь с таким номером телефона уже зарегистрирован',
-        
-        // Пароль
-        'password.required' => 'Пароль обязателен для заполнения',
-        'password.min' => 'Пароль должен содержать минимум :min символов',
-        
-        // Тип пользователя
-        'user_type.required' => 'Тип пользователя обязателен для заполнения',
-        'user_type.string' => 'Тип пользователя должен быть строкой',
+        'user_type.required' => 'Тип пользователя обязателен',
         'user_type.exists' => 'Выбранный тип пользователя не существует',
     ];
 
@@ -59,44 +45,6 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function show($id)
-    {
-        $user = User::with(['userType', 'clientProfile', 'clientProfile.driverCategories'])->findOrFail($id);
-        return response()->json($user);
-    }
-
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'email' => 'required|email|unique:users',
-                'phone' => 'required|string|unique:users',
-                'password' => 'required|min:6',
-                'user_type' => 'required|string|exists:user_types,name',
-            ], $this->validationMessages);
-            
-            $userType = UserType::where('name', $request->user_type)->first();
-            
-            $user = User::create([
-                'email' => $validated['email'],
-                'phone' => $validated['phone'],
-                'password_hash' => Hash::make($validated['password']),
-                'user_type_id' => $userType->id,
-            ]);
-            
-            return response()->json([
-                'message' => 'Пользователь успешно создан',
-                'user' => $user->load(['userType', 'clientProfile'])
-            ], 201);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Ошибка валидации данных',
-                'errors' => $e->errors()
-            ], 422);
-        }
-    }
-
     public function update(Request $request, $id)
     {
         try {
@@ -116,55 +64,15 @@ class UserController extends Controller
             $user->update($request->only(['email', 'phone']));
             
             return response()->json([
-                'message' => 'Пользователь успешно обновлён',
+                'message' => 'Пользователь обновлён',
                 'user' => $user->load(['userType', 'clientProfile'])
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'message' => 'Ошибка валидации данных',
+                'message' => 'Ошибка валидации',
                 'errors' => $e->errors()
             ], 422);
         }
-    }
-
-    public function destroy($id)
-    {
-        $user = User::findOrFail($id);
-        
-        if (request()->user()->id === $user->id) {
-            return response()->json(['message' => 'Нельзя удалить самого себя'], 422);
-        }
-        
-        $user->delete();
-        
-        return response()->json(['message' => 'Пользователь успешно удалён']);
-    }
-
-    public function block($id)
-    {
-        $user = User::findOrFail($id);
-        
-        if ($user->is_blocked) {
-            return response()->json(['message' => 'Пользователь уже заблокирован'], 422);
-        }
-        
-        $user->update(['is_blocked' => true]);
-        $user->tokens()->delete();
-        
-        return response()->json(['message' => 'Пользователь успешно заблокирован']);
-    }
-
-    public function unblock($id)
-    {
-        $user = User::findOrFail($id);
-        
-        if (!$user->is_blocked) {
-            return response()->json(['message' => 'Пользователь уже разблокирован'], 422);
-        }
-        
-        $user->update(['is_blocked' => false]);
-        
-        return response()->json(['message' => 'Пользователь успешно разблокирован']);
     }
 }

@@ -123,19 +123,13 @@ export const useSignUpForm = () => {
 
     const saveCurrentStepData = () => {
         const currentValues = getValues();
-        console.log('=== saveCurrentStepData ===');
-        console.log('Step:', step);
-        console.log('Current values:', currentValues);
         
         if (step === 1) {
             setStep1Data(currentValues);
-            console.log('Saved to step1Data:', currentValues);
         } else if (step === 2) {
             setStep2Data(currentValues);
-            console.log('Saved to step2Data:', currentValues);
         } else if (step === 3) {
             setStep3Data(currentValues);
-            console.log('Saved to step3Data:', currentValues);
         }
     };
 
@@ -219,12 +213,6 @@ export const useSignUpForm = () => {
             ...data
         };
         
-        console.log('=== ПОЛНЫЕ ДАННЫЕ ===', allData);
-
-        console.log('step1Data:', step1Data);
-        console.log('step2Data:', step2Data);
-        console.log('step3Data:', step3Data);
-        
         const payloadForBackend = {
             email: allData.email,
             phone: allData.phone,
@@ -244,28 +232,28 @@ export const useSignUpForm = () => {
             driver_license_issue_date: convertToISO(allData.licenseIssueDate),
             driver_license_expiry_date: convertToISO(allData.licenseExpiryDate)
         };
-    
-        console.log('=== PAYLOAD ДЛЯ БЭКА ===', payloadForBackend);
         
         try {
             const response = await apiRegister(payloadForBackend);
             const { token, user, profile } = response.data;  
-
+    
             const fullUser = {
                 ...user,
                 client_profile: profile  
             };
-
+    
+            const hasPendingVehicle = localStorage.getItem('pendingVehicle');
+            const hasPendingPolicy = localStorage.getItem('pendingPolicy');
+            const hasPendingData = hasPendingVehicle && hasPendingPolicy;
+            
+            console.log('Registration successful, hasPendingData:', hasPendingData);
+            console.log('pendingVehicle:', hasPendingVehicle);
+            console.log('pendingPolicy:', hasPendingPolicy);
+            
             login(fullUser, token);
             
-            const pendingData = localStorage.getItem('pendingCalculatorData');
-            if (pendingData) {
-                localStorage.removeItem('pendingCalculatorData');
-            }
             
-            navigate('/Profile');
         } catch (error) {
-            console.error('Registration error:', error);
             const responseData = error.response?.data || {};
             const errors = responseData.errors || {};
             const message = responseData.message || 'Ошибка регистрации';
@@ -274,6 +262,9 @@ export const useSignUpForm = () => {
             if (errors.email) newErrors.email = errors.email[0];
             if (errors.phone) newErrors.phone = errors.phone[0];
             if (errors.password) newErrors.password = errors.password[0];
+            if (errors.last_name) newErrors.last_name = errors.last_name[0];
+            if (errors.first_name) newErrors.first_name = errors.first_name[0];
+            if (errors.middle_name) newErrors.middle_name = errors.middle_name[0];
             if (message) newErrors.form = message;
             
             setFormErrors(newErrors);

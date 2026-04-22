@@ -81,8 +81,16 @@ export const CALCULATOR_VEHICLE_FIELDS = [
     { name: 'model', label: 'Модель', type: 'text', placeholder: 'Camry' },
     { name: 'manufactureYear', label: 'Год выпуска', type: 'number', placeholder: '2020' },
     { name: 'powerHp', label: 'Мощность (л.с.)', type: 'number', placeholder: '150' },
-    { name: 'category', label: 'Категория ТС', type: 'select', options: ['A', 'B', 'C', 'D', 'E'] },
+    { name: 'category', label: 'Категория ТС', type: 'select', options: [
+        { value: 'A', label: 'A - Мотоциклы' },
+        { value: 'B', label: 'B - Легковые автомобили' },
+        { value: 'C', label: 'C - Грузовые автомобили' },
+        { value: 'D', label: 'D - Автобусы' },
+        { value: 'E', label: 'E - Прицепы' }
+    ] },
     { name: 'vin', label: 'VIN', type: 'text', placeholder: 'JTDBE32KX00123456' },
+    { name: 'purchasePrice', label: 'Стоимость автомобиля (₽)', type: 'number', placeholder: '2000000' },
+    { name: 'hasTracker', label: 'Наличие спутниковой сигнализации', type: 'checkbox' },
 ];
 
 // Поля для КАСКО (дополнительные)
@@ -103,7 +111,13 @@ export const NEW_VEHICLE_FIELDS = [
     { name: 'model', label: 'Модель *', type: 'text', required: true },
     { name: 'manufacture_year', label: 'Год выпуска', type: 'number', placeholder: '2020' },
     { name: 'power_hp', label: 'Мощность (л.с.)', type: 'number', placeholder: '150' },
-    { name: 'category', label: 'Категория ТС', type: 'select', options: ['A', 'B', 'C', 'D', 'E'] },
+    { name: 'category', label: 'Категория ТС', type: 'select', options: [
+        { value: 'A', label: 'A - Мотоциклы' },
+        { value: 'B', label: 'B - Легковые автомобили' },
+        { value: 'C', label: 'C - Грузовые автомобили' },
+        { value: 'D', label: 'D - Автобусы' },
+        { value: 'E', label: 'E - Прицепы' }
+    ] },
     { name: 'vin', label: 'VIN *', type: 'text', required: true },
     { name: 'purchase_price', label: 'Стоимость автомобиля (₽)', type: 'number', placeholder: '2000000' },
     { name: 'parking_type', label: 'Способ парковки', type: 'select', options: [
@@ -111,7 +125,7 @@ export const NEW_VEHICLE_FIELDS = [
         { value: 'street', label: 'Улица' },
         { value: 'parking_lot', label: 'Охраняемая парковка' },
         { value: 'other', label: 'Другое' }
-    ]},
+    ] },
     { name: 'has_tracker', label: 'Наличие спутниковой сигнализации', type: 'checkbox' },
 ];
 
@@ -123,16 +137,21 @@ export const PAYMENT_FIELDS = [
     { name: 'cvv', label: 'CVV', type: 'text', placeholder: '123', maxLength: 3 },
 ];
 
-// Поля для страхового случая (шаг 3)
+// Поля для страхового случая
 export const ACCIDENT_FIELDS = [
-    { name: 'accident_date', label: 'Дата происшествия *', type: 'date' },
+    { name: 'accident_date', label: 'Дата происшествия', type: 'date', required: true },
     { name: 'damage_amount', label: 'Сумма ущерба (₽)', type: 'number', placeholder: 'Введите сумму ущерба' },
-    { name: 'description', label: 'Описание происшествия', type: 'textarea', placeholder: 'Опишите обстоятельства происшествия (минимум 10 символов)...', rows: 5 },
-    { name: 'is_client_fault', label: 'Я признаю свою вину в ДТП', type: 'checkbox' },
+    { name: 'description', label: 'Описание происшествия', type: 'textarea', placeholder: 'Опишите обстоятельства происшествия', rows: 5 },
 ];
 
 // Категории ТС для селектов
-export const VEHICLE_CATEGORIES = ['A', 'B', 'C', 'D', 'E'];
+export const VEHICLE_CATEGORIES = [
+    { value: 'A', label: 'A - Мотоциклы' },
+    { value: 'B', label: 'B - Легковые автомобили' },
+    { value: 'C', label: 'C - Грузовые автомобили' },
+    { value: 'D', label: 'D - Автобусы' },
+    { value: 'E', label: 'E - Прицепы' }
+];
 
 // Опции парковки
 export const PARKING_OPTIONS = [

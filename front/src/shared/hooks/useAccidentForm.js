@@ -14,8 +14,7 @@ export const useAccidentForm = (isAuthenticated) => {
     const [formData, setFormData] = useState({
         accident_date: '',
         damage_amount: '',
-        description: '',
-        is_client_fault: false
+        description: ''
     });
 
     const loadMyVehicles = async () => {
@@ -63,16 +62,15 @@ export const useAccidentForm = (isAuthenticated) => {
         setFormData({
             accident_date: '',
             damage_amount: '',
-            description: '',
-            is_client_fault: false
+            description: ''
         });
     };
 
     const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({ 
             ...prev, 
-            [name]: type === 'checkbox' ? checked : value 
+            [name]: value 
         }));
         if (validationErrors[name]) {
             setValidationErrors(prev => ({ ...prev, [name]: null }));
@@ -85,17 +83,17 @@ export const useAccidentForm = (isAuthenticated) => {
         if (!formData.accident_date) {
             errors.accident_date = 'Укажите дату происшествия';
         } else {
-            const accidentDate = new Date(formData.accident_date);
-            const policyStartDate = new Date(selectedPolicy.start_date);
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const todayStr = today.toISOString().split('T')[0];
             
-            if (isNaN(accidentDate.getTime())) {
-                errors.accident_date = 'Укажите корректную дату';
-            } else if (accidentDate > today) {
+            if (formData.accident_date > todayStr) {
                 errors.accident_date = 'Дата происшествия не может быть в будущем';
-            } else if (accidentDate < policyStartDate) {
-                errors.accident_date = `Дата происшествия не может быть раньше начала действия полиса`;
+            }
+            
+            const policyStartDate = selectedPolicy.start_date.split('T')[0];
+            if (formData.accident_date < policyStartDate) {
+                const formattedDate = new Date(selectedPolicy.start_date).toLocaleDateString('ru-RU');
+                errors.accident_date = `Дата происшествия не может быть раньше ${formattedDate}`;
             }
         }
         
@@ -136,7 +134,7 @@ export const useAccidentForm = (isAuthenticated) => {
                 accident_date: formData.accident_date,
                 damage_amount: formData.damage_amount ? parseFloat(formData.damage_amount) : null,
                 description: formData.description || null,
-                is_client_fault: formData.is_client_fault
+                is_client_fault: false 
             });
 
             setSuccess('Страховой случай успешно зарегистрирован!');

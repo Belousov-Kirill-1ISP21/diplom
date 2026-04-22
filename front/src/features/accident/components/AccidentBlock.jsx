@@ -17,20 +17,6 @@ const renderField = (field, formData, handleInputChange, validationErrors) => {
         );
     }
     
-    if (field.type === 'checkbox') {
-        return (
-            <label className="checkboxLabel">
-                <input
-                    type="checkbox"
-                    name={field.name}
-                    checked={formData[field.name]}
-                    onChange={handleInputChange}
-                />
-                {field.label}
-            </label>
-        );
-    }
-    
     if (field.type === 'date') {
         return (
             <input
@@ -162,21 +148,11 @@ export const AccidentBlock = () => {
                     <div className={styles.stepContent}>
                         <h2>Данные о происшествии</h2>
                         <form onSubmit={handleSubmit}>
-                            {ACCIDENT_FIELDS.map(field => (
+                            {ACCIDENT_FIELDS.filter(field => field.name !== 'is_client_fault').map(field => (
                                 <div key={field.name} className={styles.formGroup}>
                                     <label>{field.label}</label>
                                     {renderField(field, formData, handleInputChange, validationErrors)}
                                     {validationErrors[field.name] && <span className={styles.fieldError}>{validationErrors[field.name]}</span>}
-                                    {field.name === 'description' && (
-                                        <span className={styles.charCounter}>{formData.description?.length || 0}/1000 символов</span>
-                                    )}
-                                    {field.name === 'is_client_fault' && (
-                                        <p className={styles.hint}>
-                                            {formData.is_client_fault 
-                                                ? '⚠️ Признание вины повлияет на ваш бонус-малус класс' 
-                                                : 'Если вы не признаёте вину, будет проведена экспертиза'}
-                                        </p>
-                                    )}
                                 </div>
                             ))}
 
