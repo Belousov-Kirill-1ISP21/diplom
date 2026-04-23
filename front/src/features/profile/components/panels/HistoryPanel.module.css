@@ -42,6 +42,8 @@
     align-items: center;
     margin-bottom: 15px;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .policyNumber {
@@ -115,13 +117,235 @@
     background-color: #333366;
 }
 
-.emptyMessage {
-    text-align: center;
-    padding: 40px;
-    color: #666;
+@media (max-width: 1600px) {
+    .historyPanel {
+        padding: 2.5vh;
+    }
+    .historyTitle {
+        font-size: 2.5vh;
+    }
+    .policyCard {
+        padding: 1.8vh;
+    }
+    .policyNumber {
+        font-size: 2vh;
+    }
+    .policyStatus {
+        font-size: 1.6vh;
+        padding: 0.5vh 1.2vh;
+    }
+    .policyInfo p {
+        font-size: 1.6vh;
+        margin: 0.8vh 0;
+    }
+    .policyInfo strong {
+        width: 14vh;
+    }
 }
 
-.emptyMessage p:first-child {
-    font-size: 18px;
-    margin-bottom: 20px;
+@media (max-width: 1366px) {
+    .historyPanel {
+        padding: 2.8vh;
+    }
+    .historyTitle {
+        font-size: 2.8vh;
+    }
+    .policyCard {
+        padding: 2vh;
+    }
+    .policyNumber {
+        font-size: 2.2vh;
+    }
+    .policyStatus {
+        font-size: 1.8vh;
+        padding: 0.6vh 1.4vh;
+    }
+    .policyInfo p {
+        font-size: 1.8vh;
+        margin: 1vh 0;
+    }
+    .policyInfo strong {
+        width: 15vh;
+    }
+}
+
+@media (max-width: 1280px) {
+    .historyPanel {
+        padding: 3vh;
+    }
+    .historyTitle {
+        font-size: 3vh;
+    }
+    .policyCard {
+        padding: 2.2vh;
+    }
+    .policyNumber {
+        font-size: 2.4vh;
+    }
+    .policyStatus {
+        font-size: 2vh;
+        padding: 0.7vh 1.5vh;
+    }
+    .policyInfo p {
+        font-size: 2vh;
+        margin: 1.2vh 0;
+    }
+    .policyInfo strong {
+        width: 16vh;
+    }
+}
+
+@media (max-width: 1024px) {
+    .historyPanel {
+        padding: 3.2vh;
+    }
+    .historyTitle {
+        font-size: 3.2vh;
+    }
+    .policyCard {
+        padding: 2.4vh;
+    }
+    .policyNumber {
+        font-size: 2.6vh;
+    }
+    .policyStatus {
+        font-size: 2.2vh;
+        padding: 0.8vh 1.6vh;
+    }
+    .policyInfo p {
+        font-size: 2.2vh;
+        margin: 1.4vh 0;
+    }
+    .policyInfo strong {
+        width: 17vh;
+    }
+}
+
+@media (max-width: 900px) {
+    .historyPanel {
+        padding: 3.5vh;
+    }
+    .historyTitle {
+        font-size: 3.5vh;
+    }
+    .policyCard {
+        padding: 2.6vh;
+    }
+    .policyNumber {
+        font-size: 2.8vh;
+    }
+    .policyStatus {
+        font-size: 2.4vh;
+        padding: 0.9vh 1.7vh;
+    }
+    .policyInfo p {
+        font-size: 2.4vh;
+        margin: 1.6vh 0;
+    }
+    .policyInfo strong {
+        width: 18vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .historyPanel {
+        padding: 3.8vh;
+    }
+    .historyTitle {
+        font-size: 3.8vh;
+        text-align: center;
+        width: 100%;
+    }
+    .historyHeader {
+        justify-content: center;
+    }
+    .policyCard {
+        padding: 2.8vh;
+    }
+    .policyHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .policyNumber {
+        font-size: 3vh;
+    }
+    .policyStatus {
+        font-size: 2.6vh;
+        padding: 1vh 1.8vh;
+    }
+    .policyInfo p {
+        font-size: 2.6vh;
+        margin: 1.8vh 0;
+    }
+    .policyInfo strong {
+        width: 19vh;
+    }
+    .goToCalculatorButton {
+        font-size: 2.6vh;
+        padding: 1.8vh 3.6vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .historyPanel {
+        padding: 4vh;
+    }
+    .historyTitle {
+        font-size: 4vh;
+    }
+    .policyCard {
+        padding: 3vh;
+    }
+    .policyNumber {
+        font-size: 3.2vh;
+    }
+    .policyStatus {
+        font-size: 2.8vh;
+        padding: 1.1vh 1.9vh;
+    }
+    .policyInfo p {
+        font-size: 2.8vh;
+        margin: 2vh 0;
+    }
+    .policyInfo strong {
+        width: 20vh;
+        display: block;
+        margin-bottom: 0.5vh;
+    }
+    .goToCalculatorButton {
+        font-size: 2.8vh;
+        padding: 2vh 4vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .historyPanel {
+        padding: 4.2vh;
+    }
+    .historyTitle {
+        font-size: 4.2vh;
+    }
+    .policyCard {
+        padding: 3.2vh;
+    }
+    .policyNumber {
+        font-size: 3.4vh;
+    }
+    .policyStatus {
+        font-size: 3vh;
+        padding: 1.2vh 2vh;
+    }
+    .policyInfo p {
+        font-size: 3vh;
+        margin: 2.2vh 0;
+    }
+    .policyInfo strong {
+        width: 22vh;
+        display: block;
+        margin-bottom: 0.8vh;
+    }
+    .goToCalculatorButton {
+        font-size: 3vh;
+        padding: 2.2vh 4.2vh;
+    }
 }

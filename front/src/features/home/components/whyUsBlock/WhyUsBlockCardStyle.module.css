@@ -1,3 +1,4 @@
+/* WhyUsBlockCardStyle.module.css */
 .WhyUsBlockCard{
     height: 89%;
     width: 20%;
@@ -16,4 +17,63 @@
 
 .WhyUsBlockCardText{
     color: gray;
+}
+
+@media (max-width: 1200px) {
+    .WhyUsBlockCard{
+        width: 18%;
+        margin: 1%;
+    }
+    .WhyUsBlockCardH1{
+        font-size: 2.5vh;
+    }
+    .WhyUsBlockCardText{
+        font-size: 1.8vh;
+    }
+}
+
+@media (max-width: 1024px) {
+    .WhyUsBlockCard{
+        width: 40%;
+        margin: 2%;
+        height: auto;
+        min-height: 40vh;
+    }
+    .WhyUsBlockCardImg{
+        height: auto;
+        max-height: 200px;
+    }
+    .WhyUsBlockCardH1{
+        font-size: 3vh;
+        margin: 3% 0;
+    }
+    .WhyUsBlockCardText{
+        font-size: 2vh;
+        padding: 0 5%;
+    }
+}
+
+@media (max-width: 768px) {
+    .WhyUsBlockCard{
+        width: 80%;
+        margin: 3% auto;
+    }
+    .WhyUsBlockCardH1{
+        font-size: 3.5vh;
+    }
+    .WhyUsBlockCardText{
+        font-size: 2.2vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .WhyUsBlockCard{
+        width: 90%;
+    }
+    .WhyUsBlockCardH1{
+        font-size: 3vh;
+    }
+    .WhyUsBlockCardText{
+        font-size: 2vh;
+    }
 }

@@ -46,3 +46,37 @@
     color: gray;
     font-size: 1vh;
 }
+
+@media (max-width: 768px) {
+    .Footer{
+        height: auto;
+        padding: 3vh 0;
+    }
+    .FooterImgContainer{
+        height: auto;
+    }
+    .FooterImg{
+        height: 6vh;
+    }
+    .FooterButtonContainer{
+        height: auto;
+        flex-wrap: wrap;
+        gap: 1vh;
+    }
+    .FooterButton{
+        height: 5vh;
+        font-size: 2vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .FooterButtonContainer{
+        flex-direction: column;
+    }
+    .FooterButton{
+        width: 80%;
+    }
+    .FooterImg{
+        height: 5vh;
+    }
+}

@@ -49,3 +49,49 @@
     border-radius: 6px;
     color: white;
 }
+
+@media (max-width: 1024px) {
+    .AuthHeaderLogoButtonLink{
+        width: 16%;
+    }
+    .AuthHeaderRightLink{
+        width: 16%;
+    }
+}
+
+@media (max-width: 768px) {
+    .AuthHeader{
+        height: auto;
+        padding: 2vh 0;
+    }
+    .AuthHeaderContainer{
+        padding-left: 4%;
+        padding-right: 4%;
+    }
+    .AuthHeaderLogoButtonLink{
+        width: 22%;
+        height: 5vh;
+    }
+    .AuthHeaderRightLink{
+        width: 22%;
+        height: 5vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .AuthHeaderContainer{
+        flex-direction: column;
+        gap: 2vh;
+        padding: 2vh 0;
+    }
+    .AuthHeaderLogoButtonLink{
+        width: 60%;
+        height: 5vh;
+        margin: 0;
+    }
+    .AuthHeaderRightLink{
+        width: 60%;
+        height: 5vh;
+        margin: 0;
+    }
+}

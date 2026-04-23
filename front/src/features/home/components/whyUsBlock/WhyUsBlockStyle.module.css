@@ -1,3 +1,4 @@
+/* WhyUsBlockStyle.module.css */
 .WhyUsBlock{
     width: 100%;
     height: 100vh;
@@ -33,4 +34,53 @@
     height: 70%;
     width: 88%;
     margin-left: 8%;
+}
+
+@media (max-width: 1200px) {
+    .WhyUsBlockContainer{
+        height: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 1024px) {
+    .WhyUsBlock{
+        height: auto;
+        padding-bottom: 5%;
+    }
+    .WhyUsBlockHeaderH1{
+        font-size: 7vh;
+    }
+    .WhyUsBlockHeaderText{
+        font-size: 2.5vh;
+    }
+    .WhyUsBlockHeaderTextInText{
+        font-size: 3.5vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .WhyUsBlockHeaderH1{
+        font-size: 6vh;
+    }
+    .WhyUsBlockHeaderText{
+        font-size: 2.2vh;
+    }
+    .WhyUsBlockHeaderTextInText{
+        font-size: 3vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .WhyUsBlockHeaderH1{
+        font-size: 5vh;
+    }
+    .WhyUsBlockHeaderText{
+        font-size: 2vh;
+    }
+    .WhyUsBlockHeaderTextInText{
+        font-size: 2.8vh;
+    }
 }

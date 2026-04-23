@@ -21,3 +21,122 @@
     display: inline-block;
     font-size: 1.4vh;
 }
+
+.editInput {
+    font-size: 1.4vh;
+    padding: 5px;
+}
+
+@media (max-width: 1600px) {
+    .MainPanelLineH1 {
+        font-size: 1.9vh;
+    }
+    .MainPanelLineText {
+        font-size: 1.8vh;
+    }
+    .editInput {
+        font-size: 1.8vh;
+    }
+}
+
+@media (max-width: 1366px) {
+    .MainPanelLineH1 {
+        font-size: 2.2vh;
+    }
+    .MainPanelLineText {
+        font-size: 2.1vh;
+    }
+    .editInput {
+        font-size: 2.1vh;
+    }
+}
+
+@media (max-width: 1280px) {
+    .MainPanelLine {
+        height: 16%;
+    }
+    .MainPanelLineH1 {
+        font-size: 2.5vh;
+    }
+    .MainPanelLineText {
+        font-size: 2.4vh;
+    }
+    .editInput {
+        font-size: 2.4vh;
+    }
+}
+
+@media (max-width: 1024px) {
+    .MainPanelLine {
+        height: 17%;
+    }
+    .MainPanelLineH1 {
+        font-size: 2.8vh;
+    }
+    .MainPanelLineText {
+        font-size: 2.7vh;
+    }
+    .editInput {
+        font-size: 2.7vh;
+    }
+}
+
+@media (max-width: 900px) {
+    .MainPanelLine {
+        height: 18%;
+    }
+    .MainPanelLineH1 {
+        font-size: 3.1vh;
+    }
+    .MainPanelLineText {
+        font-size: 3vh;
+    }
+    .editInput {
+        font-size: 3vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .MainPanelLine {
+        height: 19%;
+    }
+    .MainPanelLineH1 {
+        font-size: 3.4vh;
+    }
+    .MainPanelLineText {
+        font-size: 3.3vh;
+    }
+    .editInput {
+        font-size: 3.3vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .MainPanelLine {
+        height: 20%;
+    }
+    .MainPanelLineH1 {
+        font-size: 3.7vh;
+    }
+    .MainPanelLineText {
+        font-size: 3.6vh;
+    }
+    .editInput {
+        font-size: 3.6vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .MainPanelLine {
+        height: 22%;
+    }
+    .MainPanelLineH1 {
+        font-size: 4vh;
+    }
+    .MainPanelLineText {
+        font-size: 3.9vh;
+    }
+    .editInput {
+        font-size: 3.9vh;
+    }
+}

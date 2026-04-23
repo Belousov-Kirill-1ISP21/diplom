@@ -1,5 +1,5 @@
 .MainPanel{
-    height: 90%;
+    height: 95%;
     width: 90%;  
     margin-left: 5%;  
     display: flex;
@@ -52,4 +52,82 @@
 .MainPanelButtonContainer button:last-child {
     background-color: #4669B0;
     border-color: #4669B0;
+}
+
+@media (max-width: 1600px) {
+    .MainPanelHeadH1 {
+        font-size: 2.3vh;
+    }
+    .MainPanelHeadText {
+        font-size: 1.8vh;
+    }
+}
+
+@media (max-width: 1366px) {
+    .MainPanelHeadH1 {
+        font-size: 2.6vh;
+    }
+    .MainPanelHeadText {
+        font-size: 2.1vh;
+    }
+}
+
+@media (max-width: 1280px) {
+    .MainPanelHeadH1 {
+        font-size: 2.9vh;
+    }
+    .MainPanelHeadText {
+        font-size: 2.4vh;
+    }
+}
+
+@media (max-width: 1024px) {
+    .MainPanelHeadH1 {
+        font-size: 3.2vh;
+    }
+    .MainPanelHeadText {
+        font-size: 2.7vh;
+    }
+}
+
+@media (max-width: 900px) {
+    .MainPanelHeadH1 {
+        font-size: 3.5vh;
+    }
+    .MainPanelHeadText {
+        font-size: 3vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .MainPanelHeadH1 {
+        font-size: 3.8vh;
+    }
+    .MainPanelHeadText {
+        font-size: 3.3vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .MainPanelHeadH1 {
+        font-size: 4.2vh;
+    }
+    .MainPanelHeadText {
+        font-size: 3.6vh;
+    }
+    .MainPanelButtonContainer button {
+        font-size: 2vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .MainPanelHeadH1 {
+        font-size: 4.5vh;
+    }
+    .MainPanelHeadText {
+        font-size: 4vh;
+    }
+    .MainPanelButtonContainer button {
+        font-size: 2.2vh;
+    }
 }

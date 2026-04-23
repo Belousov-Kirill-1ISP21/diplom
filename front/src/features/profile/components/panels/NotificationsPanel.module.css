@@ -42,6 +42,7 @@
     border-radius: 10px;
     padding: 20px;
     border: 1px solid #ddd;
+    cursor: pointer;
 }
 
 .notificationCard.unread {
@@ -51,6 +52,17 @@
 
 .notificationCard.read {
     opacity: 0.7;
+}
+
+.notificationContent p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.notificationDate {
+    font-size: 12px;
+    color: #999;
 }
 
 .markAllButton {
@@ -66,4 +78,239 @@
 
 .markAllButton:hover {
     background-color: #3457a0;
+}
+
+@media (max-width: 1600px) {
+    .notificationsPanel {
+        padding: 2.5vh;
+    }
+    .notificationsTitle {
+        font-size: 2.5vh;
+    }
+    .headerBadge {
+        font-size: 1.6vh;
+        min-width: 2.5vh;
+        height: 2.5vh;
+        padding: 0.4vh 0.8vh;
+    }
+    .notificationCard {
+        padding: 1.8vh;
+    }
+    .notificationContent p {
+        font-size: 1.6vh;
+        margin-bottom: 0.8vh;
+    }
+    .notificationDate {
+        font-size: 1.4vh;
+    }
+    .markAllButton {
+        font-size: 1.8vh;
+        padding: 1.2vh;
+    }
+}
+
+@media (max-width: 1366px) {
+    .notificationsPanel {
+        padding: 2.8vh;
+    }
+    .notificationsTitle {
+        font-size: 2.8vh;
+    }
+    .headerBadge {
+        font-size: 1.8vh;
+        min-width: 2.8vh;
+        height: 2.8vh;
+        padding: 0.5vh 0.9vh;
+    }
+    .notificationCard {
+        padding: 2vh;
+    }
+    .notificationContent p {
+        font-size: 1.8vh;
+        margin-bottom: 1vh;
+    }
+    .notificationDate {
+        font-size: 1.6vh;
+    }
+    .markAllButton {
+        font-size: 2vh;
+        padding: 1.4vh;
+    }
+}
+
+@media (max-width: 1280px) {
+    .notificationsPanel {
+        padding: 3vh;
+    }
+    .notificationsTitle {
+        font-size: 3vh;
+    }
+    .headerBadge {
+        font-size: 2vh;
+        min-width: 3vh;
+        height: 3vh;
+        padding: 0.5vh 1vh;
+    }
+    .notificationCard {
+        padding: 2.2vh;
+    }
+    .notificationContent p {
+        font-size: 2vh;
+        margin-bottom: 1.2vh;
+    }
+    .notificationDate {
+        font-size: 1.8vh;
+    }
+    .markAllButton {
+        font-size: 2.2vh;
+        padding: 1.6vh;
+    }
+}
+
+@media (max-width: 1024px) {
+    .notificationsPanel {
+        padding: 3.2vh;
+    }
+    .notificationsTitle {
+        font-size: 3.2vh;
+    }
+    .headerBadge {
+        font-size: 2.2vh;
+        min-width: 3.2vh;
+        height: 3.2vh;
+        padding: 0.6vh 1.1vh;
+    }
+    .notificationCard {
+        padding: 2.4vh;
+    }
+    .notificationContent p {
+        font-size: 2.2vh;
+        margin-bottom: 1.4vh;
+    }
+    .notificationDate {
+        font-size: 2vh;
+    }
+    .markAllButton {
+        font-size: 2.4vh;
+        padding: 1.8vh;
+    }
+}
+
+@media (max-width: 900px) {
+    .notificationsPanel {
+        padding: 3.5vh;
+    }
+    .notificationsTitle {
+        font-size: 3.5vh;
+    }
+    .headerBadge {
+        font-size: 2.4vh;
+        min-width: 3.5vh;
+        height: 3.5vh;
+        padding: 0.6vh 1.2vh;
+    }
+    .notificationCard {
+        padding: 2.6vh;
+    }
+    .notificationContent p {
+        font-size: 2.4vh;
+        margin-bottom: 1.6vh;
+    }
+    .notificationDate {
+        font-size: 2.2vh;
+    }
+    .markAllButton {
+        font-size: 2.6vh;
+        padding: 2vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .notificationsPanel {
+        padding: 3.8vh;
+    }
+    .notificationsHeader {
+        justify-content: center;
+    }
+    .notificationsTitle {
+        font-size: 3.8vh;
+    }
+    .headerBadge {
+        font-size: 2.6vh;
+        min-width: 3.8vh;
+        height: 3.8vh;
+        padding: 0.7vh 1.3vh;
+    }
+    .notificationCard {
+        padding: 2.8vh;
+    }
+    .notificationContent p {
+        font-size: 2.6vh;
+        margin-bottom: 1.8vh;
+    }
+    .notificationDate {
+        font-size: 2.4vh;
+    }
+    .markAllButton {
+        font-size: 2.8vh;
+        padding: 2.2vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .notificationsPanel {
+        padding: 4vh;
+    }
+    .notificationsTitle {
+        font-size: 4vh;
+    }
+    .headerBadge {
+        font-size: 2.8vh;
+        min-width: 4vh;
+        height: 4vh;
+        padding: 0.7vh 1.4vh;
+    }
+    .notificationCard {
+        padding: 3vh;
+    }
+    .notificationContent p {
+        font-size: 2.8vh;
+        margin-bottom: 2vh;
+    }
+    .notificationDate {
+        font-size: 2.6vh;
+    }
+    .markAllButton {
+        font-size: 3vh;
+        padding: 2.4vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .notificationsPanel {
+        padding: 4.2vh;
+    }
+    .notificationsTitle {
+        font-size: 4.2vh;
+    }
+    .headerBadge {
+        font-size: 3vh;
+        min-width: 4.2vh;
+        height: 4.2vh;
+        padding: 0.8vh 1.5vh;
+    }
+    .notificationCard {
+        padding: 3.2vh;
+    }
+    .notificationContent p {
+        font-size: 3vh;
+        margin-bottom: 2.2vh;
+    }
+    .notificationDate {
+        font-size: 2.8vh;
+    }
+    .markAllButton {
+        font-size: 3.2vh;
+        padding: 2.6vh;
+    }
 }

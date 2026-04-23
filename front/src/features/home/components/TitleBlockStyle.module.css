@@ -71,3 +71,137 @@
     display: inline-block;
 }
 
+@media (max-width: 1400px) {
+    .TitleBlockH1{
+        font-size: 7.5vh;
+    }
+    .TitleBlockText{
+        font-size: 4.4vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 2.5vh;
+    }
+    .TitleBlockLink{
+        width: 30%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .TitleBlockH1{
+        font-size: 6.9vh;
+    }
+    .TitleBlockText{
+        font-size: 4.4vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 2.8vh;
+    }
+    .TitleBlockLink{
+        width: 32%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .TitleBlockH1{
+        font-size: 6.3vh;
+    }
+    .TitleBlockText{
+        font-size: 4vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 2.8vh;
+    }
+    .TitleBlockLink{
+        width: 35%;
+    }
+}
+
+@media (max-width: 1000px) {
+    .TitleBlockH1{
+        font-size: 7.9vh;
+    }
+    .TitleBlockText{
+        font-size: 5vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 3.5vh;
+    }
+    .TitleBlockLink{
+        width: 38%;
+    }
+}
+
+@media (max-width: 900px) {
+    .TitleBlockH1{
+        font-size: 7vh;
+    }
+    .TitleBlockText{
+        font-size: 4.8vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 3.9vh;
+    }
+    .TitleBlockLink{
+        width: 40%;
+    }
+}
+
+@media (max-width: 768px) {
+    .TitleBlockH1{
+        font-size: 6.3vh;
+    }
+    .TitleBlockText{
+        font-size: 4.4vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 3.9vh;
+    }
+    .TitleBlockLink{
+        width: 42%;
+    }
+}
+
+@media (max-width: 650px) {
+    .TitleBlockH1{
+        font-size: 5.5vh;
+    }
+    .TitleBlockText{
+        font-size: 3.9vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 3.6vh;
+    }
+    .TitleBlockLink{
+        width: 45%;
+    }
+}
+
+@media (max-width: 550px) {
+    .TitleBlockH1{
+        font-size: 4.8vh;
+    }
+    .TitleBlockText{
+        font-size: 3.6vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 3.5vh;
+    }
+    .TitleBlockLink{
+        width: 48%;
+    }
+}
+
+@media (max-width: 450px) {
+    .TitleBlockH1{
+        font-size: 4.4vh;
+    }
+    .TitleBlockText{
+        font-size: 3.5vh;
+    }
+    .TitleBlockButtonText{
+        font-size: 3.1vh;
+    }
+    .TitleBlockLink{
+        width: 50%;
+    }
+}

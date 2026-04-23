@@ -1,5 +1,5 @@
 .SidePanel {
-    height: 90%;
+    height: 95%;
     width: 69%;
     margin-left: 10%;
 }
@@ -26,4 +26,154 @@
 .SidePanelContainer {
     height: 60%;
     width: 100%;
+}
+
+@media (max-width: 1600px) {
+    .SidePanel {
+        width: 74%;
+        margin-left: 8%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 2.4vh;
+    }
+    .SidePanelHeadText {
+        font-size: 2vh;
+    }
+}
+
+@media (max-width: 1366px) {
+    .SidePanel {
+        width: 78%;
+        margin-left: 7%;
+        height: 96%;
+    }
+    .SidePanelHead {
+        height: 23%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 2.7vh;
+    }
+    .SidePanelHeadText {
+        font-size: 2.3vh;
+    }
+}
+
+@media (max-width: 1280px) {
+    .SidePanel {
+        width: 82%;
+        margin-left: 6%;
+        height: 97%;
+    }
+    .SidePanelHead {
+        height: 22%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 3vh;
+    }
+    .SidePanelHeadText {
+        font-size: 2.6vh;
+    }
+    .SidePanelContainer {
+        height: 63%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .SidePanel {
+        width: 86%;
+        margin-left: 5%;
+        height: 97%;
+    }
+    .SidePanelHead {
+        height: 21%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 3.3vh;
+    }
+    .SidePanelHeadText {
+        font-size: 2.9vh;
+    }
+    .SidePanelContainer {
+        height: 64%;
+    }
+}
+
+@media (max-width: 900px) {
+    .SidePanel {
+        width: 90%;
+        margin-left: 4%;
+        height: 98%;
+    }
+    .SidePanelHead {
+        height: 20%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 3.6vh;
+    }
+    .SidePanelHeadText {
+        font-size: 3.2vh;
+    }
+    .SidePanelContainer {
+        height: 65%;
+    }
+}
+
+@media (max-width: 768px) {
+    .SidePanel {
+        width: 94%;
+        margin-left: 3%;
+        height: 98%;
+    }
+    .SidePanelHead {
+        height: 19%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 3.9vh;
+    }
+    .SidePanelHeadText {
+        font-size: 3.5vh;
+    }
+    .SidePanelContainer {
+        height: 66%;
+    }
+}
+
+@media (max-width: 640px) {
+    .SidePanel {
+        width: 96%;
+        margin-left: 2%;
+        height: 99%;
+    }
+    .SidePanelHead {
+        height: 18%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 4.2vh;
+    }
+    .SidePanelHeadText {
+        font-size: 3.8vh;
+    }
+    .SidePanelContainer {
+        height: 67%;
+    }
+}
+
+@media (max-width: 480px) {
+    .SidePanel {
+        width: 98%;
+        margin-left: 1%;
+        height: 99%;
+    }
+    .SidePanelHead {
+        height: 17%;
+    }
+    .SidePanelHeadH1 {
+        font-size: 4.5vh;
+    }
+    .SidePanelHeadText {
+        font-size: 4.1vh;
+    }
+    .SidePanelContainer {
+        height: 68%;
+    }
 }

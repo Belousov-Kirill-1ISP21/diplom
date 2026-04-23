@@ -11,6 +11,8 @@
     align-items: center;
     margin-bottom: 24px;
     flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .title {
@@ -23,7 +25,7 @@
     background-color: #4669B0;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
@@ -199,4 +201,223 @@
 
 .modalButtons button:hover {
     background: #31548a;
+}
+
+@media (max-width: 1600px) {
+    .title {
+        font-size: 2.5vh;
+    }
+    .reportButton {
+        font-size: 1.8vh;
+        padding: 0.8vh 1.8vh;
+    }
+    .table th {
+        padding: 1.5vh 2vh;
+        font-size: 1.8vh;
+    }
+    .table td {
+        padding: 1.5vh 2vh;
+        font-size: 1.8vh;
+    }
+    .status {
+        font-size: 1.6vh;
+        padding: 0.5vh 1vh;
+    }
+    .viewButton {
+        font-size: 1.6vh;
+        padding: 0.5vh 1.5vh;
+    }
+}
+
+@media (max-width: 1366px) {
+    .title {
+        font-size: 2.8vh;
+    }
+    .reportButton {
+        font-size: 2vh;
+        padding: 1vh 2vh;
+    }
+    .table th {
+        padding: 1.8vh 2.2vh;
+        font-size: 2vh;
+    }
+    .table td {
+        padding: 1.8vh 2.2vh;
+        font-size: 2vh;
+    }
+    .status {
+        font-size: 1.8vh;
+        padding: 0.6vh 1.2vh;
+    }
+    .viewButton {
+        font-size: 1.8vh;
+        padding: 0.6vh 1.8vh;
+    }
+}
+
+@media (max-width: 1280px) {
+    .title {
+        font-size: 3vh;
+    }
+    .reportButton {
+        font-size: 2.2vh;
+        padding: 1.2vh 2.2vh;
+    }
+    .table th {
+        padding: 2vh 2.5vh;
+        font-size: 2.2vh;
+    }
+    .table td {
+        padding: 2vh 2.5vh;
+        font-size: 2.2vh;
+    }
+    .status {
+        font-size: 2vh;
+        padding: 0.7vh 1.3vh;
+    }
+    .viewButton {
+        font-size: 2vh;
+        padding: 0.7vh 2vh;
+    }
+}
+
+@media (max-width: 1024px) {
+    .title {
+        font-size: 3.2vh;
+    }
+    .reportButton {
+        font-size: 2.4vh;
+        padding: 1.4vh 2.4vh;
+    }
+    .table th {
+        padding: 2.2vh 2.8vh;
+        font-size: 2.4vh;
+    }
+    .table td {
+        padding: 2.2vh 2.8vh;
+        font-size: 2.4vh;
+    }
+    .status {
+        font-size: 2.2vh;
+        padding: 0.8vh 1.4vh;
+    }
+    .viewButton {
+        font-size: 2.2vh;
+        padding: 0.8vh 2.2vh;
+    }
+}
+
+@media (max-width: 900px) {
+    .title {
+        font-size: 3.5vh;
+    }
+    .reportButton {
+        font-size: 2.6vh;
+        padding: 1.6vh 2.6vh;
+    }
+    .table th {
+        padding: 2.5vh 3vh;
+        font-size: 2.6vh;
+    }
+    .table td {
+        padding: 2.5vh 3vh;
+        font-size: 2.6vh;
+    }
+    .status {
+        font-size: 2.4vh;
+        padding: 0.9vh 1.5vh;
+    }
+    .viewButton {
+        font-size: 2.4vh;
+        padding: 0.9vh 2.4vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .title {
+        font-size: 3.8vh;
+        text-align: center;
+    }
+    .reportButton {
+        font-size: 2.8vh;
+        padding: 1.8vh 2.8vh;
+        width: 100%;
+        white-space: normal;
+    }
+    .table th {
+        padding: 2.8vh 3.2vh;
+        font-size: 2.8vh;
+    }
+    .table td {
+        padding: 2.8vh 3.2vh;
+        font-size: 2.8vh;
+    }
+    .status {
+        font-size: 2.6vh;
+        padding: 1vh 1.6vh;
+    }
+    .viewButton {
+        font-size: 2.6vh;
+        padding: 1vh 2.6vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .title {
+        font-size: 4vh;
+    }
+    .reportButton {
+        font-size: 3vh;
+        padding: 2vh 3vh;
+        width: 100%;
+        white-space: normal;
+    }
+    .table th {
+        padding: 3vh 3.5vh;
+        font-size: 3vh;
+    }
+    .table td {
+        padding: 3vh 3.5vh;
+        font-size: 3vh;
+    }
+    .status {
+        font-size: 2.8vh;
+        padding: 1.1vh 1.7vh;
+    }
+    .viewButton {
+        font-size: 2.8vh;
+        padding: 1.1vh 2.8vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 4.2vh;
+    }
+    .reportButton {
+        font-size: 3.2vh;
+        padding: 2.2vh 3.2vh;
+        width: 100%;
+        white-space: normal;
+    }
+    .table th {
+        padding: 3.2vh 3.8vh;
+        font-size: 3.2vh;
+    }
+    .table td {
+        padding: 3.2vh 3.8vh;
+        font-size: 3.2vh;
+    }
+    .status {
+        font-size: 3vh;
+        padding: 1.2vh 1.8vh;
+    }
+    .viewButton {
+        font-size: 3vh;
+        padding: 1.2vh 3vh;
+    }
 }

@@ -95,3 +95,183 @@
     margin-top: 6%;
     color: white;
 }
+
+@media (max-width: 1600px) {
+    .HeaderLogoButton{
+        font-size: 32px;
+    }
+    .HeaderLeftButton{
+        font-size: 16px;
+    }
+    .HeaderLeftContactButton{
+        font-size: 16px;
+    }
+    .HeaderRightButton{
+        font-size: 16px;
+        width: auto;
+        padding: 0 20px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 1200px) {
+    .HeaderLeft{
+        width: 70%;
+    }
+    .HeaderLogoButton{
+        font-size: 28px;
+        width: 38%;
+    }
+    .HeaderLeftButtonContainer{
+        width: 58%;
+    }
+    .HeaderLeftButton{
+        font-size: 14px;
+        width: auto;
+        padding: 0 10px;
+    }
+    .HeaderLeftContactButton{
+        font-size: 14px;
+        width: auto;
+        padding: 0 10px;
+        white-space: nowrap;
+    }
+    .HeaderRight{
+        width: 28%;
+    }
+    .HeaderRightButton{
+        font-size: 14px;
+        width: auto;
+        padding: 0 15px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 1000px) {
+    .Header{
+        height: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    .HeaderLeft{
+        width: 100%;
+        display: block;
+    }
+    .HeaderLogoButton{
+        float: none;
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+        font-size: 28px;
+        height: 8vh;
+    }
+    .HeaderLeftButtonContainer{
+        float: none;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        height: auto;
+        padding: 1.5vh 0;
+        gap: 10px;
+    }
+    .HeaderLeftButton{
+        padding: 0 15px;
+        font-size: 18px;
+        height: 6vh;
+    }
+    .HeaderLeftContactButton{
+        padding: 0 15px;
+        font-size: 18px;
+        height: 6vh;
+        white-space: nowrap;
+    }
+    .HeaderRight{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        height: 8vh;
+        margin-top: 1.5vh;
+    }
+    .HeaderRightButton{
+        float: none;
+        padding: 0 25px;
+        height: 6vh;
+        margin-top: 1.5vh;
+        font-size: 18px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 700px) {
+    .HeaderLeftButton{
+        font-size: 16px;
+        padding: 0 12px;
+    }
+    .HeaderLeftContactButton{
+        font-size: 16px;
+        padding: 0 12px;
+    }
+    .HeaderRightButton{
+        font-size: 16px;
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 550px) {
+    .HeaderLeftButtonContainer{
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .HeaderLeftButton{
+        width: 90%;
+        height: 6vh;
+        font-size: 18px;
+        padding: 0;
+    }
+    .HeaderLeftContactButton{
+        width: 90%;
+        height: 6vh;
+        font-size: 18px;
+        white-space: normal;
+        padding: 0;
+    }
+    .HeaderRight{
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        height: auto;
+        margin-top: 2vh;
+    }
+    .HeaderRightButton{
+        width: 90%;
+        height: 6vh;
+        margin-top: 0;
+        font-size: 18px;
+        padding: 0;
+        white-space: normal;
+    }
+    .HeaderLogoButton{
+        font-size: 24px;
+        height: 8vh;
+    }
+}
+
+@media (max-width: 400px) {
+    .HeaderLeftButton{
+        font-size: 16px;
+        height: 7vh;
+    }
+    .HeaderLeftContactButton{
+        font-size: 16px;
+        height: 7vh;
+    }
+    .HeaderRightButton{
+        font-size: 16px;
+        height: 7vh;
+    }
+    .HeaderLogoButton{
+        font-size: 20px;
+    }
+}
