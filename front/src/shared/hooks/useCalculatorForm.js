@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useCalculator } from '../context/calculatorContext';
-import { validateDates, validateVehicleData } from '../lib/validations/calculatorValidations';
+import { normalizeLicensePlate, validateLicensePlate, validateVehicleData, validateDates } from '../lib/validations/calculatorValidations';
 import api from '../../api/client';
 import { createPolicy } from '../../api/policies';
 import { useNavigate } from 'react-router-dom';
@@ -124,8 +124,18 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
     const handleAddNewVehicle = async (e) => {
         e.preventDefault();
         
+        // Валидация госномера
+        const plateError = validateLicensePlate(newVehicleData.state_number);
+        if (plateError) {
+            setError(plateError);
+            return;
+        }
+        
+        // Нормализуем госномер перед сохранением
+        const normalizedPlate = normalizeLicensePlate(newVehicleData.state_number);
+        
         const vehicleToAdd = {
-            state_number: newVehicleData.state_number,
+            state_number: normalizedPlate,
             brand: newVehicleData.brand,
             model: newVehicleData.model,
             manufacture_year: parseInt(newVehicleData.manufacture_year),
@@ -224,18 +234,30 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
         const errorsList = {};
         
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
+        today.setHours(0, 0, 0, 0);
         
         if (!data.startDate) {
             errorsList.startDate = 'Укажите дату начала';
-        } else if (data.startDate < todayStr) {
-            errorsList.startDate = 'Дата начала не может быть раньше сегодняшнего дня';
+        } else {
+            const startDate = new Date(data.startDate);
+            startDate.setHours(0, 0, 0, 0);
+            
+            if (startDate < today) {
+                errorsList.startDate = 'Дата начала не может быть раньше сегодняшнего дня';
+            }
         }
         
         if (!data.endDate) {
             errorsList.endDate = 'Укажите дату окончания';
-        } else if (data.endDate <= data.startDate) {
-            errorsList.endDate = 'Дата окончания должна быть позже даты начала';
+        } else if (data.startDate && data.endDate) {
+            const startDate = new Date(data.startDate);
+            const endDate = new Date(data.endDate);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(0, 0, 0, 0);
+            
+            if (endDate <= startDate) {
+                errorsList.endDate = 'Дата окончания должна быть позже даты начала';
+            }
         }
         
         setErrors(errorsList);
@@ -324,7 +346,32 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
             }
         } catch (error) {
             console.error('Calculate price error:', error);
-            setError(error.response?.data?.message || error.message || 'Ошибка при расчете');
+            
+            if (error.response?.data?.errors) {
+                const validationErrors = error.response.data.errors;
+                const errorMessages = [];
+                
+                Object.keys(validationErrors).forEach(key => {
+                    errorMessages.push(...validationErrors[key]);
+                });
+                
+                setError(errorMessages[0] || 'Ошибка при расчете');
+                
+                const fieldErrors = {};
+                if (validationErrors.start_date) {
+                    fieldErrors.startDate = validationErrors.start_date[0];
+                }
+                if (validationErrors.end_date) {
+                    fieldErrors.endDate = validationErrors.end_date[0];
+                }
+                if (Object.keys(fieldErrors).length > 0) {
+                    setErrors(fieldErrors);
+                }
+            } else if (error.response?.data?.message) {
+                setError(error.response.data.message);
+            } else {
+                setError(error.message || 'Ошибка при расчете');
+            }
         } finally {
             setIsCalculating(false);
         }
@@ -398,7 +445,9 @@ export const useCalculatorForm = (isAuthenticated, profileData, addPolicy, refre
     const nextStep = () => {
         if (step === 1 && !validateStep1()) return;
         if (step === 2) {
-            calculatePrice();
+            if (validateStep2()) {
+                calculatePrice();
+            }
             return;
         }
         const newStep = step + 1;

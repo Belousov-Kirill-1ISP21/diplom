@@ -106,9 +106,9 @@ export const CALCULATOR_DATE_FIELDS = [
 
 // Поля для добавления нового автомобиля (модальное окно)
 export const NEW_VEHICLE_FIELDS = [
-    { name: 'state_number', label: 'Государственный номер *', type: 'text', required: true },
-    { name: 'brand', label: 'Марка *', type: 'text', required: true },
-    { name: 'model', label: 'Модель *', type: 'text', required: true },
+    { name: 'state_number', label: 'Государственный номер *', type: 'text', required: true, placeholder: 'A123AA123' },
+    { name: 'brand', label: 'Марка *', type: 'text', required: true, placeholder: 'Toyota' },
+    { name: 'model', label: 'Модель *', type: 'text', required: true, placeholder: 'Camry' },
     { name: 'manufacture_year', label: 'Год выпуска', type: 'number', placeholder: '2020' },
     { name: 'power_hp', label: 'Мощность (л.с.)', type: 'number', placeholder: '150' },
     { name: 'category', label: 'Категория ТС', type: 'select', options: [
@@ -118,7 +118,7 @@ export const NEW_VEHICLE_FIELDS = [
         { value: 'D', label: 'D - Автобусы' },
         { value: 'E', label: 'E - Прицепы' }
     ] },
-    { name: 'vin', label: 'VIN *', type: 'text', required: true },
+    { name: 'vin', label: 'VIN *', type: 'text', required: true, placeholder: 'JTDBE32KX00123456' },
     { name: 'purchase_price', label: 'Стоимость автомобиля (₽)', type: 'number', placeholder: '2000000' },
     { name: 'parking_type', label: 'Способ парковки', type: 'select', options: [
         { value: 'garage', label: 'Гараж' },

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMyVehicles, createVehicle, deleteVehicle } from '../../../api/vehicles';
+import { normalizeLicensePlate, validateLicensePlate } from '../../../shared/lib/validations/calculatorValidations';
 
 export const useVehiclesPanel = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -90,9 +91,17 @@ export const useVehiclesPanel = () => {
         e.preventDefault();
         setModalError(null);
         
+        const plateError = validateLicensePlate(formData.state_number);
+        if (plateError) {
+            setModalError(plateError);
+            return;
+        }
+    
+        const normalizedPlate = normalizeLicensePlate(formData.state_number);
+        
         try {
             await createVehicle({
-                state_number: formData.state_number,
+                state_number: normalizedPlate,
                 brand: formData.brand,
                 model: formData.model,
                 manufacture_year: formData.manufacture_year ? parseInt(formData.manufacture_year) : null,
@@ -111,13 +120,25 @@ export const useVehiclesPanel = () => {
             console.error('Create vehicle error:', error);
             const responseData = error.response?.data || {};
             
+            // Обработка ошибки дублирования госномера
+            if (error.response?.status === 500 && error.response?.data?.message?.includes('Duplicate entry')) {
+                setModalError('Автомобиль с таким государственным номером уже существует');
+                return;
+            }
+            
+            // Обработка ошибки дублирования VIN
+            if (error.response?.status === 500 && error.response?.data?.message?.includes('vehicles_vin_unique')) {
+                setModalError('Автомобиль с таким VIN уже существует');
+                return;
+            }
+            
             if (responseData.errors) {
                 const errorMessage = formatValidationErrors(responseData.errors);
                 setModalError(errorMessage || 'Пожалуйста, проверьте правильность заполнения полей');
             } else if (responseData.message) {
                 setModalError(responseData.message);
             } else {
-                setModalError('Ошибка при добавлении автомобиля');
+                setModalError('Ошибка при добавлении автомобиля. Проверьте введенные данные');
             }
         }
     }, [formData, formatValidationErrors, loadVehicles, resetForm]);

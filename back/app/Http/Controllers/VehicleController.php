@@ -3,110 +3,192 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
-use App\Models\ClientProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VehicleController extends Controller
 {
-    private $validationMessages = [
-        'state_number.required' => 'Госномер обязателен',
-        'state_number.unique' => 'Автомобиль с таким госномером уже зарегистрирован',
-        'state_number.regex' => 'Неверный формат госномера. Пример: А123АА124',
-        'brand.required' => 'Марка обязательна',
-        'brand.min' => 'Марка должна содержать минимум :min символа',
-        'brand.max' => 'Марка не может превышать :max символов',
-        'model.required' => 'Модель обязательна',
-        'model.min' => 'Модель должна содержать минимум :min символ',
-        'model.max' => 'Модель не может превышать :max символов',
-        'manufacture_year.required' => 'Год выпуска обязателен',
-        'manufacture_year.min' => 'Год выпуска не может быть раньше 1900',
-        'manufacture_year.max' => 'Год выпуска не может быть в будущем',
-        'power_hp.required' => 'Мощность обязательна',
-        'power_hp.min' => 'Мощность должна быть минимум :min л.с.',
-        'power_hp.max' => 'Мощность не может превышать :max л.с.',
-        'vin.required' => 'VIN обязателен',
-        'vin.size' => 'VIN должен содержать ровно :size символов',
-        'vin.unique' => 'Автомобиль с таким VIN уже зарегистрирован',
-        'vin.regex' => 'VIN может содержать только латинские буквы и цифры',
-        'purchase_price.min' => 'Стоимость должна быть минимум :min рублей',
-    ];
-
-    public function myVehicles(Request $request)
+    /**
+     * Нормализация госномера (замена русских букв на английские)
+     */
+    private function normalizeLicensePlate($plate)
     {
-        $user = $request->user();
-        $profile = $user->clientProfile;
+        if (!$plate) return $plate;
         
-        if (!$profile) {
+        $mapping = [
+            'А' => 'A', 'В' => 'B', 'Е' => 'E', 'К' => 'K', 'М' => 'M',
+            'Н' => 'H', 'О' => 'O', 'Р' => 'P', 'С' => 'C', 'Т' => 'T',
+            'У' => 'Y', 'Х' => 'X', 'а' => 'a', 'в' => 'b', 'е' => 'e',
+            'к' => 'k', 'м' => 'm', 'н' => 'h', 'о' => 'o', 'р' => 'p',
+            'с' => 'c', 'т' => 't', 'у' => 'y', 'х' => 'x'
+        ];
+        
+        $normalized = '';
+        $length = mb_strlen($plate);
+        for ($i = 0; $i < $length; $i++) {
+            $char = mb_substr($plate, $i, 1);
+            $normalized .= $mapping[$char] ?? $char;
+        }
+        
+        return strtoupper($normalized);
+    }
+
+    /**
+     * Валидация формата госномера
+     */
+    private function validateLicensePlateFormat($plate)
+    {
+        $normalized = $this->normalizeLicensePlate($plate);
+        
+        if (!preg_match('/^[A-Z]{1}[0-9]{3}[A-Z]{2}[0-9]{2,3}$/', $normalized)) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Получить список автомобилей текущего клиента
+     */
+    public function myVehicles()
+    {
+        $clientProfile = Auth::user()->clientProfile;
+        
+        if (!$clientProfile) {
             return response()->json([]);
         }
         
-        $vehicles = Vehicle::where('client_id', $profile->id)
-            ->with('category')
-            ->get();
+        $vehicles = Vehicle::where('client_id', $clientProfile->id)->get();
         
         return response()->json($vehicles);
     }
 
+    /**
+     * Получить конкретный автомобиль
+     */
+    public function show($id)
+    {
+        $clientProfile = Auth::user()->clientProfile;
+        
+        $vehicle = Vehicle::where('id', $id)
+            ->where('client_id', $clientProfile->id)
+            ->firstOrFail();
+        
+        return response()->json($vehicle);
+    }
+
+    /**
+     * Создать новый автомобиль
+     */
     public function store(Request $request)
     {
+        $clientProfile = Auth::user()->clientProfile;
+        
+        if (!$clientProfile) {
+            return response()->json(['message' => 'Профиль клиента не найден'], 404);
+        }
+        
         try {
             $validated = $request->validate([
-                'state_number' => [
-                    'required',
-                    'string',
-                    'max:15',
-                    'unique:vehicles',
-                    'regex:/^[АВЕКМНОРСТУХ]{1}\d{3}[АВЕКМНОРСТУХ]{2}\d{3}$/iu'
-                ],
-                'brand' => 'required|string|min:2|max:30',
-                'model' => 'required|string|min:1|max:30',
-                'manufacture_year' => 'required|integer|min:1900|max:' . date('Y'),
-                'power_hp' => 'required|integer|min:1|max:2000',
-                'category' => 'nullable|string|exists:vehicle_categories,code',
-                'vin' => [
-                    'required',
-                    'string',
-                    'size:17',
-                    'unique:vehicles',
-                    'regex:/^[A-HJ-NPR-Z0-9]{17}$/i'
-                ],
-                'purchase_price' => 'nullable|numeric|min:10000',
-            ], $this->validationMessages);
-
-            $clientId = $request->client_id;
+                'state_number' => 'required|string|max:20',
+                'brand' => 'required|string|max:50',
+                'model' => 'required|string|max:50',
+                'manufacture_year' => 'nullable|integer|min:1900|max:' . date('Y'),
+                'power_hp' => 'nullable|integer|min:1|max:2000',
+                'category' => 'nullable|string|max:10',
+                'vin' => 'nullable|string|max:17',
+                'purchase_price' => 'nullable|numeric|min:0',
+                'has_tracker' => 'boolean',
+                'parking_type' => 'nullable|string|max:50'
+            ]);
             
-            if (!$clientId && $request->user()->userType->name === 'client') {
-                $profile = $request->user()->clientProfile;
-                if ($profile) {
-                    $clientId = $profile->id;
+            if (!empty($validated['state_number'])) {
+                if (!$this->validateLicensePlateFormat($validated['state_number'])) {
+                    return response()->json([
+                        'message' => 'Неверный формат госномера',
+                        'errors' => [
+                            'state_number' => ['Неверный формат госномера. Примеры: А123АА123 или A123AA123']
+                        ]
+                    ], 422);
                 }
+                $validated['state_number'] = $this->normalizeLicensePlate($validated['state_number']);
             }
             
-            if (!$clientId) {
-                return response()->json(['message' => 'Требуется ID клиента'], 422);
-            }
-
-            $vehicle = Vehicle::create(array_merge(
-                $validated,
-                ['client_id' => $clientId]
-            ));
-
-            if ($vehicle->category && $clientId) {
-                $profile = ClientProfile::find($clientId);
-                if ($profile) {
-                    $currentCategories = $profile->driverCategories->pluck('code')->toArray();
-                    if (!in_array($vehicle->category, $currentCategories)) {
-                        $currentCategories[] = $vehicle->category;
-                        $profile->driverCategories()->sync($currentCategories);
-                    }
-                }
-            }
-
+            $vehicle = Vehicle::create([
+                'client_id' => $clientProfile->id,
+                'state_number' => $validated['state_number'],
+                'brand' => $validated['brand'],
+                'model' => $validated['model'],
+                'manufacture_year' => $validated['manufacture_year'] ?? null,
+                'power_hp' => $validated['power_hp'] ?? null,
+                'category' => $validated['category'] ?? 'B',
+                'vin' => $validated['vin'] ?? null,
+                'purchase_price' => $validated['purchase_price'] ?? null,
+                'has_tracker' => $validated['has_tracker'] ?? false,
+                'parking_type' => $validated['parking_type'] ?? 'garage'
+            ]);
+            
             return response()->json([
-                'message' => 'Автомобиль создан',
-                'vehicle' => $vehicle->load('category')
+                'message' => 'Автомобиль успешно добавлен',
+                'vehicle' => $vehicle
             ], 201);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Ошибка валидации',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ошибка при создании автомобиля: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
+    /**
+     * Обновить автомобиль
+     */
+    public function update(Request $request, $id)
+    {
+        $clientProfile = Auth::user()->clientProfile;
+        
+        $vehicle = Vehicle::where('id', $id)
+            ->where('client_id', $clientProfile->id)
+            ->firstOrFail();
+        
+        try {
+            $validated = $request->validate([
+                'state_number' => 'sometimes|string|max:20',
+                'brand' => 'sometimes|string|max:50',
+                'model' => 'sometimes|string|max:50',
+                'manufacture_year' => 'nullable|integer|min:1900|max:' . date('Y'),
+                'power_hp' => 'nullable|integer|min:1|max:2000',
+                'category' => 'nullable|string|max:10',
+                'vin' => 'nullable|string|max:17',
+                'purchase_price' => 'nullable|numeric|min:0',
+                'has_tracker' => 'boolean',
+                'parking_type' => 'nullable|string|max:50'
+            ]);
+            
+            if (isset($validated['state_number'])) {
+                if (!$this->validateLicensePlateFormat($validated['state_number'])) {
+                    return response()->json([
+                        'message' => 'Неверный формат госномера',
+                        'errors' => [
+                            'state_number' => ['Неверный формат госномера. Примеры: А123АА123 или A123AA123']
+                        ]
+                    ], 422);
+                }
+                $validated['state_number'] = $this->normalizeLicensePlate($validated['state_number']);
+            }
+            
+            $vehicle->update($validated);
+            
+            return response()->json([
+                'message' => 'Автомобиль успешно обновлён',
+                'vehicle' => $vehicle
+            ]);
+            
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Ошибка валидации',
@@ -115,42 +197,27 @@ class VehicleController extends Controller
         }
     }
 
-    public function destroy(Request $request, $id)
+    /**
+     * Удалить автомобиль
+     */
+    public function destroy($id)
     {
-        $vehicle = Vehicle::findOrFail($id);
+        $clientProfile = Auth::user()->clientProfile;
         
-        $user = $request->user();
-        if ($user->userType->name === 'client') {
-            $profile = $user->clientProfile;
-            if (!$profile || $vehicle->client_id !== $profile->id) {
-                return response()->json(['message' => 'Доступ запрещён'], 403);
-            }
+        $vehicle = Vehicle::where('id', $id)
+            ->where('client_id', $clientProfile->id)
+            ->firstOrFail();
+        
+        if ($vehicle->policies()->whereIn('status', ['draft', 'active'])->exists()) {
+            return response()->json([
+                'message' => 'Невозможно удалить автомобиль, на который оформлены активные полисы'
+            ], 422);
         }
-        
-        if ($vehicle->policies()->where('status', 'active')->exists()) {
-            return response()->json(['message' => 'Нельзя удалить автомобиль с активными полисами'], 422);
-        }
-        
-        $categoryCode = $vehicle->category;
-        $clientId = $vehicle->client_id;
         
         $vehicle->delete();
         
-        if ($categoryCode && $clientId) {
-            $profile = ClientProfile::find($clientId);
-            if ($profile) {
-                $hasOtherVehiclesOfCategory = Vehicle::where('client_id', $clientId)
-                    ->where('category', $categoryCode)
-                    ->exists();
-                
-                if (!$hasOtherVehiclesOfCategory) {
-                    $currentCategories = $profile->driverCategories->pluck('code')->toArray();
-                    $currentCategories = array_values(array_diff($currentCategories, [$categoryCode]));
-                    $profile->driverCategories()->sync($currentCategories);
-                }
-            }
-        }
-        
-        return response()->json(['message' => 'Автомобиль удалён']);
+        return response()->json([
+            'message' => 'Автомобиль успешно удалён'
+        ]);
     }
 }

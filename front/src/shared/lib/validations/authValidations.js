@@ -1,9 +1,9 @@
 import * as yup from 'yup';
 
 const CURRENT_DATE = new Date();
-const CURRENT_YEAR = 2026;
+const CURRENT_YEAR = CURRENT_DATE.getFullYear();
 
-// Общая функция валидации даты в формате YYYY-MM-DD
+// Общая функция валидации даты в формате YYYY-MM-DD 
 export const isValidDateISO = (dateString) => {
     if (!dateString) return false;
     const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -15,12 +15,20 @@ export const isValidDateISO = (dateString) => {
     
     if (month < 1 || month > 12) return false;
     if (day < 1 || day > 31) return false;
-    if (year < 1900 || year > CURRENT_YEAR) return false;
+    if (year < 1900) return false; 
     
     const date = new Date(year, month - 1, day);
     return date.getDate() === day && 
            date.getMonth() === month - 1 && 
            date.getFullYear() === year;
+};
+
+// Функция валидации даты с проверкой на будущее (для дат, которые не могут быть в будущем)
+export const isValidDateNotFuture = (dateString) => {
+    if (!isValidDateISO(dateString)) return false;
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date <= CURRENT_DATE;
 };
 
 // Схема для даты с проверкой на будущее (прошлая дата)
@@ -30,10 +38,15 @@ export const pastDateSchema = (fieldName) => {
         .test('valid-format', 'Введите корректную дату', isValidDateISO)
         .test('not-future', `${fieldName} не может быть в будущем`, (value) => {
             if (!value) return false;
-            const [year, month, day] = value.split('-').map(Number);
-            const date = new Date(year, month - 1, day);
-            return date <= CURRENT_DATE;
+            return isValidDateNotFuture(value);
         });
+};
+
+// Схема для даты окончания (может быть в будущем)
+export const futureDateSchema = (fieldName) => {
+    return yup.string()
+        .required(`${fieldName} обязательна`)
+        .test('valid-format', 'Введите корректную дату', isValidDateISO);
 };
 
 // Общие правила для пароля
@@ -124,9 +137,7 @@ export const licenseSchema = {
     
     licenseIssueDate: pastDateSchema('Дата выдачи ВУ'),
     
-    licenseExpiryDate: yup.string()
-        .required('Дата окончания действия ВУ обязательна')
-        .test('valid-format', 'Введите корректную дату', isValidDateISO)
+    licenseExpiryDate: futureDateSchema('Дата окончания действия ВУ')
         .test('after-issue', 'Дата окончания должна быть позже даты выдачи', function(value) {
             if (!value || !this.parent.licenseIssueDate) return false;
             
@@ -138,5 +149,4 @@ export const licenseSchema = {
             
             return expiryDate > issueDate;
         })
-    
 };

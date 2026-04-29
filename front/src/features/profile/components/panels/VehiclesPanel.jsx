@@ -1,5 +1,6 @@
 import styles from './VehiclesPanel.module.css';
 import { useVehiclesPanel } from '../../../../shared/hooks/profile/useVehiclesPanel';
+import { NEW_VEHICLE_FIELDS, VEHICLE_CATEGORIES, PARKING_OPTIONS } from '../../../../shared/config/fields';
 
 export const VehiclesPanel = () => {
     const {
@@ -9,14 +10,11 @@ export const VehiclesPanel = () => {
         modalError,
         globalError,
         formData,
-        vehicleCategories,
-        parkingOptions,
         handleInputChange,
         handleSubmit,
         handleDelete,
         openModal,
         closeModal,
-        setFormData,
         formatYear
     } = useVehiclesPanel();
 
@@ -84,128 +82,58 @@ export const VehiclesPanel = () => {
                         )}
                         
                         <form onSubmit={handleSubmit}>
-                            <div className={styles.formGroup}>
-                                <label>Государственный номер *</label>
-                                <input
-                                    type="text"
-                                    name="state_number"
-                                    value={formData.state_number}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className={styles.row}>
-                                <div className={styles.formGroup}>
-                                    <label>Марка *</label>
-                                    <input
-                                        type="text"
-                                        name="brand"
-                                        value={formData.brand}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>Модель *</label>
-                                    <input
-                                        type="text"
-                                        name="model"
-                                        value={formData.model}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={styles.row}>
-                                <div className={styles.formGroup}>
-                                    <label>Год выпуска</label>
-                                    <input
-                                        type="number"
-                                        name="manufacture_year"
-                                        value={formData.manufacture_year}
-                                        onChange={handleInputChange}
-                                        placeholder="2020"
-                                        min="1900"
-                                        max={new Date().getFullYear()}
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>Мощность (л.с.)</label>
-                                    <input
-                                        type="number"
-                                        name="power_hp"
-                                        value={formData.power_hp}
-                                        onChange={handleInputChange}
-                                        placeholder="150"
-                                        min="0"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label>Категория ТС</label>
-                                <select
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleInputChange}
-                                >
-                                    {vehicleCategories.map(cat => (
-                                        <option key={cat} value={cat}>{cat}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label>VIN *</label>
-                                <input
-                                    type="text"
-                                    name="vin"
-                                    value={formData.vin}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label>Стоимость автомобиля (₽)</label>
-                                <input
-                                    type="number"
-                                    name="purchase_price"
-                                    value={formData.purchase_price}
-                                    onChange={handleInputChange}
-                                    placeholder="2000000"
-                                    min="0"
-                                    step="0.01"
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label>Способ парковки</label>
-                                <select
-                                    name="parking_type"
-                                    value={formData.parking_type}
-                                    onChange={handleInputChange}
-                                >
-                                    {parkingOptions.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className={styles.checkboxGroup}>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name="has_tracker"
-                                        checked={formData.has_tracker}
-                                        onChange={handleInputChange}
-                                    />
-                                    Наличие спутниковой сигнализации
-                                </label>
-                            </div>
-
+                            {NEW_VEHICLE_FIELDS.map(field => {
+                                if (field.type === 'select') {
+                                    const options = field.options || VEHICLE_CATEGORIES;
+                                    return (
+                                        <div key={field.name} className={styles.formGroup}>
+                                            <label>{field.label}</label>
+                                            <select 
+                                                name={field.name} 
+                                                value={formData[field.name]} 
+                                                onChange={handleInputChange}
+                                                required={field.required}
+                                            >
+                                                {options.map(opt => typeof opt === 'object' 
+                                                    ? <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    : <option key={opt} value={opt}>{opt}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    );
+                                }
+                                if (field.type === 'checkbox') {
+                                    return (
+                                        <div key={field.name} className={styles.checkboxGroup}>
+                                            <label>
+                                                <input 
+                                                    type="checkbox" 
+                                                    name={field.name} 
+                                                    checked={formData[field.name]} 
+                                                    onChange={handleInputChange}
+                                                />
+                                                {field.label}
+                                            </label>
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div key={field.name} className={styles.formGroup}>
+                                        <label>{field.label}</label>
+                                        <input 
+                                            type={field.type} 
+                                            name={field.name} 
+                                            value={formData[field.name]} 
+                                            onChange={handleInputChange}
+                                            placeholder={field.placeholder}
+                                            required={field.required}
+                                            min={field.min}
+                                            max={field.max}
+                                            step={field.step}
+                                        />
+                                    </div>
+                                );
+                            })}
                             <div className={styles.modalButtons}>
                                 <button type="button" onClick={closeModal}>
                                     Отмена

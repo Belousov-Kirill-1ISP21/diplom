@@ -15,6 +15,7 @@ export const SignUpForm = () => {
         register,
         handleSubmit,
         errors,
+        formErrors,
         nextStep,
         prevStep,
         onSubmit
@@ -24,6 +25,18 @@ export const SignUpForm = () => {
         if (step === 1) return SIGNUP_STEP1_FIELDS;
         if (step === 2) return SIGNUP_STEP2_FIELDS;
         return SIGNUP_STEP3_FIELDS;
+    };
+
+    const getFieldError = (fieldName) => {
+        if (step === 3) {
+            if (fieldName === 'email' && formErrors.email) {
+                return formErrors.email;
+            }
+            if (fieldName === 'phone' && formErrors.phone) {
+                return formErrors.phone;
+            }
+        }
+        return null;
     };
 
     return (
@@ -37,18 +50,43 @@ export const SignUpForm = () => {
                     {SIGNUP_STEP_TITLES[step]}
                 </h1>
 
-                {getCurrentFields().map((field) => (
-                    <TextInput 
-                        key={field.id}
-                        className={styles.SignUpFormFormInput}
-                        placeholder={field.placeholder}
-                        type={field.type}
-                        register={register(field.name)}
-                        error={errors[field.name]}
-                        errorClassName={styles.errorMessage}
-                        options={field.options} 
-                    />
-                ))}
+                {formErrors.form && (
+                    <div className={styles.formError}>
+                        {formErrors.form}
+                    </div>
+                )}
+
+                {step === 3 && (
+                    <div className={styles.apiErrors}>
+                        {formErrors.email && (
+                            <div className={styles.fieldError}>
+                                {formErrors.email}
+                            </div>
+                        )}
+                        {formErrors.phone && (
+                            <div className={styles.fieldError}>
+                                {formErrors.phone}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {getCurrentFields().map((field) => {
+                    const apiError = getFieldError(field.name);
+                    
+                    return (
+                        <TextInput 
+                            key={field.id}
+                            className={styles.SignUpFormFormInput}
+                            placeholder={field.placeholder}
+                            type={field.type}
+                            register={register(field.name)}
+                            error={errors[field.name] || apiError}
+                            errorClassName={styles.errorMessage}
+                            options={field.options} 
+                        />
+                    );
+                })}
 
                 <div className={styles.buttonContainer}>
                     {step > 1 && (

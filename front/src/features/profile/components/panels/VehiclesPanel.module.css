@@ -226,3 +226,10 @@
     font-size: 14px;
     word-break: break-word;
 }
+
+.hint {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}

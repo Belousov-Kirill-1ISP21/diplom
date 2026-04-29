@@ -1,3 +1,37 @@
+// Функция нормализации госномера (замена русских букв на английские)
+export const normalizeLicensePlate = (plate) => {
+    if (!plate) return plate;
+    
+    const mapping = {
+        'А': 'A', 'В': 'B', 'Е': 'E', 'К': 'K', 'М': 'M',
+        'Н': 'H', 'О': 'O', 'Р': 'P', 'С': 'C', 'Т': 'T',
+        'У': 'Y', 'Х': 'X', 'а': 'a', 'в': 'b', 'е': 'e',
+        'к': 'k', 'м': 'm', 'н': 'h', 'о': 'o', 'р': 'p',
+        'с': 'c', 'т': 't', 'у': 'y', 'х': 'x'
+    };
+    
+    let normalized = '';
+    for (let char of plate) {
+        normalized += mapping[char] || char;
+    }
+    
+    return normalized.toUpperCase();
+};
+
+// Функция валидации госномера
+export const validateLicensePlate = (plate) => {
+    if (!plate) return 'Госномер обязателен';
+    
+    const pattern = /^[A-Z]{1}[0-9]{3}[A-Z]{2}[0-9]{2,3}$/;
+    const normalized = normalizeLicensePlate(plate);
+    
+    if (!pattern.test(normalized)) {
+        return 'Неверный формат госномера. Примеры: А123АА123 или A123AA123';
+    }
+    
+    return null;
+};
+
 // Валидация для автомобиля
 export const validateVehicleData = (data, policyType) => {
     const errors = {};
@@ -6,9 +40,9 @@ export const validateVehicleData = (data, policyType) => {
     if (!data.stateNumber?.trim()) {
         errors.stateNumber = 'Госномер обязателен';
     } else {
-        const cleaned = data.stateNumber.replace(/[\s-]/g, '').toUpperCase();
-        if (!/^[АВЕКМНОРСТУХ]{1}\d{3}[АВЕКМНОРСТУХ]{2}\d{3}$/i.test(cleaned)) {
-            errors.stateNumber = 'Формат госномера: А123АА124 (русские буквы А,В,Е,К,М,Н,О,Р,С,Т,У,Х)';
+        const normalized = normalizeLicensePlate(data.stateNumber);
+        if (!/^[A-Z]{1}[0-9]{3}[A-Z]{2}[0-9]{2,3}$/.test(normalized)) {
+            errors.stateNumber = 'Неверный формат госномера. Примеры: А123АА123 или A123AA123';
         }
     }
     

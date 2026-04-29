@@ -8,24 +8,13 @@ import {
     personalInfoSchema, 
     passportSchema, 
     licenseSchema,
-    passwordRules 
+    passwordRules,
+    isValidDateISO,
+    isValidDateNotFuture
 } from '../../lib/validations/authValidations';
 import { register as apiRegister } from '../../../api/auth';
 
-const isValidDateDDMMYYYY = (value) => {
-    if (!value) return false;
-    const regex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
-    if (!regex.test(value)) return false;
-    
-    const [day, month, year] = value.split('.').map(Number);
-    if (month < 1 || month > 12) return false;
-    if (day < 1 || day > 31) return false;
-    if (year < 1900 || year > new Date().getFullYear()) return false;
-    
-    const date = new Date(year, month - 1, day);
-    return date.getDate() === day && date.getMonth() === month - 1;
-};
-
+// Конвертер из ДД.ММ.ГГГГ в YYYY-MM-DD
 const convertToISO = (dateStr) => {
     if (!dateStr) return '';
     const parts = dateStr.split('.');
@@ -33,17 +22,26 @@ const convertToISO = (dateStr) => {
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
 };
 
+// Валидация формата ДД.ММ.ГГГГ (конвертируем в ISO и проверяем)
+const isValidDateDDMMYYYY = (value) => {
+    if (!value) return false;
+    const isoDate = convertToISO(value);
+    return isValidDateISO(isoDate);
+};
+
+// Проверка что дата не в будущем
+const isNotFutureDate = (value) => {
+    if (!value) return false;
+    const isoDate = convertToISO(value);
+    return isValidDateNotFuture(isoDate);
+};
+
 const step1Schema = yup.object().shape({
     ...personalInfoSchema,
     birthDate: yup.string()
         .required('Дата рождения обязательна')
         .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
-        .test('not-future', 'Дата рождения не может быть в будущем', (value) => {
-            if (!value) return false;
-            const [day, month, year] = value.split('.').map(Number);
-            const date = new Date(year, month - 1, day);
-            return date <= new Date();
-        }),
+        .test('not-future', 'Дата рождения не может быть в будущем', isNotFutureDate),
     password: yup.string()
         .required('Пароль обязателен')
         .min(passwordRules.min, `Пароль должен содержать минимум ${passwordRules.min} символов`)
@@ -62,12 +60,7 @@ const step2Schema = yup.object().shape({
     issueDate: yup.string()
         .required('Дата выдачи обязательна')
         .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
-        .test('not-future', 'Дата выдачи не может быть в будущем', (value) => {
-            if (!value) return false;
-            const [day, month, year] = value.split('.').map(Number);
-            const date = new Date(year, month - 1, day);
-            return date <= new Date();
-        })
+        .test('not-future', 'Дата выдачи не может быть в будущем', isNotFutureDate)
         .test('not-too-old', 'Дата выдачи не может быть раньше 1991 года', (value) => {
             if (!value) return false;
             const [day, month, year] = value.split('.').map(Number);
@@ -80,12 +73,7 @@ const step3Schema = yup.object().shape({
     licenseIssueDate: yup.string()
         .required('Дата выдачи ВУ обязательна')
         .test('valid-format', 'Дата должна быть в формате ДД.ММ.ГГГГ', isValidDateDDMMYYYY)
-        .test('not-future', 'Дата выдачи ВУ не может быть в будущем', (value) => {
-            if (!value) return false;
-            const [day, month, year] = value.split('.').map(Number);
-            const date = new Date(year, month - 1, day);
-            return date <= new Date();
-        }),
+        .test('not-future', 'Дата выдачи ВУ не может быть в будущем', isNotFutureDate),
     
     licenseExpiryDate: yup.string()
         .required('Дата окончания действия ВУ обязательна')
@@ -145,6 +133,7 @@ export const useSignUpForm = () => {
         if (isValid) {
             saveCurrentStepData();
             setStep(step + 1);
+            setFormErrors({});
             
             if (step === 1) {
                 if (Object.keys(step2Data).length > 0) {
@@ -180,11 +169,12 @@ export const useSignUpForm = () => {
             }, 0);
         }
     };
-
+    
     const prevStep = () => {
         saveCurrentStepData();
         const prevStepNumber = step - 1;
         setStep(prevStepNumber);
+        setFormErrors({}); 
         
         if (prevStepNumber === 1) {
             reset(step1Data);
@@ -252,22 +242,51 @@ export const useSignUpForm = () => {
             
             login(fullUser, token);
             
-            
         } catch (error) {
+            console.error('Registration error:', error);
             const responseData = error.response?.data || {};
             const errors = responseData.errors || {};
             const message = responseData.message || 'Ошибка регистрации';
             
             const newErrors = {};
-            if (errors.email) newErrors.email = errors.email[0];
-            if (errors.phone) newErrors.phone = errors.phone[0];
-            if (errors.password) newErrors.password = errors.password[0];
-            if (errors.last_name) newErrors.last_name = errors.last_name[0];
-            if (errors.first_name) newErrors.first_name = errors.first_name[0];
-            if (errors.middle_name) newErrors.middle_name = errors.middle_name[0];
-            if (message) newErrors.form = message;
+            
+            if (errors.email) {
+                newErrors.email = errors.email[0];
+            }
+            if (errors.phone) {
+                newErrors.phone = errors.phone[0];
+            }
+            if (errors.password) {
+                newErrors.password = errors.password[0];
+            }
+            if (errors.last_name) {
+                newErrors.last_name = errors.last_name[0];
+            }
+            if (errors.first_name) {
+                newErrors.first_name = errors.first_name[0];
+            }
+            if (errors.middle_name) {
+                newErrors.middle_name = errors.middle_name[0];
+            }
+            
+            if (message && Object.keys(newErrors).length === 0) {
+                newErrors.form = message;
+            }
+            
+            if (message.includes('email') || message.includes('Email')) {
+                newErrors.email = 'Пользователь с таким email уже существует';
+                newErrors.form = null;
+            }
+            
+            if (message.includes('phone') || message.includes('Phone')) {
+                newErrors.phone = 'Пользователь с таким телефоном уже существует';
+                newErrors.form = null;
+            }
             
             setFormErrors(newErrors);
+            
+            if (newErrors.email || newErrors.phone || newErrors.password || newErrors.last_name || newErrors.first_name) {
+            }
         }
     };
 
