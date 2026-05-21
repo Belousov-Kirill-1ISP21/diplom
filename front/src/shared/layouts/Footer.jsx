@@ -1,6 +1,6 @@
-import FacebookImg from "../../assets/Footer/Facebook.webp";
-import InstagramImg from "../../assets/Footer/Instagram.webp";
-import TwitterImg from "../../assets/Footer/Twitter.webp";
+import ZenImg from "../../assets/Footer/Zen.webp";
+import MaxmImg from "../../assets/Footer/Max.webp";
+import OKImg from "../../assets/Footer/OK.webp";
 import VKImg from "../../assets/Footer/VK.webp";
 import styles from './FooterStyle.module.css';
 import { Link } from 'react-router-dom';
@@ -11,9 +11,9 @@ export const Footer =(props)=>{
     return <div className={styles.Footer}> 
 
         <div className={styles.FooterImgContainer}>
-            <img  src={FacebookImg} className={styles.FooterImg}/>
-            <img src={InstagramImg} className={styles.FooterImg}/>
-            <img src={TwitterImg} className={styles.FooterImg}/> 
+            <img  src={MaxmImg} className={styles.FooterImg}/>
+            <img src={OKImg} className={styles.FooterImg}/>
+            <img src={ZenImg} className={styles.FooterImg}/> 
             <img src={VKImg} className={styles.FooterImg}/>
         </div>
 
